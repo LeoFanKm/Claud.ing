@@ -1,3 +1,6 @@
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -5,17 +8,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal, type NoProps } from '@/lib/modals';
+} from "@/components/ui/dialog";
+import { defineModal, type NoProps } from "@/lib/modals";
 
 const DisclaimerDialogImpl = NiceModal.create<NoProps>(() => {
   const modal = useModal();
 
   const handleAccept = () => {
-    modal.resolve('accepted');
+    modal.resolve("accepted");
   };
 
   return (
@@ -26,10 +26,10 @@ const DisclaimerDialogImpl = NiceModal.create<NoProps>(() => {
             <AlertTriangle className="h-6 w-6 text-destructive" />
             <DialogTitle>Safety Notice</DialogTitle>
           </div>
-          <DialogDescription className="text-left space-y-4 pt-4">
+          <DialogDescription className="space-y-4 pt-4 text-left">
             <p>
-              Vibe Kanban runs AI coding agents with{' '}
-              <code>--dangerously-skip-permissions</code> / <code>--yolo</code>{' '}
+              Kanban by Clauding runs AI coding agents with{" "}
+              <code>--dangerously-skip-permissions</code> / <code>--yolo</code>{" "}
               by default, giving them unrestricted access to execute code and
               run commands on your system.
             </p>
@@ -39,14 +39,14 @@ const DisclaimerDialogImpl = NiceModal.create<NoProps>(() => {
               experimental - use it responsibly.
             </p>
             <p>
-              Learn more at{' '}
+              Learn more at{" "}
               <a
-                href="https://www.vibekanban.com/docs/getting-started#safety-notice"
-                target="_blank"
+                className="text-blue-600 underline hover:no-underline dark:text-blue-400"
+                href="https://claud.ing/docs/getting-started#safety-notice"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 underline hover:no-underline"
+                target="_blank"
               >
-                https://www.vibekanban.com/docs/getting-started#safety-notice
+                https://claud.ing/docs/getting-started#safety-notice
               </a>
             </p>
           </DialogDescription>
@@ -61,6 +61,6 @@ const DisclaimerDialogImpl = NiceModal.create<NoProps>(() => {
   );
 });
 
-export const DisclaimerDialog = defineModal<void, 'accepted' | void>(
+export const DisclaimerDialog = defineModal<void, "accepted" | void>(
   DisclaimerDialogImpl
 );
