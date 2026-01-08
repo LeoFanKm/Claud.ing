@@ -3,7 +3,7 @@ import { Chrome, Github, Loader2, LogIn } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ProfileResponse } from "shared/types";
-import { useUserSystem } from "@/components/ConfigProvider";
+import { useUserSystemOptional } from "@/components/ConfigProvider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +29,7 @@ type OAuthState =
 const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
   const modal = useModal();
   const { t } = useTranslation("common");
-  const { reloadSystem } = useUserSystem();
+  const userSystem = useUserSystemOptional();
   const [state, setState] = useState<OAuthState>({ type: "select" });
   const popupRef = useRef<Window | null>(null);
   const [isPolling, setIsPolling] = useState(false);
@@ -101,8 +101,8 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
         popupRef.current.close();
       }
 
-      // Reload user system to refresh login status
-      reloadSystem();
+      // Reload user system to refresh login status (if available)
+      userSystem?.reloadSystem();
 
       setState({ type: "success", profile: statusData.profile });
       setTimeout(() => {
@@ -110,7 +110,7 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
         modal.remove();
       }, 1500);
     }
-  }, [statusData, isPolling, modal, reloadSystem]);
+  }, [statusData, isPolling, modal, userSystem]);
 
   const handleProviderSelect = (provider: OAuthProvider) => {
     setState({ type: "waiting", provider });

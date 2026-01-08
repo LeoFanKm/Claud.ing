@@ -467,3 +467,11 @@ export function useUserSystem() {
   }
   return context;
 }
+
+/**
+ * Optional version of useUserSystem that returns null when used outside of UserSystemProvider.
+ * Use this in components that might render both inside and outside the provider (e.g., OAuthDialog on Landing).
+ */
+export function useUserSystemOptional() {
+  return useContext(UserSystemContext) ?? null;
+}
