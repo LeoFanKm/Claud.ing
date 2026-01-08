@@ -39,8 +39,20 @@ export function useApiAuth() {
       // CRITICAL: Only use getToken after Clerk is fully loaded
       // If isLoaded is false, getToken() will hang waiting for initialization
       isLoaded = clerkAuth.isLoaded;
-      if (isLoaded) {
+
+      // Debug: Log Clerk auth state
+      console.log("[useApiAuth] Clerk state:", {
+        isLoaded: clerkAuth.isLoaded,
+        isSignedIn: clerkAuth.isSignedIn,
+        userId: clerkAuth.userId,
+        hasGetToken: !!clerkAuth.getToken,
+      });
+
+      if (isLoaded && clerkAuth.isSignedIn) {
         getToken = clerkAuth.getToken;
+      } else if (isLoaded && !clerkAuth.isSignedIn) {
+        // User is not signed in - don't set tokenGetter
+        console.log("[useApiAuth] User not signed in, skipping token getter");
       }
     } catch {
       // Clerk 未初始化时忽略错误
