@@ -9,10 +9,14 @@ import {
 } from "@clerk/clerk-react";
 import { LogIn, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { OAuthDialog } from "@/components/dialogs/global/OAuthDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClerkEnabled } from "@/contexts/ClerkContext";
+import { useLandingAuth } from "@/hooks";
 
 // Safe wrapper for SignedIn - only renders children when Clerk is enabled AND user is signed in
 export function SignedIn({ children }: { children: ReactNode }) {
@@ -81,12 +85,48 @@ function ClerkAuthButtonsInner() {
   );
 }
 
+// Fallback auth buttons when Clerk is disabled (uses OAuth flow)
+function LegacyAuthButtons() {
+  const { t } = useTranslation("common");
+  const { isSignedIn } = useLandingAuth();
+  const navigate = useNavigate();
+
+  const handleSignIn = useCallback(async () => {
+    if (isSignedIn) {
+      navigate("/projects");
+      return;
+    }
+    const result = await OAuthDialog.show();
+    if (result) {
+      navigate("/projects");
+    }
+  }, [isSignedIn, navigate]);
+
+  // If already signed in, don't show sign in buttons
+  if (isSignedIn) {
+    return null;
+  }
+
+  return (
+    <>
+      <Button className="gap-2" onClick={handleSignIn} size="sm" variant="ghost">
+        <LogIn className="h-4 w-4" />
+        <span className="hidden sm:inline">{t("signIn", "Sign in")}</span>
+      </Button>
+      <Button className="gap-2" onClick={handleSignIn} size="sm" variant="default">
+        <UserPlus className="h-4 w-4" />
+        <span className="hidden sm:inline">{t("signUp", "Sign up")}</span>
+      </Button>
+    </>
+  );
+}
+
 export function ClerkAuthButtons() {
   const isClerkEnabled = useClerkEnabled();
 
-  // If Clerk is not enabled, don't render auth buttons
+  // If Clerk is not enabled, show legacy OAuth buttons
   if (!isClerkEnabled) {
-    return null;
+    return <LegacyAuthButtons />;
   }
 
   return <ClerkAuthButtonsInner />;
