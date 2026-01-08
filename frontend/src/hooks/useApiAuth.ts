@@ -8,7 +8,11 @@
 import { useAuth as useClerkAuth } from "@clerk/clerk-react";
 import { useEffect } from "react";
 import { useClerkEnabled } from "@/contexts/ClerkContext";
-import { clearAuthTokenGetter, setAuthTokenGetter } from "@/lib/api";
+import {
+  clearAuthTokenGetter,
+  setAuthPending,
+  setAuthTokenGetter,
+} from "@/lib/api";
 
 /**
  * Hook to integrate Clerk authentication with the API client.
@@ -44,15 +48,22 @@ export function useApiAuth() {
   }
 
   useEffect(() => {
-    // Only set token getter when Clerk is loaded AND we have a getToken function
-    if (isClerkEnabled && isLoaded && getToken) {
-      // 设置 token getter，API 客户端会在每次请求时调用
-      setAuthTokenGetter(getToken);
+    if (isClerkEnabled) {
+      if (isLoaded && getToken) {
+        // Clerk is loaded - set the token getter
+        setAuthTokenGetter(getToken);
+        return () => {
+          clearAuthTokenGetter();
+        };
+      }
+      // Clerk is enabled but still loading - signal that auth is pending
+      // This will make API requests wait for auth to be ready
+      setAuthPending();
       return () => {
         clearAuthTokenGetter();
       };
     }
-    // Clerk 未启用或未加载完成时清除 token getter
+    // Clerk not enabled - clear any pending auth state
     clearAuthTokenGetter();
   }, [isClerkEnabled, isLoaded, getToken]);
 

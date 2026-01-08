@@ -162,12 +162,34 @@ type TokenGetter = () => Promise<string | null>;
 
 let tokenGetter: TokenGetter | null = null;
 
+// Auth ready state - resolves when Clerk is loaded and tokenGetter is set
+let authReadyResolve: (() => void) | null = null;
+let authReadyPromise: Promise<void> | null = null;
+
+/**
+ * Signal that auth is pending (Clerk is loading)
+ * API requests will wait for auth to be ready before sending
+ */
+export function setAuthPending() {
+  if (!authReadyPromise) {
+    authReadyPromise = new Promise((resolve) => {
+      authReadyResolve = resolve;
+    });
+  }
+}
+
 /**
  * Configure the authentication token getter
  * Called from ClerkProvider integration to enable authenticated requests
  */
 export function setAuthTokenGetter(getter: TokenGetter) {
   tokenGetter = getter;
+  // Resolve the auth ready promise when token getter is set
+  if (authReadyResolve) {
+    authReadyResolve();
+    authReadyResolve = null;
+    authReadyPromise = null;
+  }
 }
 
 /**
@@ -175,17 +197,40 @@ export function setAuthTokenGetter(getter: TokenGetter) {
  */
 export function clearAuthTokenGetter() {
   tokenGetter = null;
+  // Reset auth ready state
+  authReadyResolve = null;
+  authReadyPromise = null;
 }
 
-// Timeout for getting auth token (3 seconds)
-const AUTH_TOKEN_TIMEOUT_MS = 15000; // Increased from 3s to 15s to handle Clerk initialization
+// Timeout for getting auth token
+const AUTH_TOKEN_TIMEOUT_MS = 5000; // 5 seconds for token fetch
+const AUTH_READY_TIMEOUT_MS = 10000; // 10 seconds max wait for Clerk to load
 
 /**
  * Get the current auth token (if available)
- * Has a timeout to prevent hanging if Clerk is slow to initialize
+ * Waits for auth to be ready if Clerk is loading, then fetches token
  */
 async function getAuthToken(): Promise<string | null> {
+  // If auth is pending (Clerk loading), wait for it with timeout
+  if (authReadyPromise) {
+    try {
+      await Promise.race([
+        authReadyPromise,
+        new Promise<void>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Auth ready timeout")),
+            AUTH_READY_TIMEOUT_MS
+          )
+        ),
+      ]);
+    } catch {
+      console.warn("[API] Auth ready timed out, proceeding without token");
+      return null;
+    }
+  }
+
   if (!tokenGetter) return null;
+
   try {
     // Race between token getter and timeout
     const result = await Promise.race([
