@@ -9,8 +9,6 @@
  * @lastModified 2026-01-08
  */
 
-console.log("[Landing.tsx] Module loading...");
-
 import {
   AgentSupportSection,
   FAQSection,
@@ -22,10 +20,7 @@ import {
 } from "@/components/landing";
 import { LandingAuthProvider } from "@/hooks";
 
-console.log("[Landing.tsx] Imports loaded successfully");
-
 export function Landing() {
-  console.log("[Landing] Component rendering...");
   return (
     <LandingAuthProvider>
       <div className="min-h-screen bg-background">
