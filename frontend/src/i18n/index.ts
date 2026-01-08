@@ -1,2 +1,3 @@
-import './config';
-export { default } from './config';
+import "./config";
+
+export { default } from "./config";

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,37 +10,36 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { useOrganizationMutations } from '@/hooks/useOrganizationMutations';
-import { useTranslation } from 'react-i18next';
-import { defineModal, type NoProps } from '@/lib/modals';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useOrganizationMutations } from "@/hooks/useOrganizationMutations";
+import { defineModal, type NoProps } from "@/lib/modals";
 
 export type CreateOrganizationResult = {
-  action: 'created' | 'canceled';
+  action: "created" | "canceled";
   organizationId?: string;
 };
 
 const CreateOrganizationDialogImpl = NiceModal.create<NoProps>(() => {
   const modal = useModal();
-  const { t } = useTranslation('organization');
-  const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
+  const { t } = useTranslation("organization");
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
   const [isManualSlug, setIsManualSlug] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { createOrganization } = useOrganizationMutations({
     onCreateSuccess: (result) => {
       modal.resolve({
-        action: 'created',
+        action: "created",
         organizationId: result.organization.id,
       } as CreateOrganizationResult);
       modal.hide();
     },
     onCreateError: (err) => {
       setError(
-        err instanceof Error ? err.message : 'Failed to create organization'
+        err instanceof Error ? err.message : "Failed to create organization"
       );
     },
   });
@@ -47,8 +47,8 @@ const CreateOrganizationDialogImpl = NiceModal.create<NoProps>(() => {
   useEffect(() => {
     // Reset form when dialog opens
     if (modal.visible) {
-      setName('');
-      setSlug('');
+      setName("");
+      setSlug("");
       setIsManualSlug(false);
       setError(null);
     }
@@ -60,34 +60,34 @@ const CreateOrganizationDialogImpl = NiceModal.create<NoProps>(() => {
       const generatedSlug = name
         .toLowerCase()
         .trim()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
       setSlug(generatedSlug);
     }
   }, [name, isManualSlug]);
 
   const validateName = (value: string): string | null => {
     const trimmedValue = value.trim();
-    if (!trimmedValue) return 'Organization name is required';
+    if (!trimmedValue) return "Organization name is required";
     if (trimmedValue.length < 3)
-      return 'Organization name must be at least 3 characters';
+      return "Organization name must be at least 3 characters";
     if (trimmedValue.length > 50)
-      return 'Organization name must be 50 characters or less';
+      return "Organization name must be 50 characters or less";
     return null;
   };
 
   const validateSlug = (value: string): string | null => {
     const trimmedValue = value.trim();
-    if (!trimmedValue) return 'Slug is required';
-    if (trimmedValue.length < 3) return 'Slug must be at least 3 characters';
-    if (trimmedValue.length > 50) return 'Slug must be 50 characters or less';
+    if (!trimmedValue) return "Slug is required";
+    if (trimmedValue.length < 3) return "Slug must be at least 3 characters";
+    if (trimmedValue.length > 50) return "Slug must be 50 characters or less";
     if (!/^[a-z0-9-]+$/.test(trimmedValue)) {
-      return 'Slug can only contain lowercase letters, numbers, and hyphens';
+      return "Slug can only contain lowercase letters, numbers, and hyphens";
     }
-    if (trimmedValue.startsWith('-') || trimmedValue.endsWith('-')) {
-      return 'Slug cannot start or end with a hyphen';
+    if (trimmedValue.startsWith("-") || trimmedValue.endsWith("-")) {
+      return "Slug cannot start or end with a hyphen";
     }
     return null;
   };
@@ -113,7 +113,7 @@ const CreateOrganizationDialogImpl = NiceModal.create<NoProps>(() => {
   };
 
   const handleCancel = () => {
-    modal.resolve({ action: 'canceled' } as CreateOrganizationResult);
+    modal.resolve({ action: "canceled" } as CreateOrganizationResult);
     modal.hide();
   };
 
@@ -130,42 +130,42 @@ const CreateOrganizationDialogImpl = NiceModal.create<NoProps>(() => {
   };
 
   return (
-    <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={modal.visible}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('createDialog.title')}</DialogTitle>
-          <DialogDescription>{t('createDialog.description')}</DialogDescription>
+          <DialogTitle>{t("createDialog.title")}</DialogTitle>
+          <DialogDescription>{t("createDialog.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="org-name">{t('createDialog.nameLabel')}</Label>
+            <Label htmlFor="org-name">{t("createDialog.nameLabel")}</Label>
             <Input
+              autoFocus
+              disabled={createOrganization.isPending}
               id="org-name"
-              value={name}
+              maxLength={50}
               onChange={(e) => {
                 setName(e.target.value);
                 setError(null);
               }}
-              placeholder={t('createDialog.namePlaceholder')}
-              maxLength={50}
-              autoFocus
-              disabled={createOrganization.isPending}
+              placeholder={t("createDialog.namePlaceholder")}
+              value={name}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="org-slug">{t('createDialog.slugLabel')}</Label>
+            <Label htmlFor="org-slug">{t("createDialog.slugLabel")}</Label>
             <Input
-              id="org-slug"
-              value={slug}
-              onChange={handleSlugChange}
-              placeholder={t('createDialog.slugPlaceholder')}
-              maxLength={50}
               disabled={createOrganization.isPending}
+              id="org-slug"
+              maxLength={50}
+              onChange={handleSlugChange}
+              placeholder={t("createDialog.slugPlaceholder")}
+              value={slug}
             />
-            <p className="text-xs text-muted-foreground">
-              {t('createDialog.slugHelper')}
+            <p className="text-muted-foreground text-xs">
+              {t("createDialog.slugHelper")}
             </p>
           </div>
 
@@ -178,21 +178,21 @@ const CreateOrganizationDialogImpl = NiceModal.create<NoProps>(() => {
 
         <DialogFooter>
           <Button
-            variant="outline"
-            onClick={handleCancel}
             disabled={createOrganization.isPending}
+            onClick={handleCancel}
+            variant="outline"
           >
-            {t('common:buttons.cancel')}
+            {t("common:buttons.cancel")}
           </Button>
           <Button
-            onClick={handleCreate}
             disabled={
-              !name.trim() || !slug.trim() || createOrganization.isPending
+              !(name.trim() && slug.trim()) || createOrganization.isPending
             }
+            onClick={handleCreate}
           >
             {createOrganization.isPending
-              ? t('createDialog.creating')
-              : t('createDialog.createButton')}
+              ? t("createDialog.creating")
+              : t("createDialog.createButton")}
           </Button>
         </DialogFooter>
       </DialogContent>

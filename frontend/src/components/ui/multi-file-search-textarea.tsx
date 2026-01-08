@@ -1,9 +1,8 @@
-import { KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { AutoExpandingTextarea } from '@/components/ui/auto-expanding-textarea';
-import { projectsApi } from '@/lib/api';
-
-import type { SearchResult } from 'shared/types';
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import type { SearchResult } from "shared/types";
+import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
+import { projectsApi } from "@/lib/api";
 
 interface FileSearchResult extends SearchResult {
   name: string;
@@ -24,7 +23,7 @@ interface MultiFileSearchTextareaProps {
 export function MultiFileSearchTextarea({
   value,
   onChange,
-  placeholder = 'Start typing a file path...',
+  placeholder = "Start typing a file path...",
   rows = 3,
   disabled = false,
   className,
@@ -32,7 +31,7 @@ export function MultiFileSearchTextarea({
   onKeyDown,
   maxRows = 10,
 }: MultiFileSearchTextareaProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FileSearchResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -48,7 +47,7 @@ export function MultiFileSearchTextarea({
 
   // Search for files when query changes
   useEffect(() => {
-    if (!searchQuery || !projectId || searchQuery.length < 2) {
+    if (!(searchQuery && projectId) || searchQuery.length < 2) {
       setSearchResults([]);
       setShowDropdown(false);
       return;
@@ -78,7 +77,7 @@ export function MultiFileSearchTextarea({
         const result = await projectsApi.searchFiles(
           projectId,
           searchQuery,
-          'settings',
+          "settings",
           {
             signal: abortController.signal,
           }
@@ -88,7 +87,7 @@ export function MultiFileSearchTextarea({
         if (!abortController.signal.aborted) {
           const fileResults: FileSearchResult[] = result.map((item) => ({
             ...item,
-            name: item.path.split('/').pop() || item.path,
+            name: item.path.split("/").pop() || item.path,
           }));
 
           // Cache the results
@@ -100,7 +99,7 @@ export function MultiFileSearchTextarea({
         }
       } catch (error) {
         if (!abortController.signal.aborted) {
-          console.error('Failed to search files:', error);
+          console.error("Failed to search files:", error);
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -125,23 +124,25 @@ export function MultiFileSearchTextarea({
 
     // Find the last separator (comma or newline) before cursor
     const lastSeparatorIndex = Math.max(
-      textBefore.lastIndexOf(','),
-      textBefore.lastIndexOf('\n')
+      textBefore.lastIndexOf(","),
+      textBefore.lastIndexOf("\n")
     );
 
     // Find the next separator after cursor
     const nextSeparatorIndex = Math.min(
-      textAfter.indexOf(',') === -1
-        ? Infinity
-        : textAfter.indexOf(',') + cursorPosition,
-      textAfter.indexOf('\n') === -1
-        ? Infinity
-        : textAfter.indexOf('\n') + cursorPosition
+      textAfter.indexOf(",") === -1
+        ? Number.POSITIVE_INFINITY
+        : textAfter.indexOf(",") + cursorPosition,
+      textAfter.indexOf("\n") === -1
+        ? Number.POSITIVE_INFINITY
+        : textAfter.indexOf("\n") + cursorPosition
     );
 
     const tokenStart = lastSeparatorIndex + 1;
     const tokenEnd =
-      nextSeparatorIndex === Infinity ? text.length : nextSeparatorIndex;
+      nextSeparatorIndex === Number.POSITIVE_INFINITY
+        ? text.length
+        : nextSeparatorIndex;
     const token = text.slice(tokenStart, tokenEnd).trim();
 
     return {
@@ -167,7 +168,7 @@ export function MultiFileSearchTextarea({
     if (token.length >= 2) {
       setSearchQuery(token);
     } else {
-      setSearchQuery('');
+      setSearchQuery("");
       setShowDropdown(false);
     }
   };
@@ -177,30 +178,30 @@ export function MultiFileSearchTextarea({
     // Handle dropdown navigation first
     if (showDropdown && searchResults.length > 0) {
       switch (e.key) {
-        case 'ArrowDown':
+        case "ArrowDown":
           e.preventDefault();
           setSelectedIndex((prev) =>
             prev < searchResults.length - 1 ? prev + 1 : 0
           );
           return;
-        case 'ArrowUp':
+        case "ArrowUp":
           e.preventDefault();
           setSelectedIndex((prev) =>
             prev > 0 ? prev - 1 : searchResults.length - 1
           );
           return;
-        case 'Enter':
-        case 'Tab':
+        case "Enter":
+        case "Tab":
           if (selectedIndex >= 0) {
             e.preventDefault();
             selectFile(searchResults[selectedIndex]);
             return;
           }
           break;
-        case 'Escape':
+        case "Escape":
           e.preventDefault();
           setShowDropdown(false);
-          setSearchQuery('');
+          setSearchQuery("");
           return;
       }
     }
@@ -221,19 +222,19 @@ export function MultiFileSearchTextarea({
     const trimmedAfter = after.trimStart();
     const needsComma =
       trimmedAfter.length > 0 &&
-      !trimmedAfter.startsWith(',') &&
-      !trimmedAfter.startsWith('\n');
+      !trimmedAfter.startsWith(",") &&
+      !trimmedAfter.startsWith("\n");
 
     if (needsComma || trimmedAfter.length === 0) {
-      insertion += ', ';
+      insertion += ", ";
     }
 
     const newValue =
-      before.trimEnd() + (before.trimEnd() ? ' ' : '') + insertion + after;
+      before.trimEnd() + (before.trimEnd() ? " " : "") + insertion + after;
     onChange(newValue);
 
     setShowDropdown(false);
-    setSearchQuery('');
+    setSearchQuery("");
 
     // Focus back to textarea and position cursor after insertion
     setTimeout(() => {
@@ -315,7 +316,7 @@ export function MultiFileSearchTextarea({
     if (selectedIndex >= 0) {
       const itemEl = itemRefs.current.get(selectedIndex);
       if (itemEl) {
-        itemEl.scrollIntoView({ block: 'nearest' });
+        itemEl.scrollIntoView({ block: "nearest" });
       }
     }
   }, [selectedIndex]);
@@ -324,54 +325,54 @@ export function MultiFileSearchTextarea({
 
   return (
     <div
-      className={`relative ${className?.includes('flex-1') ? 'flex-1' : ''}`}
+      className={`relative ${className?.includes("flex-1") ? "flex-1" : ""}`}
     >
       <AutoExpandingTextarea
-        ref={textareaRef}
-        value={value}
+        className={className}
+        disabled={disabled}
+        maxRows={maxRows}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
+        ref={textareaRef}
         rows={rows}
-        disabled={disabled}
-        className={className}
-        maxRows={maxRows}
+        value={value}
       />
 
       {showDropdown &&
         createPortal(
           <div
+            className="fixed min-w-64 overflow-y-auto rounded-md border border-border bg-background shadow-lg"
             ref={dropdownRef}
-            className="fixed bg-background border border-border rounded-md shadow-lg overflow-y-auto min-w-64"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,
               maxHeight: dropdownPosition.maxHeight,
-              zIndex: 10000,
+              zIndex: 10_000,
             }}
           >
             {isLoading ? (
-              <div className="p-2 text-sm text-muted-foreground">
+              <div className="p-2 text-muted-foreground text-sm">
                 Searching...
               </div>
             ) : (
               <div className="py-1">
                 {searchResults.map((file, index) => (
                   <div
+                    className={`cursor-pointer px-3 py-2 text-sm ${
+                      index === selectedIndex
+                        ? "bg-blue-50 text-blue-900"
+                        : "hover:bg-muted"
+                    }`}
                     key={file.path}
+                    onClick={() => selectFile(file)}
                     ref={(el) => {
                       if (el) itemRefs.current.set(index, el);
                       else itemRefs.current.delete(index);
                     }}
-                    className={`px-3 py-2 cursor-pointer text-sm ${
-                      index === selectedIndex
-                        ? 'bg-blue-50 text-blue-900'
-                        : 'hover:bg-muted'
-                    }`}
-                    onClick={() => selectFile(file)}
                   >
-                    <div className="font-medium truncate">{file.name}</div>
-                    <div className="text-xs text-muted-foreground truncate">
+                    <div className="truncate font-medium">{file.name}</div>
+                    <div className="truncate text-muted-foreground text-xs">
                       {file.path}
                     </div>
                   </div>

@@ -1,12 +1,12 @@
+export type { ColumnDef, DataTableProps } from "./data-table";
+export { DataTable } from "./data-table";
 export {
   Table,
-  TableHead,
   TableBody,
-  TableRow,
-  TableHeaderCell,
   TableCell,
   TableEmpty,
+  TableHead,
+  TableHeaderCell,
   TableLoading,
-} from './table';
-export { DataTable } from './data-table';
-export type { ColumnDef, DataTableProps } from './data-table';
+  TableRow,
+} from "./table";

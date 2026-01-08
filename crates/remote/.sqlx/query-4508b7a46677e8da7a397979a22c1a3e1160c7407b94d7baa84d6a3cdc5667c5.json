@@ -10,14 +10,9 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Inet",
-        "Timestamptz"
-      ]
+      "Left": ["Inet", "Timestamptz"]
     },
-    "nullable": [
-      null
-    ]
+    "nullable": [null]
   },
   "hash": "4508b7a46677e8da7a397979a22c1a3e1160c7407b94d7baa84d6a3cdc5667c5"
 }

@@ -1,16 +1,16 @@
-import type { ConflictOp } from 'shared/types';
+import type { ConflictOp } from "shared/types";
 
 export function displayConflictOpLabel(op?: ConflictOp | null): string {
   switch (op) {
-    case 'merge':
-      return 'Merge';
-    case 'cherry_pick':
-      return 'Cherry-pick';
-    case 'revert':
-      return 'Revert';
-    case 'rebase':
+    case "merge":
+      return "Merge";
+    case "cherry_pick":
+      return "Cherry-pick";
+    case "revert":
+      return "Revert";
+    case "rebase":
     default:
-      return 'Rebase';
+      return "Rebase";
   }
 }
 
@@ -20,17 +20,17 @@ function formatConflictHeader(
   baseBranch?: string,
   repoName?: string
 ): string {
-  const repoContext = repoName ? ` in repository '${repoName}'` : '';
+  const repoContext = repoName ? ` in repository '${repoName}'` : "";
   switch (op) {
-    case 'merge':
+    case "merge":
       return `Merge conflicts while merging into '${sourceBranch}'${repoContext}.`;
-    case 'cherry_pick':
+    case "cherry_pick":
       return `Cherry-pick conflicts on '${sourceBranch}'${repoContext}.`;
-    case 'revert':
+    case "revert":
       return `Revert conflicts on '${sourceBranch}'${repoContext}.`;
-    case 'rebase':
+    case "rebase":
     default:
-      return `Rebase conflicts while rebasing '${sourceBranch}' onto '${baseBranch ?? 'base branch'}'${repoContext}.`;
+      return `Rebase conflicts while rebasing '${sourceBranch}' onto '${baseBranch ?? "base branch"}'${repoContext}.`;
   }
 }
 
@@ -41,12 +41,12 @@ export function buildResolveConflictsInstructions(
   op?: ConflictOp | null,
   repoName?: string
 ): string {
-  const source = sourceBranch || 'current attempt branch';
-  const base = baseBranch ?? 'base branch';
+  const source = sourceBranch || "current attempt branch";
+  const base = baseBranch ?? "base branch";
   const filesList = conflictedFiles.slice(0, 12);
   const filesBlock = filesList.length
-    ? `\n\nFiles with conflicts:\n${filesList.map((f) => `- ${f}`).join('\n')}`
-    : '';
+    ? `\n\nFiles with conflicts:\n${filesList.map((f) => `- ${f}`).join("\n")}`
+    : "";
 
   const opTitle = displayConflictOpLabel(op);
   const header = formatConflictHeader(op, source, base, repoName);

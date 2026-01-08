@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { imagesApi } from '@/lib/api';
-import type { ImageResponse } from 'shared/types';
+import { useQuery } from "@tanstack/react-query";
+import type { ImageResponse } from "shared/types";
+import { imagesApi } from "@/lib/api";
 
 export function useTaskImages(taskId?: string) {
   return useQuery<ImageResponse[]>({
-    queryKey: ['taskImages', taskId],
+    queryKey: ["taskImages", taskId],
     queryFn: () => imagesApi.getTaskImages(taskId!),
     enabled: !!taskId,
   });

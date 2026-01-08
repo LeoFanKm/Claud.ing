@@ -1,8 +1,8 @@
 function App() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Vibe Kanban Remote</h1>
+        <h1 className="mb-4 font-bold text-4xl">Vibe Kanban Remote</h1>
       </div>
     </div>
   );

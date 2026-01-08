@@ -1,17 +1,4 @@
 import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card.tsx';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu.tsx';
-import { Button } from '@/components/ui/button.tsx';
-import {
   Calendar,
   Edit,
   ExternalLink,
@@ -20,15 +7,28 @@ import {
   MoreHorizontal,
   Trash2,
   Unlink,
-} from 'lucide-react';
-import { Project } from 'shared/types';
-import { useEffect, useRef } from 'react';
-import { useOpenProjectInEditor } from '@/hooks/useOpenProjectInEditor';
-import { useNavigateWithSearch, useProjectRepos } from '@/hooks';
-import { projectsApi } from '@/lib/api';
-import { LinkProjectDialog } from '@/components/dialogs/projects/LinkProjectDialog';
-import { useTranslation } from 'react-i18next';
-import { useProjectMutations } from '@/hooks/useProjectMutations';
+} from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import type { Project } from "shared/types";
+import { LinkProjectDialog } from "@/components/dialogs/projects/LinkProjectDialog";
+import { Button } from "@/components/ui/button.tsx";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu.tsx";
+import { useNavigateWithSearch, useProjectRepos } from "@/hooks";
+import { useOpenProjectInEditor } from "@/hooks/useOpenProjectInEditor";
+import { useProjectMutations } from "@/hooks/useProjectMutations";
+import { projectsApi } from "@/lib/api";
 
 type Props = {
   project: Project;
@@ -41,21 +41,21 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
   const navigate = useNavigateWithSearch();
   const ref = useRef<HTMLDivElement>(null);
   const handleOpenInEditor = useOpenProjectInEditor(project);
-  const { t } = useTranslation('projects');
+  const { t } = useTranslation("projects");
 
   const { data: repos } = useProjectRepos(project.id);
   const isSingleRepoProject = repos?.length === 1;
 
   const { unlinkProject } = useProjectMutations({
     onUnlinkError: (error) => {
-      console.error('Failed to unlink project:', error);
-      setError('Failed to unlink project');
+      console.error("Failed to unlink project:", error);
+      setError("Failed to unlink project");
     },
   });
 
   useEffect(() => {
     if (isFocused && ref.current) {
-      ref.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      ref.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
       ref.current.focus();
     }
   }, [isFocused]);
@@ -71,8 +71,8 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
     try {
       await projectsApi.delete(id);
     } catch (error) {
-      console.error('Failed to delete project:', error);
-      setError('Failed to delete project');
+      console.error("Failed to delete project:", error);
+      setError("Failed to delete project");
     }
   };
 
@@ -91,7 +91,7 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
         projectName: project.name,
       });
     } catch (error) {
-      console.error('Failed to link project:', error);
+      console.error("Failed to link project:", error);
     }
   };
 
@@ -106,10 +106,12 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
 
   return (
     <Card
-      className={`hover:shadow-md transition-shadow cursor-pointer focus:ring-2 focus:ring-primary outline-none border`}
+      className={
+        "cursor-pointer border outline-none transition-shadow hover:shadow-md focus:ring-2 focus:ring-primary"
+      }
       onClick={() => navigate(`/projects/${project.id}/tasks`)}
-      tabIndex={isFocused ? 0 : -1}
       ref={ref}
+      tabIndex={isFocused ? 0 : -1}
     >
       <CardHeader>
         <div className="flex items-start justify-between">
@@ -117,7 +119,7 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button className="h-8 w-8 p-0" size="sm" variant="ghost">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -129,7 +131,7 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
                   }}
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  {t('viewProject')}
+                  {t("viewProject")}
                 </DropdownMenuItem>
                 {isSingleRepoProject && (
                   <DropdownMenuItem
@@ -139,7 +141,7 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
                     }}
                   >
                     <FolderOpen className="mr-2 h-4 w-4" />
-                    {t('openInIDE')}
+                    {t("openInIDE")}
                   </DropdownMenuItem>
                 )}
                 {project.remote_project_id ? (
@@ -150,7 +152,7 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
                     }}
                   >
                     <Unlink className="mr-2 h-4 w-4" />
-                    {t('unlinkFromOrganization')}
+                    {t("unlinkFromOrganization")}
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem
@@ -160,7 +162,7 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
                     }}
                   >
                     <Link2 className="mr-2 h-4 w-4" />
-                    {t('linkToOrganization')}
+                    {t("linkToOrganization")}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
@@ -170,17 +172,17 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
                   }}
                 >
                   <Edit className="mr-2 h-4 w-4" />
-                  {t('common:buttons.edit')}
+                  {t("common:buttons.edit")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  className="text-destructive"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(project.id, project.name);
                   }}
-                  className="text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {t('common:buttons.delete')}
+                  {t("common:buttons.delete")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -188,7 +190,7 @@ function ProjectCard({ project, isFocused, setError, onEdit }: Props) {
         </div>
         <CardDescription className="flex items-center">
           <Calendar className="mr-1 h-3 w-3" />
-          {t('createdDate', {
+          {t("createdDate", {
             date: new Date(project.created_at).toLocaleDateString(),
           })}
         </CardDescription>

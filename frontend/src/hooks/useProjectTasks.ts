@@ -1,16 +1,17 @@
-import { useCallback, useMemo } from 'react';
-import { useJsonPatchWsStream } from './useJsonPatchWsStream';
-import { useAuth } from '@/hooks';
-import { useProject } from '@/contexts/ProjectContext';
-import { useLiveQuery, eq, isNull } from '@tanstack/react-db';
-import { sharedTasksCollection } from '@/lib/electric/sharedTasksCollection';
-import { useAssigneeUserNames } from './useAssigneeUserName';
-import { useAutoLinkSharedTasks } from './useAutoLinkSharedTasks';
+import { eq, isNull, useLiveQuery } from "@tanstack/react-db";
+import { useCallback, useMemo } from "react";
 import type {
   SharedTask,
   TaskStatus,
   TaskWithAttemptStatus,
-} from 'shared/types';
+} from "shared/types";
+import { useProject } from "@/contexts/ProjectContext";
+import { useAuth } from "@/hooks";
+import { sharedTasksCollection } from "@/lib/electric/sharedTasksCollection";
+import type { ConnectionState } from "@/types/connection";
+import { useAssigneeUserNames } from "./useAssigneeUserName";
+import { useAutoLinkSharedTasks } from "./useAutoLinkSharedTasks";
+import { useJsonPatchWsStream } from "./useJsonPatchWsStream";
 
 export type SharedTaskRecord = SharedTask & {
   remote_project_id: string;
@@ -30,8 +31,15 @@ export interface UseProjectTasksResult {
   sharedTasksById: Record<string, SharedTaskRecord>;
   sharedOnlyByStatus: Record<TaskStatus, SharedTaskRecord[]>;
   isLoading: boolean;
+  /** @deprecated Use connection.status === 'connected' instead */
   isConnected: boolean;
   error: string | null;
+  /** Full connection state with status, attempts, and timestamps */
+  connection: ConnectionState;
+  /** Countdown in seconds until next reconnect attempt (null if not reconnecting) */
+  reconnectCountdown: number | null;
+  /** Manually trigger a reconnect attempt */
+  reconnect: () => void;
 }
 
 /**
@@ -48,16 +56,19 @@ export const useProjectTasks = (projectId: string): UseProjectTasksResult => {
 
   const initialData = useCallback((): TasksState => ({ tasks: {} }), []);
 
-  const { data, isConnected, error } = useJsonPatchWsStream(
-    endpoint,
-    !!projectId,
-    initialData
-  );
+  const {
+    data,
+    connection,
+    isConnected,
+    error,
+    reconnectCountdown,
+    reconnect,
+  } = useJsonPatchWsStream(endpoint, !!projectId, initialData);
 
   const sharedTasksQuery = useLiveQuery(
     useCallback(
       (q) => {
-        if (!remoteProjectId || !isSignedIn) {
+        if (!(remoteProjectId && isSignedIn)) {
           return undefined;
         }
         return q
@@ -177,7 +188,7 @@ export const useProjectTasks = (projectId: string): UseProjectTasksResult => {
     return grouped;
   }, [localTasksById, sharedTasksById, referencedSharedIds]);
 
-  const isLoading = !data && !error; // until first snapshot
+  const isLoading = !(data || error); // until first snapshot
 
   // Auto-link shared tasks assigned to current user
   useAutoLinkSharedTasks({
@@ -198,5 +209,8 @@ export const useProjectTasks = (projectId: string): UseProjectTasksResult => {
     isLoading,
     isConnected,
     error,
+    connection,
+    reconnectCountdown,
+    reconnect,
   };
 };

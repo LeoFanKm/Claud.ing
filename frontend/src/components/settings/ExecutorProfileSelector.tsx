@@ -1,7 +1,7 @@
-import { AgentSelector } from '@/components/tasks/AgentSelector';
-import { ConfigSelector } from '@/components/tasks/ConfigSelector';
-import { cn } from '@/lib/utils';
-import type { ExecutorConfig, ExecutorProfileId } from 'shared/types';
+import type { ExecutorConfig, ExecutorProfileId } from "shared/types";
+import { AgentSelector } from "@/components/tasks/AgentSelector";
+import { ConfigSelector } from "@/components/tasks/ConfigSelector";
+import { cn } from "@/lib/utils";
 
 type Props = {
   profiles: Record<string, ExecutorConfig> | null;
@@ -27,22 +27,22 @@ function ExecutorProfileSelector({
   }
 
   return (
-    <div className={cn('flex gap-3 flex-col sm:flex-row', className)}>
+    <div className={cn("flex flex-col gap-3 sm:flex-row", className)}>
       <AgentSelector
+        className={itemClassName}
+        disabled={disabled}
+        onChange={onProfileSelect}
         profiles={profiles}
         selectedExecutorProfile={selectedProfile}
-        onChange={onProfileSelect}
-        disabled={disabled}
         showLabel={showLabel}
-        className={itemClassName}
       />
       <ConfigSelector
+        className={itemClassName}
+        disabled={disabled}
+        onChange={onProfileSelect}
         profiles={profiles}
         selectedExecutorProfile={selectedProfile}
-        onChange={onProfileSelect}
-        disabled={disabled}
         showLabel={showLabel}
-        className={itemClassName}
       />
     </div>
   );

@@ -1,11 +1,11 @@
-import { WidgetProps } from '@rjsf/utils';
+import type { WidgetProps } from "@rjsf/utils";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 export const SelectWidget = (props: WidgetProps) => {
   const {
@@ -25,7 +25,7 @@ export const SelectWidget = (props: WidgetProps) => {
 
   const handleChange = (newValue: string) => {
     // Handle nullable enum values - '__null__' means null for nullable types
-    const finalValue = newValue === '__null__' ? options.emptyValue : newValue;
+    const finalValue = newValue === "__null__" ? options.emptyValue : newValue;
     onChange(finalValue);
   };
 
@@ -43,23 +43,23 @@ export const SelectWidget = (props: WidgetProps) => {
 
   // Handle nullable types by adding a null option and filtering out null from enumOptions
   // (schema has null in both type and enum, but String(null) breaks validation)
-  const isNullable = Array.isArray(schema.type) && schema.type.includes('null');
+  const isNullable = Array.isArray(schema.type) && schema.type.includes("null");
   const allOptions = isNullable
     ? [
-        { value: '__null__', label: 'Not specified' },
+        { value: "__null__", label: "Not specified" },
         ...selectOptions.filter((opt) => opt.value !== null),
       ]
     : selectOptions;
 
   return (
     <Select
-      value={value === null ? '__null__' : (value ?? '')}
-      onValueChange={handleChange}
-      onOpenChange={handleOpenChange}
       disabled={disabled || readonly}
+      onOpenChange={handleOpenChange}
+      onValueChange={handleChange}
+      value={value === null ? "__null__" : (value ?? "")}
     >
       <SelectTrigger id={id}>
-        <SelectValue placeholder={placeholder || 'Select an option...'} />
+        <SelectValue placeholder={placeholder || "Select an option..."} />
       </SelectTrigger>
       <SelectContent>
         {allOptions.map((option) => (

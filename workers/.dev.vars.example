@@ -1,0 +1,10 @@
+# Clerk Authentication
+# Get your keys from: https://dashboard.clerk.com
+CLERK_SECRET_KEY=sk_test_xxx
+CLERK_PUBLISHABLE_KEY=pk_test_xxx
+
+# Stripe Billing
+# Get your keys from: https://dashboard.stripe.com/apikeys
+STRIPE_SECRET_KEY=sk_test_xxx
+# Webhook secret from: https://dashboard.stripe.com/webhooks
+STRIPE_WEBHOOK_SECRET=whsec_xxx

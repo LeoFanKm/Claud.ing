@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useState } from "react";
+import { EditorType, type Project } from "shared/types";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,18 +9,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { EditorType, Project } from 'shared/types';
-import { useOpenProjectInEditor } from '@/hooks/useOpenProjectInEditor';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
+} from "@/components/ui/select";
+import { useOpenProjectInEditor } from "@/hooks/useOpenProjectInEditor";
+import { defineModal } from "@/lib/modals";
 
 export interface ProjectEditorSelectionDialogProps {
   selectedProject: Project | null;
@@ -47,8 +47,8 @@ const ProjectEditorSelectionDialogImpl =
 
     return (
       <Dialog
-        open={modal.visible}
         onOpenChange={(open) => !open && handleCancel()}
+        open={modal.visible}
       >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -60,12 +60,12 @@ const ProjectEditorSelectionDialogImpl =
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Editor</label>
+              <label className="font-medium text-sm">Editor</label>
               <Select
-                value={selectedEditor}
                 onValueChange={(value) =>
                   setSelectedEditor(value as EditorType)
                 }
+                value={selectedEditor}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -81,7 +81,7 @@ const ProjectEditorSelectionDialogImpl =
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancel}>
+            <Button onClick={handleCancel} variant="outline">
               Cancel
             </Button>
             <Button onClick={handleConfirm}>Open Editor</Button>

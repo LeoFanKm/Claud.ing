@@ -1,9 +1,9 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import type { Invitation } from 'shared/types';
-import { MemberRole } from 'shared/types';
-import { useTranslation } from 'react-i18next';
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { Invitation } from "shared/types";
+import { MemberRole } from "shared/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface PendingInvitationItemProps {
   invitation: Invitation;
@@ -16,7 +16,7 @@ export function PendingInvitationItem({
   onRevoke,
   isRevoking,
 }: PendingInvitationItemProps) {
-  const { t } = useTranslation('organization');
+  const { t } = useTranslation("organization");
 
   const handleRevoke = () => {
     const confirmed = window.confirm(
@@ -28,31 +28,31 @@ export function PendingInvitationItem({
   };
 
   return (
-    <div className="flex items-center justify-between p-3 border rounded-lg">
+    <div className="flex items-center justify-between rounded-lg border p-3">
       <div className="flex items-center gap-3">
         <div>
           <div className="font-medium text-sm">{invitation.email}</div>
-          <div className="text-xs text-muted-foreground">
-            {t('invitationList.invited', {
+          <div className="text-muted-foreground text-xs">
+            {t("invitationList.invited", {
               date: new Date(invitation.created_at).toLocaleDateString(),
             })}
           </div>
         </div>
         <Badge
           variant={
-            invitation.role === MemberRole.ADMIN ? 'default' : 'secondary'
+            invitation.role === MemberRole.ADMIN ? "default" : "secondary"
           }
         >
-          {t('roles.' + invitation.role.toLowerCase())}
+          {t("roles." + invitation.role.toLowerCase())}
         </Badge>
-        <Badge variant="outline">{t('invitationList.pending')}</Badge>
+        <Badge variant="outline">{t("invitationList.pending")}</Badge>
       </div>
       <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleRevoke}
         disabled={isRevoking}
+        onClick={handleRevoke}
+        size="icon"
         title="Revoke invitation"
+        variant="ghost"
       >
         <Trash2 className="h-4 w-4" />
       </Button>

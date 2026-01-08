@@ -1,3 +1,5 @@
+import { Check, X } from "lucide-react";
+import type { ReactNode } from "react";
 import {
   useCallback,
   useContext,
@@ -5,31 +7,28 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import type { ReactNode } from 'react';
-import type { ApprovalStatus, ToolStatus } from 'shared/types';
-import { Button } from '@/components/ui/button';
+} from "react";
+import { useHotkeysContext } from "react-hotkeys-hook";
+import type { ApprovalStatus, ToolStatus } from "shared/types";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { approvalsApi } from '@/lib/api';
-import { Check, X } from 'lucide-react';
-import WYSIWYGEditor from '@/components/ui/wysiwyg';
+} from "@/components/ui/tooltip";
+import WYSIWYGEditor from "@/components/ui/wysiwyg";
+import { useApprovalForm } from "@/contexts/ApprovalFormContext";
+import { useProject } from "@/contexts/ProjectContext";
+import { TabNavContext } from "@/contexts/TabNavigationContext";
+import { Scope, useKeyApproveRequest, useKeyDenyApproval } from "@/keyboard";
+import { approvalsApi } from "@/lib/api";
 
-import { useHotkeysContext } from 'react-hotkeys-hook';
-import { TabNavContext } from '@/contexts/TabNavigationContext';
-import { useKeyApproveRequest, useKeyDenyApproval, Scope } from '@/keyboard';
-import { useProject } from '@/contexts/ProjectContext';
-import { useApprovalForm } from '@/contexts/ApprovalFormContext';
-
-const DEFAULT_DENIAL_REASON = 'User denied this tool use request.';
+const DEFAULT_DENIAL_REASON = "User denied this tool use request.";
 
 // ---------- Types ----------
 interface PendingApprovalEntryProps {
-  pendingStatus: Extract<ToolStatus, { status: 'pending_approval' }>;
+  pendingStatus: Extract<ToolStatus, { status: "pending_approval" }>;
   executionProcessId?: string;
   children: ReactNode;
 }
@@ -88,36 +87,36 @@ function ActionButtons({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            onClick={onApprove}
-            variant="ghost"
+            aria-busy={isResponding}
+            aria-label={isResponding ? "Submitting approval" : "Approve"}
             className="h-8 w-8 rounded-full p-0"
             disabled={disabled}
-            aria-label={isResponding ? 'Submitting approval' : 'Approve'}
-            aria-busy={isResponding}
+            onClick={onApprove}
+            variant="ghost"
           >
             <Check className="h-5 w-5" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{isResponding ? 'Submitting…' : 'Approve request'}</p>
+          <p>{isResponding ? "Submitting…" : "Approve request"}</p>
         </TooltipContent>
       </Tooltip>
 
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            onClick={onStartDeny}
-            variant="ghost"
+            aria-busy={isResponding}
+            aria-label={isResponding ? "Submitting denial" : "Deny"}
             className="h-8 w-8 rounded-full p-0"
             disabled={disabled}
-            aria-label={isResponding ? 'Submitting denial' : 'Deny'}
-            aria-busy={isResponding}
+            onClick={onStartDeny}
+            variant="ghost"
           >
             <X className="h-5 w-5" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{isResponding ? 'Submitting…' : 'Provide denial reason'}</p>
+          <p>{isResponding ? "Submitting…" : "Provide denial reason"}</p>
         </TooltipContent>
       </Tooltip>
     </div>
@@ -142,24 +141,24 @@ function DenyReasonForm({
   return (
     <div className="flex flex-col gap-2 p-4">
       <WYSIWYGEditor
-        value={value}
-        onChange={onChange}
-        placeholder="Let the agent know why this request was denied... Type @ to insert tags or search files."
-        disabled={isResponding}
         className="min-h-[80px]"
-        projectId={projectId}
+        disabled={isResponding}
+        onChange={onChange}
         onCmdEnter={onSubmit}
+        placeholder="Let the agent know why this request was denied... Type @ to insert tags or search files."
+        projectId={projectId}
+        value={value}
       />
       <div className="flex flex-wrap items-center justify-end gap-2">
         <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
           disabled={isResponding}
+          onClick={onCancel}
+          size="sm"
+          variant="ghost"
         >
           Cancel
         </Button>
-        <Button size="sm" onClick={onSubmit} disabled={isResponding}>
+        <Button disabled={isResponding} onClick={onSubmit} size="sm">
           Deny
         </Button>
       </div>
@@ -189,7 +188,7 @@ const PendingApprovalEntry = ({
 
   const { enableScope, disableScope, activeScopes } = useHotkeysContext();
   const tabNav = useContext(TabNavContext);
-  const isLogsTabActive = tabNav ? tabNav.activeTab === 'logs' : true;
+  const isLogsTabActive = tabNav ? tabNav.activeTab === "logs" : true;
   const dialogScopeActive = activeScopes.includes(Scope.DIALOG);
   const shouldControlScopes = isLogsTabActive && !dialogScopeActive;
   const approvalsScopeEnabledRef = useRef(false);
@@ -244,7 +243,7 @@ const PendingApprovalEntry = ({
     async (approved: boolean, reason?: string) => {
       if (disabled) return;
       if (!executionProcessId) {
-        setError('Missing executionProcessId');
+        setError("Missing executionProcessId");
         return;
       }
 
@@ -252,8 +251,8 @@ const PendingApprovalEntry = ({
       setError(null);
 
       const status: ApprovalStatus = approved
-        ? { status: 'approved' }
-        : { status: 'denied', reason };
+        ? { status: "approved" }
+        : { status: "denied", reason };
 
       try {
         await approvalsApi.respond(pendingStatus.approval_id, {
@@ -263,9 +262,9 @@ const PendingApprovalEntry = ({
         setHasResponded(true);
         clear();
       } catch (e: unknown) {
-        console.error('Approval respond failed:', e);
+        console.error("Approval respond failed:", e);
         const errorMessage =
-          e instanceof Error ? e.message : 'Failed to send response';
+          e instanceof Error ? e.message : "Failed to send response";
         setError(errorMessage);
       } finally {
         setIsResponding(false);
@@ -309,7 +308,7 @@ const PendingApprovalEntry = ({
   useKeyDenyApproval(triggerDeny, {
     scope: Scope.APPROVALS,
     when: () => shouldEnableApprovalsScope && !hasResponded,
-    enableOnFormTags: ['textarea', 'TEXTAREA'],
+    enableOnFormTags: ["textarea", "TEXTAREA"],
     preventDefault: true,
   });
 
@@ -340,9 +339,9 @@ const PendingApprovalEntry = ({
 
             {error && (
               <div
-                className="mt-1 text-xs text-red-600"
-                role="alert"
                 aria-live="polite"
+                className="mt-1 text-red-600 text-xs"
+                role="alert"
               >
                 {error}
               </div>
@@ -351,11 +350,11 @@ const PendingApprovalEntry = ({
             {isEnteringReason && !hasResponded && (
               <DenyReasonForm
                 isResponding={isResponding}
-                value={denyReason}
-                onChange={setDenyReason}
                 onCancel={handleCancelDeny}
+                onChange={setDenyReason}
                 onSubmit={handleSubmitDeny}
                 projectId={projectId}
+                value={denyReason}
               />
             )}
           </TooltipProvider>

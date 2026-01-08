@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { useJsonPatchWsStream } from './useJsonPatchWsStream';
-import { scratchApi } from '@/lib/api';
-import { ScratchType, type Scratch, type UpdateScratch } from 'shared/types';
+import { useCallback } from "react";
+import type { Scratch, ScratchType, UpdateScratch } from "shared/types";
+import { scratchApi } from "@/lib/api";
+import { useJsonPatchWsStream } from "./useJsonPatchWsStream";
 
 type ScratchState = {
   scratch: Scratch | null;
@@ -49,7 +49,7 @@ export const useScratch = (
     await scratchApi.delete(scratchType, id);
   }, [scratchType, id]);
 
-  const isLoading = !data && !error && !isConnected;
+  const isLoading = !(data || error || isConnected);
 
   return {
     scratch,

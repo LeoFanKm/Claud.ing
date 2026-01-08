@@ -1,12 +1,12 @@
 import {
   createContext,
-  useContext,
-  useState,
-  useMemo,
+  type ReactNode,
   useCallback,
-  ReactNode,
-} from 'react';
-import type { PatchTypeWithKey } from '@/hooks/useConversationHistory';
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+import type { PatchTypeWithKey } from "@/hooks/useConversationHistory";
 
 interface EntriesContextType {
   entries: PatchTypeWithKey[];
@@ -48,7 +48,7 @@ export const EntriesProvider = ({ children }: EntriesProviderProps) => {
 export const useEntries = (): EntriesContextType => {
   const context = useContext(EntriesContext);
   if (!context) {
-    throw new Error('useEntries must be used within an EntriesProvider');
+    throw new Error("useEntries must be used within an EntriesProvider");
   }
   return context;
 };

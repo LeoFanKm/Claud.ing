@@ -85,3 +85,14 @@ dev_assets
 vibe-kanban-cloud/
 
 .jj
+
+# Playwright
+frontend/playwright-report/
+frontend/test-results/
+frontend/e2e/.auth/
+nul
+frontend/nul
+
+# Workers dev vars (contains secrets)
+workers/.dev.vars
+*.dev.vars

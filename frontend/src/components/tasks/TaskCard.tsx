@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { KanbanCard } from '@/components/ui/shadcn-io/kanban';
-import { Link, Loader2, XCircle } from 'lucide-react';
-import type { TaskWithAttemptStatus } from 'shared/types';
-import { ActionsDropdown } from '@/components/ui/actions-dropdown';
-import { Button } from '@/components/ui/button';
-import { useNavigateWithSearch } from '@/hooks';
-import { paths } from '@/lib/paths';
-import { attemptsApi } from '@/lib/api';
-import type { SharedTaskRecord } from '@/hooks/useProjectTasks';
-import { TaskCardHeader } from './TaskCardHeader';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks';
+import { Link, Loader2, XCircle } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { TaskWithAttemptStatus } from "shared/types";
+import { ActionsDropdown } from "@/components/ui/actions-dropdown";
+import { Button } from "@/components/ui/button";
+import { KanbanCard } from "@/components/ui/shadcn-io/kanban";
+import { useAuth, useNavigateWithSearch } from "@/hooks";
+import type { SharedTaskRecord } from "@/hooks/useProjectTasks";
+import { attemptsApi } from "@/lib/api";
+import { paths } from "@/lib/paths";
+import { TaskCardHeader } from "./TaskCardHeader";
 
 type Task = TaskWithAttemptStatus;
 
@@ -33,7 +32,7 @@ export function TaskCard({
   projectId,
   sharedTask,
 }: TaskCardProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const navigate = useNavigateWithSearch();
   const [isNavigatingToParent, setIsNavigatingToParent] = useState(false);
   const { isSignedIn } = useAuth();
@@ -58,7 +57,7 @@ export function TaskCard({
           )
         );
       } catch (error) {
-        console.error('Failed to navigate to parent task attempt:', error);
+        console.error("Failed to navigate to parent task attempt:", error);
         setIsNavigatingToParent(false);
       }
     },
@@ -68,37 +67,36 @@ export function TaskCard({
   const localRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isOpen || !localRef.current) return;
+    if (!(isOpen && localRef.current)) return;
     const el = localRef.current;
     requestAnimationFrame(() => {
       el.scrollIntoView({
-        block: 'center',
-        inline: 'nearest',
-        behavior: 'smooth',
+        block: "center",
+        inline: "nearest",
+        behavior: "smooth",
       });
     });
   }, [isOpen]);
 
   return (
     <KanbanCard
-      key={task.id}
-      id={task.id}
-      name={task.title}
-      index={index}
-      parent={status}
-      onClick={handleClick}
-      isOpen={isOpen}
-      forwardedRef={localRef}
-      dragDisabled={(!!sharedTask || !!task.shared_task_id) && !isSignedIn}
       className={
         sharedTask || task.shared_task_id
-          ? 'relative overflow-hidden pl-5 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] before:bg-card-foreground before:content-[""]'
+          ? 'relative overflow-hidden pl-5 before:absolute before:top-0 before:bottom-0 before:left-0 before:w-[3px] before:bg-card-foreground before:content-[""]'
           : undefined
       }
+      dragDisabled={(!!sharedTask || !!task.shared_task_id) && !isSignedIn}
+      forwardedRef={localRef}
+      id={task.id}
+      index={index}
+      isOpen={isOpen}
+      key={task.id}
+      name={task.title}
+      onClick={handleClick}
+      parent={status}
     >
       <div className="flex flex-col gap-2">
         <TaskCardHeader
-          title={task.title}
           avatar={
             sharedTask
               ? {
@@ -118,22 +116,23 @@ export function TaskCard({
               )}
               {task.parent_workspace_id && (
                 <Button
-                  variant="icon"
-                  onClick={handleParentClick}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
                   disabled={isNavigatingToParent}
-                  title={t('navigateToParent')}
+                  onClick={handleParentClick}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  title={t("navigateToParent")}
+                  variant="icon"
                 >
                   <Link className="h-4 w-4" />
                 </Button>
               )}
-              <ActionsDropdown task={task} sharedTask={sharedTask} />
+              <ActionsDropdown sharedTask={sharedTask} task={task} />
             </>
           }
+          title={task.title}
         />
         {task.description && (
-          <p className="text-sm text-secondary-foreground break-words">
+          <p className="break-words text-secondary-foreground text-sm">
             {task.description.length > 130
               ? `${task.description.substring(0, 130)}...`
               : task.description}

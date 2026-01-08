@@ -1,5 +1,17 @@
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import { MoreHorizontal } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import type { TaskWithAttemptStatus, Workspace } from "shared/types";
+import { CreateAttemptDialog } from "@/components/dialogs/tasks/CreateAttemptDialog";
+import { DeleteTaskConfirmationDialog } from "@/components/dialogs/tasks/DeleteTaskConfirmationDialog";
+import { EditBranchNameDialog } from "@/components/dialogs/tasks/EditBranchNameDialog";
+import { GitActionsDialog } from "@/components/dialogs/tasks/GitActionsDialog";
+import { ReassignDialog } from "@/components/dialogs/tasks/ReassignDialog";
+import { ShareDialog } from "@/components/dialogs/tasks/ShareDialog";
+import { StopShareTaskDialog } from "@/components/dialogs/tasks/StopShareTaskDialog";
+import { ViewProcessesDialog } from "@/components/dialogs/tasks/ViewProcessesDialog";
+import { ViewRelatedTasksDialog } from "@/components/dialogs/tasks/ViewRelatedTasksDialog";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,26 +19,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
-import type { TaskWithAttemptStatus } from 'shared/types';
-import type { Workspace } from 'shared/types';
-import { useOpenInEditor } from '@/hooks/useOpenInEditor';
-import { DeleteTaskConfirmationDialog } from '@/components/dialogs/tasks/DeleteTaskConfirmationDialog';
-import { ViewProcessesDialog } from '@/components/dialogs/tasks/ViewProcessesDialog';
-import { ViewRelatedTasksDialog } from '@/components/dialogs/tasks/ViewRelatedTasksDialog';
-import { CreateAttemptDialog } from '@/components/dialogs/tasks/CreateAttemptDialog';
-import { GitActionsDialog } from '@/components/dialogs/tasks/GitActionsDialog';
-import { EditBranchNameDialog } from '@/components/dialogs/tasks/EditBranchNameDialog';
-import { ShareDialog } from '@/components/dialogs/tasks/ShareDialog';
-import { ReassignDialog } from '@/components/dialogs/tasks/ReassignDialog';
-import { StopShareTaskDialog } from '@/components/dialogs/tasks/StopShareTaskDialog';
-import { useProject } from '@/contexts/ProjectContext';
-import { openTaskForm } from '@/lib/openTaskForm';
-
-import { useNavigate } from 'react-router-dom';
-import type { SharedTaskRecord } from '@/hooks/useProjectTasks';
-import { useAuth } from '@/hooks';
+} from "@/components/ui/dropdown-menu";
+import { useProject } from "@/contexts/ProjectContext";
+import { useAuth } from "@/hooks";
+import { useOpenInEditor } from "@/hooks/useOpenInEditor";
+import type { SharedTaskRecord } from "@/hooks/useProjectTasks";
+import { openTaskForm } from "@/lib/openTaskForm";
 
 interface ActionsDropdownProps {
   task?: TaskWithAttemptStatus | null;
@@ -39,7 +37,7 @@ export function ActionsDropdown({
   attempt,
   sharedTask,
 }: ActionsDropdownProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const { projectId } = useProject();
   const openInEditor = useOpenInEditor(attempt?.id);
   const navigate = useNavigate();
@@ -48,23 +46,23 @@ export function ActionsDropdown({
   const hasAttemptActions = Boolean(attempt);
   const hasTaskActions = Boolean(task);
   const isShared = Boolean(sharedTask);
-  const canEditShared = (!isShared && !task?.shared_task_id) || isSignedIn;
+  const canEditShared = !(isShared || task?.shared_task_id) || isSignedIn;
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!projectId || !task) return;
-    openTaskForm({ mode: 'edit', projectId, task });
+    if (!(projectId && task)) return;
+    openTaskForm({ mode: "edit", projectId, task });
   };
 
   const handleDuplicate = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!projectId || !task) return;
-    openTaskForm({ mode: 'duplicate', projectId, initialTask: task });
+    if (!(projectId && task)) return;
+    openTaskForm({ mode: "duplicate", projectId, initialTask: task });
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!projectId || !task) return;
+    if (!(projectId && task)) return;
     try {
       await DeleteTaskConfirmationDialog.show({
         task,
@@ -89,7 +87,7 @@ export function ActionsDropdown({
 
   const handleViewRelatedTasks = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!attempt?.id || !projectId) return;
+    if (!(attempt?.id && projectId)) return;
     ViewRelatedTasksDialog.show({
       attemptId: attempt.id,
       projectId,
@@ -112,11 +110,11 @@ export function ActionsDropdown({
 
   const handleCreateSubtask = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!projectId || !attempt) return;
+    if (!(projectId && attempt)) return;
     const baseBranch = attempt.branch;
     if (!baseBranch) return;
     openTaskForm({
-      mode: 'subtask',
+      mode: "subtask",
       projectId,
       parentTaskAttemptId: attempt.id,
       initialBaseBranch: baseBranch,
@@ -125,7 +123,7 @@ export function ActionsDropdown({
 
   const handleGitActions = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!attempt?.id || !task) return;
+    if (!(attempt?.id && task)) return;
     GitActionsDialog.show({
       attemptId: attempt.id,
       task,
@@ -170,11 +168,11 @@ export function ActionsDropdown({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="icon"
             aria-label="Actions"
-            onPointerDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            variant="icon"
           >
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -182,45 +180,45 @@ export function ActionsDropdown({
         <DropdownMenuContent align="end">
           {hasAttemptActions && (
             <>
-              <DropdownMenuLabel>{t('actionsMenu.attempt')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("actionsMenu.attempt")}</DropdownMenuLabel>
               <DropdownMenuItem
                 disabled={!attempt?.id}
                 onClick={handleOpenInEditor}
               >
-                {t('actionsMenu.openInIde')}
+                {t("actionsMenu.openInIde")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={!attempt?.id}
                 onClick={handleViewProcesses}
               >
-                {t('actionsMenu.viewProcesses')}
+                {t("actionsMenu.viewProcesses")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={!attempt?.id}
                 onClick={handleViewRelatedTasks}
               >
-                {t('actionsMenu.viewRelatedTasks')}
+                {t("actionsMenu.viewRelatedTasks")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleCreateNewAttempt}>
-                {t('actionsMenu.createNewAttempt')}
+                {t("actionsMenu.createNewAttempt")}
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={!projectId || !attempt}
+                disabled={!(projectId && attempt)}
                 onClick={handleCreateSubtask}
               >
-                {t('actionsMenu.createSubtask')}
+                {t("actionsMenu.createSubtask")}
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={!attempt?.id || !task}
+                disabled={!(attempt?.id && task)}
                 onClick={handleGitActions}
               >
-                {t('actionsMenu.gitActions')}
+                {t("actionsMenu.gitActions")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={!attempt?.id}
                 onClick={handleEditBranchName}
               >
-                {t('actionsMenu.editBranchName')}
+                {t("actionsMenu.editBranchName")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>
@@ -228,42 +226,42 @@ export function ActionsDropdown({
 
           {hasTaskActions && (
             <>
-              <DropdownMenuLabel>{t('actionsMenu.task')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("actionsMenu.task")}</DropdownMenuLabel>
               <DropdownMenuItem
                 disabled={!task || isShared}
                 onClick={handleShare}
               >
-                {t('actionsMenu.share')}
+                {t("actionsMenu.share")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={!canReassign}
                 onClick={handleReassign}
               >
-                {t('actionsMenu.reassign')}
+                {t("actionsMenu.reassign")}
               </DropdownMenuItem>
               <DropdownMenuItem
+                className="text-destructive"
                 disabled={!canStopShare}
                 onClick={handleStopShare}
-                className="text-destructive"
               >
-                {t('actionsMenu.stopShare')}
+                {t("actionsMenu.stopShare")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                disabled={!projectId || !canEditShared}
+                disabled={!(projectId && canEditShared)}
                 onClick={handleEdit}
               >
-                {t('common:buttons.edit')}
+                {t("common:buttons.edit")}
               </DropdownMenuItem>
               <DropdownMenuItem disabled={!projectId} onClick={handleDuplicate}>
-                {t('actionsMenu.duplicate')}
+                {t("actionsMenu.duplicate")}
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={!projectId || !canEditShared}
-                onClick={handleDelete}
                 className="text-destructive"
+                disabled={!(projectId && canEditShared)}
+                onClick={handleDelete}
               >
-                {t('common:buttons.delete')}
+                {t("common:buttons.delete")}
               </DropdownMenuItem>
             </>
           )}

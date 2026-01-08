@@ -12,10 +12,11 @@ use uuid::Uuid;
 
 use crate::{
     AppState, configure_user_scope,
+    cache::{get_session_cached, get_user_cached, invalidate_session_cache},
     db::{
         auth::{AuthSessionError, AuthSessionRepository, MAX_SESSION_INACTIVITY_DURATION},
         identity_errors::IdentityError,
-        users::{User, UserRepository},
+        users::User,
     },
 };
 
@@ -46,8 +47,10 @@ pub async fn require_session(
     };
 
     let pool = state.pool();
-    let session_repo = AuthSessionRepository::new(pool);
-    let session = match session_repo.get(identity.session_id).await {
+    let cache = state.cache();
+
+    // Use cache-first pattern for session lookup
+    let session = match get_session_cached(pool, cache, identity.session_id).await {
         Ok(session) => session,
         Err(AuthSessionError::NotFound) => {
             warn!("session `{}` not found", identity.session_id);
@@ -73,14 +76,17 @@ pub async fn require_session(
             "session `{}` expired due to inactivity; revoking",
             identity.session_id
         );
+        let session_repo = AuthSessionRepository::new(pool);
         if let Err(error) = session_repo.revoke(session.id).await {
             warn!(?error, "failed to revoke inactive session");
         }
+        // Invalidate cache for revoked session
+        invalidate_session_cache(cache, session.id).await;
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
-    let user_repo = UserRepository::new(pool);
-    let user = match user_repo.fetch_user(identity.user_id).await {
+    // Use cache-first pattern for user lookup
+    let user = match get_user_cached(pool, cache, identity.user_id).await {
         Ok(user) => user,
         Err(IdentityError::NotFound) => {
             warn!("user `{}` missing", identity.user_id);
@@ -104,6 +110,8 @@ pub async fn require_session(
         access_token_expires_at: identity.expires_at,
     });
 
+    // Touch session (update last_used_at) - this doesn't need caching
+    let session_repo = AuthSessionRepository::new(pool);
     match session_repo.touch(session.id).await {
         Ok(_) => {}
         Err(error) => warn!(?error, "failed to update session last-used timestamp"),

@@ -1,17 +1,17 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { ProjectList } from '@/components/projects/ProjectList';
-import { ProjectDetail } from '@/components/projects/ProjectDetail';
+import { useNavigate, useParams } from "react-router-dom";
+import { ProjectDetail } from "@/components/projects/ProjectDetail";
+import { ProjectList } from "@/components/projects/ProjectList";
 
 export function Projects() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/projects');
+    navigate("/projects");
   };
 
   if (projectId) {
-    return <ProjectDetail projectId={projectId} onBack={handleBack} />;
+    return <ProjectDetail onBack={handleBack} projectId={projectId} />;
   }
 
   return <ProjectList />;

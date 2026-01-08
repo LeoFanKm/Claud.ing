@@ -1,19 +1,18 @@
-import { useState, useMemo } from 'react';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { AlertCircle, ExternalLink } from "lucide-react";
+import { useMemo, useState } from "react";
+import { APP_NAME, RELEASE_NOTES_URL } from "@/constants/branding";
+import { useTheme } from "@/components/ThemeProvider";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, ExternalLink } from 'lucide-react';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { useTheme } from '@/components/ThemeProvider';
-import { getActualTheme } from '@/utils/theme';
-import { defineModal, type NoProps } from '@/lib/modals';
-
-const RELEASE_NOTES_BASE_URL = 'https://vibekanban.com/release-notes';
+} from "@/components/ui/dialog";
+import { defineModal, type NoProps } from "@/lib/modals";
+import { getActualTheme } from "@/utils/theme";
 
 const ReleaseNotesDialogImpl = NiceModal.create<NoProps>(() => {
   const modal = useModal();
@@ -22,13 +21,13 @@ const ReleaseNotesDialogImpl = NiceModal.create<NoProps>(() => {
 
   const releaseNotesUrl = useMemo(() => {
     const actualTheme = getActualTheme(theme);
-    const url = new URL(RELEASE_NOTES_BASE_URL);
-    url.searchParams.set('theme', actualTheme);
+    const url = new URL(RELEASE_NOTES_URL);
+    url.searchParams.set("theme", actualTheme);
     return url.toString();
   }, [theme]);
 
   const handleOpenInBrowser = () => {
-    window.open(releaseNotesUrl, '_blank');
+    window.open(releaseNotesUrl, "_blank");
     modal.resolve();
   };
 
@@ -38,41 +37,37 @@ const ReleaseNotesDialogImpl = NiceModal.create<NoProps>(() => {
 
   return (
     <Dialog
-      open={modal.visible}
-      onOpenChange={(open) => !open && modal.resolve()}
       className="h-[calc(100%-4rem)]"
+      onOpenChange={(open) => !open && modal.resolve()}
+      open={modal.visible}
     >
-      <DialogContent className="flex flex-col w-full h-full max-w-7xl max-h-[calc(100dvh-1rem)] p-0">
-        <DialogHeader className="p-4 border-b flex-shrink-0">
-          <DialogTitle className="text-xl font-semibold">
-            We've updated Vibe Kanban! Check out what's new...
+      <DialogContent className="flex h-full max-h-[calc(100dvh-1rem)] w-full max-w-7xl flex-col p-0">
+        <DialogHeader className="flex-shrink-0 border-b p-4">
+          <DialogTitle className="font-semibold text-xl">
+            We've updated {APP_NAME}! Check out what's new...
           </DialogTitle>
         </DialogHeader>
 
         {iframeError ? (
-          <div className="flex flex-col items-center justify-center flex-1 text-center space-y-4 p-4">
+          <div className="flex flex-1 flex-col items-center justify-center space-y-4 p-4 text-center">
             <AlertCircle className="h-12 w-12 text-muted-foreground" />
             <div className="space-y-2">
-              <h3 className="text-lg font-medium">
+              <h3 className="font-medium text-lg">
                 Unable to load release notes
               </h3>
-              <p className="text-sm text-muted-foreground max-w-md">
+              <p className="max-w-md text-muted-foreground text-sm">
                 We couldn't display the release notes in this window. Click
                 below to view them in your browser.
               </p>
             </div>
-            <Button onClick={handleOpenInBrowser} className="mt-4">
-              <ExternalLink className="h-4 w-4 mr-2" />
+            <Button className="mt-4" onClick={handleOpenInBrowser}>
+              <ExternalLink className="mr-2 h-4 w-4" />
               Open Release Notes in Browser
             </Button>
           </div>
         ) : (
           <iframe
-            src={releaseNotesUrl}
-            className="flex-1 w-full border-0"
-            sandbox="allow-scripts allow-same-origin allow-popups"
-            referrerPolicy="no-referrer"
-            title="Release Notes"
+            className="w-full flex-1 border-0"
             onError={handleIframeError}
             onLoad={(e) => {
               // Check if iframe content loaded successfully
@@ -86,12 +81,16 @@ const ReleaseNotesDialogImpl = NiceModal.create<NoProps>(() => {
                 // Cross-origin access blocked (expected), iframe loaded successfully
               }
             }}
+            referrerPolicy="no-referrer"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+            src={releaseNotesUrl}
+            title="Release Notes"
           />
         )}
 
-        <DialogFooter className="p-4 border-t flex-shrink-0">
-          <Button variant="outline" onClick={handleOpenInBrowser}>
-            <ExternalLink className="h-4 w-4 mr-2" />
+        <DialogFooter className="flex-shrink-0 border-t p-4">
+          <Button onClick={handleOpenInBrowser} variant="outline">
+            <ExternalLink className="mr-2 h-4 w-4" />
             Open in Browser
           </Button>
         </DialogFooter>

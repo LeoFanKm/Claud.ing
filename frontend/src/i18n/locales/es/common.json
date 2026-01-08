@@ -58,6 +58,10 @@
     "error": "Error",
     "loading": "Cargando...",
     "reconnecting": "Reconectando",
+    "reconnectingWithCountdown": "Reconectando en {{seconds}}s...",
+    "connectionLost": "Conexión perdida",
+    "retryNow": "Reintentar ahora",
+    "maxAttemptsReached": "Se alcanzó el máximo de intentos de reconexión",
     "saving": "Guardando...",
     "success": "Éxito"
   },
@@ -79,7 +83,7 @@
     "banner": "Modo de Desarrollo - Esta es una compilación de desarrollo"
   },
   "oauth": {
-    "title": "Iniciar sesión en Vibe Kanban",
+    "title": "Iniciar sesión en Kanban by Claud.ing",
     "description": "Inicia sesión para unirte a organizaciones y compartir tareas con tu equipo",
     "continueWithGitHub": "Continuar con GitHub",
     "continueWithGoogle": "Continuar con Google",

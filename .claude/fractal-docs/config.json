@@ -1,0 +1,52 @@
+{
+  "project": {
+    "name": "DramiaOS",
+    "description": "AI 剧本写作操作系统",
+    "language": "zh-CN",
+    "techStack": [
+      "React 18",
+      "TypeScript",
+      "Tailwind CSS",
+      "ProseMirror",
+      "Loro CRDT",
+      "Cloudflare Workers"
+    ]
+  },
+  "indexedDirectories": [
+    {
+      "path": "/",
+      "description": "项目根目录",
+      "priority": "high",
+      "autoUpdate": true
+    },
+    {
+      "path": "/laper-mirror",
+      "description": "Laper 镜像站点工具",
+      "priority": "high",
+      "autoUpdate": true
+    },
+    {
+      "path": "/laper-mirror/output",
+      "description": "生成的静态站点文件",
+      "priority": "high",
+      "autoUpdate": true
+    }
+  ],
+  "templates": {
+    "readme": "@templates/folder-readme.md",
+    "fileHeader": "@templates/file-header.txt",
+    "docMaintenance": "@templates/doc-maintenance.md"
+  },
+  "rules": {
+    "readBeforeWrite": true,
+    "propagateChanges": true,
+    "standardHeaders": true,
+    "maxDepth": 3
+  },
+  "exclude": ["node_modules", ".git", "dist", "build", "*.log", ".DS_Store"],
+  "autoUpdate": {
+    "enabled": true,
+    "triggers": ["code-change", "file-add", "file-delete"],
+    "propagation": "upward"
+  }
+}

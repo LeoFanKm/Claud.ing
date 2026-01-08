@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { useEffect, useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
   firstName?: string | null;
@@ -14,15 +14,15 @@ const buildInitials = (
   lastName?: string | null,
   username?: string | null
 ) => {
-  const first = firstName?.trim().charAt(0)?.toUpperCase() ?? '';
-  const last = lastName?.trim().charAt(0)?.toUpperCase() ?? '';
+  const first = firstName?.trim().charAt(0)?.toUpperCase() ?? "";
+  const last = lastName?.trim().charAt(0)?.toUpperCase() ?? "";
 
   if (first || last) {
-    return `${first}${last}`.trim() || first || last || '?';
+    return `${first}${last}`.trim() || first || last || "?";
   }
 
   const handle = username?.trim().charAt(0)?.toUpperCase();
-  return handle ?? '?';
+  return handle ?? "?";
 };
 
 const buildLabel = (
@@ -32,7 +32,7 @@ const buildLabel = (
 ) => {
   const name = [firstName, lastName]
     .filter((value): value is string => Boolean(value && value.trim()))
-    .join(' ');
+    .join(" ");
 
   if (name) {
     return name;
@@ -42,7 +42,7 @@ const buildLabel = (
     return username;
   }
 
-  return 'Unassigned';
+  return "Unassigned";
 };
 
 const buildOptimizedImageUrl = (rawUrl?: string | null) => {
@@ -51,13 +51,13 @@ const buildOptimizedImageUrl = (rawUrl?: string | null) => {
   }
   try {
     const url = new URL(rawUrl);
-    url.searchParams.set('width', '64');
-    url.searchParams.set('height', '64');
-    url.searchParams.set('fit', 'crop');
-    url.searchParams.set('quality', '80');
+    url.searchParams.set("width", "64");
+    url.searchParams.set("height", "64");
+    url.searchParams.set("fit", "crop");
+    url.searchParams.set("quality", "80");
     return url.toString();
   } catch (error) {
-    const separator = rawUrl.includes('?') ? '&' : '?';
+    const separator = rawUrl.includes("?") ? "&" : "?";
     return `${rawUrl}${separator}width=64&height=64&fit=crop&quality=80`;
   }
 };
@@ -98,20 +98,20 @@ export const UserAvatar = ({
 
   return (
     <div
+      aria-label={label}
       className={cn(
-        'flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted-foreground text-xs font-medium text-muted',
+        "flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted-foreground font-medium text-muted text-xs",
         className
       )}
       title={label}
-      aria-label={label}
     >
       {shouldShowImage ? (
         <img
-          src={optimizedImageUrl ?? undefined}
           alt={label}
           className="h-full w-full object-cover"
           loading="lazy"
           onError={() => setImageError(true)}
+          src={optimizedImageUrl ?? undefined}
         />
       ) : (
         initials

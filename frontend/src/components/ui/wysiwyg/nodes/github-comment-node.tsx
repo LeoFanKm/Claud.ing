@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
-import { NodeKey, SerializedLexicalNode, Spread } from 'lexical';
-import { GitHubCommentCard } from '@/components/ui/github-comment-card';
+import type { NodeKey, SerializedLexicalNode, Spread } from "lexical";
+import { useCallback } from "react";
+import { GitHubCommentCard } from "@/components/ui/github-comment-card";
 import {
   createDecoratorNode,
   type DecoratorNodeConfig,
   type GeneratedDecoratorNode,
-} from '../lib/create-decorator-node';
+} from "../lib/create-decorator-node";
 
 /**
  * Normalized comment data stored in the node.
@@ -13,7 +13,7 @@ import {
  */
 export interface NormalizedComment {
   id: string;
-  comment_type: 'general' | 'review';
+  comment_type: "general" | "review";
   author: string;
   body: string;
   created_at: string;
@@ -42,7 +42,7 @@ function GitHubCommentComponent({
       event.preventDefault();
       event.stopPropagation();
       // Open GitHub URL in new tab
-      window.open(data.url, '_blank', 'noopener,noreferrer');
+      window.open(data.url, "_blank", "noopener,noreferrer");
     },
     [data.url]
   );
@@ -51,24 +51,24 @@ function GitHubCommentComponent({
     <GitHubCommentCard
       author={data.author}
       body={data.body}
-      createdAt={data.created_at}
-      url={data.url}
       commentType={data.comment_type}
-      path={data.path}
-      line={data.line}
+      createdAt={data.created_at}
       diffHunk={data.diff_hunk}
-      variant="full"
+      line={data.line}
       onClick={handleClick}
       onDoubleClick={onDoubleClickEdit}
+      path={data.path}
+      url={data.url}
+      variant="full"
     />
   );
 }
 
 const config: DecoratorNodeConfig<NormalizedComment> = {
-  type: 'github-comment',
+  type: "github-comment",
   serialization: {
-    format: 'fenced',
-    language: 'gh-comment',
+    format: "fenced",
+    language: "gh-comment",
     serialize: (data) => JSON.stringify(data, null, 2),
     deserialize: (content) => JSON.parse(content),
     validate: (data) =>
@@ -76,8 +76,8 @@ const config: DecoratorNodeConfig<NormalizedComment> = {
   },
   component: GitHubCommentComponent,
   exportDOM: (data) => {
-    const span = document.createElement('span');
-    span.setAttribute('data-github-comment-id', data.id);
+    const span = document.createElement("span");
+    span.setAttribute("data-github-comment-id", data.id);
     span.textContent = `GitHub comment by @${data.author}: ${data.body}`;
     return span;
   },

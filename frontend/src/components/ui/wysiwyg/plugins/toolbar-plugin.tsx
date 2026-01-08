@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useState, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getSelection,
   $isRangeSelection,
+  COMMAND_PRIORITY_CRITICAL,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
-  COMMAND_PRIORITY_CRITICAL,
-} from 'lexical';
-import { Bold, Italic, Underline, Strikethrough, Code } from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "lexical";
+import { Bold, Code, Italic, Strikethrough, Underline } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 
 const TOOLBAR_HEIGHT = 36;
 const GAP = 8;
@@ -28,18 +28,18 @@ function ToolbarButton({
 }) {
   return (
     <button
-      type="button"
+      aria-label={title}
+      className={cn(
+        "rounded p-1.5 transition-colors hover:bg-accent",
+        active && "bg-accent"
+      )}
       onMouseDown={(e) => {
         // Prevent losing selection when clicking toolbar
         e.preventDefault();
         onClick(e);
       }}
       title={title}
-      aria-label={title}
-      className={cn(
-        'p-1.5 rounded hover:bg-accent transition-colors',
-        active && 'bg-accent'
-      )}
+      type="button"
     >
       {children}
     </button>
@@ -73,11 +73,11 @@ export function ToolbarPlugin() {
     }
 
     // Update text format state
-    setIsBold(selection.hasFormat('bold'));
-    setIsItalic(selection.hasFormat('italic'));
-    setIsUnderline(selection.hasFormat('underline'));
-    setIsStrikethrough(selection.hasFormat('strikethrough'));
-    setIsCode(selection.hasFormat('code'));
+    setIsBold(selection.hasFormat("bold"));
+    setIsItalic(selection.hasFormat("italic"));
+    setIsUnderline(selection.hasFormat("underline"));
+    setIsStrikethrough(selection.hasFormat("strikethrough"));
+    setIsCode(selection.hasFormat("code"));
 
     // Check if selection has actual text content
     const text = selection.getTextContent();
@@ -161,12 +161,12 @@ export function ToolbarPlugin() {
       requestAnimationFrame(updatePosition);
     };
 
-    window.addEventListener('scroll', handleUpdate, true);
-    window.addEventListener('resize', handleUpdate);
+    window.addEventListener("scroll", handleUpdate, true);
+    window.addEventListener("resize", handleUpdate);
 
     return () => {
-      window.removeEventListener('scroll', handleUpdate, true);
-      window.removeEventListener('resize', handleUpdate);
+      window.removeEventListener("scroll", handleUpdate, true);
+      window.removeEventListener("resize", handleUpdate);
     };
   }, [isVisible, updatePosition]);
 
@@ -178,30 +178,30 @@ export function ToolbarPlugin() {
     const handleFocusOut = (e: FocusEvent) => {
       // Don't hide if focus is moving to the toolbar itself
       const relatedTarget = e.relatedTarget as HTMLElement | null;
-      if (relatedTarget?.closest('[data-floating-toolbar]')) {
+      if (relatedTarget?.closest("[data-floating-toolbar]")) {
         return;
       }
       setIsVisible(false);
       setPosition(null);
     };
 
-    rootElement.addEventListener('focusout', handleFocusOut);
+    rootElement.addEventListener("focusout", handleFocusOut);
     return () => {
-      rootElement.removeEventListener('focusout', handleFocusOut);
+      rootElement.removeEventListener("focusout", handleFocusOut);
     };
   }, [editor]);
 
   const iconSize = 16;
 
   // Don't render until we have both visibility and position
-  if (!isVisible || !position) {
+  if (!(isVisible && position)) {
     return null;
   }
 
   return createPortal(
     <div
+      className="fade-in-0 fixed z-[10000] flex animate-in items-center gap-0.5 rounded-lg border border-border bg-popover px-1.5 py-1 text-popover-foreground shadow-lg duration-100"
       data-floating-toolbar
-      className="fixed z-[10000] flex items-center gap-0.5 px-1.5 py-1 bg-popover text-popover-foreground border border-border rounded-lg shadow-lg animate-in fade-in-0 duration-100"
       style={{
         top: position.top,
         left: position.left,
@@ -209,21 +209,21 @@ export function ToolbarPlugin() {
     >
       <ToolbarButton
         active={isBold}
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
         title="Bold (Cmd+B)"
       >
         <Bold size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         active={isItalic}
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
         title="Italic (Cmd+I)"
       >
         <Italic size={iconSize} />
       </ToolbarButton>
       <ToolbarButton
         active={isUnderline}
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')}
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")}
         title="Underline (Cmd+U)"
       >
         <Underline size={iconSize} />
@@ -231,7 +231,7 @@ export function ToolbarPlugin() {
       <ToolbarButton
         active={isStrikethrough}
         onClick={() =>
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")
         }
         title="Strikethrough"
       >
@@ -239,7 +239,7 @@ export function ToolbarPlugin() {
       </ToolbarButton>
       <ToolbarButton
         active={isCode}
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')}
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code")}
         title="Inline Code"
       >
         <Code size={iconSize} />

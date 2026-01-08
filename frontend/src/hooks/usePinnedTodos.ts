@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import type { TodoItem, NormalizedEntry } from 'shared/types';
-import type { PatchTypeWithKey } from '@/hooks/useConversationHistory';
+import { useMemo } from "react";
+import type { NormalizedEntry, TodoItem } from "shared/types";
+import type { PatchTypeWithKey } from "@/hooks/useConversationHistory";
 
 interface UsePinnedTodosResult {
   todos: TodoItem[];
@@ -19,12 +19,12 @@ export const usePinnedTodos = (
     let lastUpdatedTime: string | null = null;
 
     for (const entry of entries) {
-      if (entry.type === 'NORMALIZED_ENTRY' && entry.content) {
+      if (entry.type === "NORMALIZED_ENTRY" && entry.content) {
         const normalizedEntry = entry.content as NormalizedEntry;
 
         if (
-          normalizedEntry.entry_type?.type === 'tool_use' &&
-          normalizedEntry.entry_type?.action_type?.action === 'todo_management'
+          normalizedEntry.entry_type?.type === "tool_use" &&
+          normalizedEntry.entry_type?.action_type?.action === "todo_management"
         ) {
           const actionType = normalizedEntry.entry_type.action_type;
           const partialTodos = actionType.todos || [];

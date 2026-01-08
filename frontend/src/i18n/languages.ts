@@ -4,39 +4,39 @@
  * a single source of truth for supported languages.
  */
 
-export type { UiLanguage } from '../../../shared/types';
+export type { UiLanguage } from "../../../shared/types";
 
 export const UI_TO_I18N = {
-  EN: 'en',
-  JA: 'ja',
-  ES: 'es',
-  KO: 'ko',
-  ZH_HANS: 'zh-Hans',
+  EN: "en",
+  JA: "ja",
+  ES: "es",
+  KO: "ko",
+  ZH_HANS: "zh-Hans",
 } as const;
 
 const SUPPORTED_UI_LANGUAGES = [
-  'BROWSER',
-  'EN',
-  'JA',
-  'ES',
-  'KO',
-  'ZH_HANS',
+  "BROWSER",
+  "EN",
+  "JA",
+  "ES",
+  "KO",
+  "ZH_HANS",
 ] as const;
 export const SUPPORTED_I18N_CODES = Object.values(UI_TO_I18N);
 
 const FALLBACK_ENDONYMS = {
-  en: 'English',
-  ja: '日本語',
-  es: 'Español',
-  ko: '한국어',
-  'zh-Hans': '简体中文',
+  en: "English",
+  ja: "日本語",
+  es: "Español",
+  ko: "한국어",
+  "zh-Hans": "简体中文",
 } as const;
 
 /**
  * Convert UiLanguage enum value to i18next language code
  */
 export function uiLanguageToI18nCode(uiLang: string): string | undefined {
-  return uiLang === 'BROWSER'
+  return uiLang === "BROWSER"
     ? undefined
     : UI_TO_I18N[uiLang as keyof typeof UI_TO_I18N];
 }
@@ -47,7 +47,7 @@ export function uiLanguageToI18nCode(uiLang: string): string | undefined {
 function getEndonym(langCode: string): string {
   try {
     return (
-      new Intl.DisplayNames([langCode], { type: 'language' }).of(langCode) ||
+      new Intl.DisplayNames([langCode], { type: "language" }).of(langCode) ||
       FALLBACK_ENDONYMS[langCode as keyof typeof FALLBACK_ENDONYMS] ||
       langCode
     );
@@ -65,7 +65,7 @@ export function getLanguageOptions(browserDefaultLabel: string) {
   return SUPPORTED_UI_LANGUAGES.map((ui) => ({
     value: ui,
     label:
-      ui === 'BROWSER'
+      ui === "BROWSER"
         ? browserDefaultLabel
         : getEndonym(UI_TO_I18N[ui as keyof typeof UI_TO_I18N]),
   }));

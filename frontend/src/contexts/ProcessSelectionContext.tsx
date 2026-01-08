@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useMemo, ReactNode } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 interface ProcessSelectionContextType {
   selectedProcessId: string | null;
@@ -40,7 +46,7 @@ export const useProcessSelection = () => {
   const context = useContext(ProcessSelectionContext);
   if (!context) {
     throw new Error(
-      'useProcessSelection must be used within ProcessSelectionProvider'
+      "useProcessSelection must be used within ProcessSelectionProvider"
     );
   }
   return context;

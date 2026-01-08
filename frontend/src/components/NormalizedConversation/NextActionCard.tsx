@@ -1,40 +1,39 @@
-import { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useQuery } from "@tanstack/react-query";
 import {
-  Play,
-  Pause,
-  Terminal,
-  FileDiff,
-  Copy,
   Check,
+  Copy,
+  FileDiff,
   GitBranch,
+  Pause,
+  Play,
   Settings,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { ViewProcessesDialog } from '@/components/dialogs/tasks/ViewProcessesDialog';
-import { CreateAttemptDialog } from '@/components/dialogs/tasks/CreateAttemptDialog';
-import { GitActionsDialog } from '@/components/dialogs/tasks/GitActionsDialog';
-import { useOpenInEditor } from '@/hooks/useOpenInEditor';
-import { useDiffSummary } from '@/hooks/useDiffSummary';
-import { useDevServer } from '@/hooks/useDevServer';
-import { Button } from '@/components/ui/button';
-import { IdeIcon } from '@/components/ide/IdeIcon';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { getIdeName } from '@/components/ide/IdeIcon';
-import { useProject } from '@/contexts/ProjectContext';
-import { useQuery } from '@tanstack/react-query';
-import { attemptsApi } from '@/lib/api';
+  Terminal,
+} from "lucide-react";
+import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
   BaseAgentCapability,
   type BaseCodingAgent,
   type TaskWithAttemptStatus,
-} from 'shared/types';
+} from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { CreateAttemptDialog } from "@/components/dialogs/tasks/CreateAttemptDialog";
+import { GitActionsDialog } from "@/components/dialogs/tasks/GitActionsDialog";
+import { ViewProcessesDialog } from "@/components/dialogs/tasks/ViewProcessesDialog";
+import { getIdeName, IdeIcon } from "@/components/ide/IdeIcon";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
+import { useProject } from "@/contexts/ProjectContext";
+import { useDevServer } from "@/hooks/useDevServer";
+import { useDiffSummary } from "@/hooks/useDiffSummary";
+import { useOpenInEditor } from "@/hooks/useOpenInEditor";
+import { attemptsApi } from "@/lib/api";
 
 type NextActionCardProps = {
   attemptId?: string;
@@ -53,14 +52,14 @@ export function NextActionCard({
   task,
   needsSetup,
 }: NextActionCardProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const { config } = useUserSystem();
   const { project } = useProject();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   const { data: attempt } = useQuery({
-    queryKey: ['attemptWithSession', attemptId],
+    queryKey: ["attemptWithSession", attemptId],
     queryFn: () => attemptsApi.getWithSession(attemptId!),
     enabled: !!attemptId && failed,
   });
@@ -89,7 +88,7 @@ export function NextActionCard({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.warn('Copy to clipboard failed:', err);
+      console.warn("Copy to clipboard failed:", err);
     }
   }, [containerRef]);
 
@@ -107,7 +106,7 @@ export function NextActionCard({
   }, [attemptId, latestDevServerProcess?.id]);
 
   const handleOpenDiffs = useCallback(() => {
-    navigate({ search: '?view=diffs' });
+    navigate({ search: "?view=diffs" });
   }, [navigate]);
 
   const handleTryAgain = useCallback(() => {
@@ -126,7 +125,7 @@ export function NextActionCard({
   }, [attemptId, task]);
 
   const handleRunSetup = useCallback(async () => {
-    if (!attemptId || !attempt?.session?.executor) return;
+    if (!(attemptId && attempt?.session?.executor)) return;
     try {
       await attemptsApi.runAgentSetup(attemptId, {
         executor_profile_id: {
@@ -135,7 +134,7 @@ export function NextActionCard({
         },
       });
     } catch (error) {
-      console.error('Failed to run setup:', error);
+      console.error("Failed to run setup:", error);
     }
   }, [attemptId, attempt]);
 
@@ -147,7 +146,7 @@ export function NextActionCard({
   );
 
   const setupHelpText = canAutoSetup
-    ? t('attempt.setupHelpText', { agent: attempt?.session?.executor })
+    ? t("attempt.setupHelpText", { agent: attempt?.session?.executor })
     : null;
 
   const editorName = getIdeName(config?.editor?.editor_type);
@@ -157,41 +156,41 @@ export function NextActionCard({
     (!failed || (execution_processes > 2 && !needsSetup)) &&
     fileCount === 0
   ) {
-    return <div className="h-24"></div>;
+    return <div className="h-24" />;
   }
 
   return (
     <TooltipProvider>
       <div className="pt-4 pb-8">
         <div
-          className={`px-3 py-1 text-background flex ${failed ? 'bg-destructive' : 'bg-foreground'}`}
+          className={`flex px-3 py-1 text-background ${failed ? "bg-destructive" : "bg-foreground"}`}
         >
-          <span className="font-semibold flex-1">
-            {t('attempt.labels.summaryAndActions')}
+          <span className="flex-1 font-semibold">
+            {t("attempt.labels.summaryAndActions")}
           </span>
         </div>
 
         {/* Display setup help text when setup is needed */}
         {needsSetup && setupHelpText && (
           <div
-            className={`border-x border-t ${failed ? 'border-destructive' : 'border-foreground'} px-3 py-2 flex items-start gap-2`}
+            className={`border-x border-t ${failed ? "border-destructive" : "border-foreground"} flex items-start gap-2 px-3 py-2`}
           >
-            <Settings className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <Settings className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span className="text-sm">{setupHelpText}</span>
           </div>
         )}
 
         <div
-          className={`border px-3 py-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 min-w-0 ${failed ? 'border-destructive' : 'border-foreground'} ${needsSetup && setupHelpText ? 'border-t-0' : ''}`}
+          className={`flex min-w-0 flex-col gap-2 border px-3 py-2 sm:flex-row sm:items-center sm:gap-3 ${failed ? "border-destructive" : "border-foreground"} ${needsSetup && setupHelpText ? "border-t-0" : ""}`}
         >
           {/* Left: Diff summary */}
           {!error && (
             <button
+              aria-label={t("attempt.diffs")}
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 text-sm transition-all hover:underline"
               onClick={handleOpenDiffs}
-              className="flex items-center gap-1.5 text-sm shrink-0 cursor-pointer hover:underline transition-all"
-              aria-label={t('attempt.diffs')}
             >
-              <span>{t('diff.filesChanged', { count: fileCount })}</span>
+              <span>{t("diff.filesChanged", { count: fileCount })}</span>
               <span className="opacity-50">•</span>
               <span className="text-green-600 dark:text-green-400">
                 +{added}
@@ -205,57 +204,57 @@ export function NextActionCard({
           {failed &&
             (needsSetup ? (
               <Button
-                variant="default"
-                size="sm"
-                onClick={handleRunSetup}
+                aria-label={t("attempt.runSetup")}
+                className="w-full text-sm sm:w-auto"
                 disabled={!attempt}
-                className="text-sm w-full sm:w-auto"
-                aria-label={t('attempt.runSetup')}
+                onClick={handleRunSetup}
+                size="sm"
+                variant="default"
               >
-                {t('attempt.runSetup')}
+                {t("attempt.runSetup")}
               </Button>
             ) : (
               execution_processes <= 2 && (
                 <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleTryAgain}
+                  aria-label={t("attempt.tryAgain")}
+                  className="w-full text-sm sm:w-auto"
                   disabled={!attempt?.task_id}
-                  className="text-sm w-full sm:w-auto"
-                  aria-label={t('attempt.tryAgain')}
+                  onClick={handleTryAgain}
+                  size="sm"
+                  variant="destructive"
                 >
-                  {t('attempt.tryAgain')}
+                  {t("attempt.tryAgain")}
                 </Button>
               )
             ))}
 
           {/* Right: Icon buttons */}
           {fileCount > 0 && (
-            <div className="flex items-center gap-1 shrink-0 sm:ml-auto">
+            <div className="flex shrink-0 items-center gap-1 sm:ml-auto">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    aria-label={t("attempt.diffs")}
                     className="h-7 w-7 p-0"
                     onClick={handleOpenDiffs}
-                    aria-label={t('attempt.diffs')}
+                    size="sm"
+                    variant="ghost"
                   >
                     <FileDiff className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{t('attempt.diffs')}</TooltipContent>
+                <TooltipContent>{t("attempt.diffs")}</TooltipContent>
               </Tooltip>
 
               {containerRef && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      aria-label={t("attempt.clickToCopy")}
                       className="h-7 w-7 p-0"
                       onClick={handleCopy}
-                      aria-label={t('attempt.clickToCopy')}
+                      size="sm"
+                      variant="ghost"
                     >
                       {copied ? (
                         <Check className="h-3.5 w-3.5 text-green-600" />
@@ -265,7 +264,7 @@ export function NextActionCard({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {copied ? t('attempt.copied') : t('attempt.clickToCopy')}
+                    {copied ? t("attempt.copied") : t("attempt.clickToCopy")}
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -273,23 +272,23 @@ export function NextActionCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={handleOpenInEditor}
-                    disabled={!attemptId}
-                    aria-label={t('attempt.openInEditor', {
+                    aria-label={t("attempt.openInEditor", {
                       editor: editorName,
                     })}
+                    className="h-7 w-7 p-0"
+                    disabled={!attemptId}
+                    onClick={handleOpenInEditor}
+                    size="sm"
+                    variant="ghost"
                   >
                     <IdeIcon
-                      editorType={config?.editor?.editor_type}
                       className="h-3.5 w-3.5"
+                      editorType={config?.editor?.editor_type}
                     />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {t('attempt.openInEditor', { editor: editorName })}
+                  {t("attempt.openInEditor", { editor: editorName })}
                 </TooltipContent>
               </Tooltip>
 
@@ -297,20 +296,20 @@ export function NextActionCard({
                 <TooltipTrigger asChild>
                   <span className="inline-block">
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      aria-label={
+                        runningDevServer
+                          ? t("attempt.pauseDev")
+                          : t("attempt.startDev")
+                      }
                       className="h-7 w-7 p-0"
-                      onClick={runningDevServer ? () => stop() : () => start()}
                       disabled={
                         (runningDevServer ? isStopping : isStarting) ||
                         !attemptId ||
                         !projectHasDevScript
                       }
-                      aria-label={
-                        runningDevServer
-                          ? t('attempt.pauseDev')
-                          : t('attempt.startDev')
-                      }
+                      onClick={runningDevServer ? () => stop() : () => start()}
+                      size="sm"
+                      variant="ghost"
                     >
                       {runningDevServer ? (
                         <Pause className="h-3.5 w-3.5 text-destructive" />
@@ -321,11 +320,11 @@ export function NextActionCard({
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {!projectHasDevScript
-                    ? t('attempt.devScriptMissingTooltip')
-                    : runningDevServer
-                      ? t('attempt.pauseDev')
-                      : t('attempt.startDev')}
+                  {projectHasDevScript
+                    ? runningDevServer
+                      ? t("attempt.pauseDev")
+                      : t("attempt.startDev")
+                    : t("attempt.devScriptMissingTooltip")}
                 </TooltipContent>
               </Tooltip>
 
@@ -333,34 +332,34 @@ export function NextActionCard({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      aria-label={t("attempt.viewDevLogs")}
                       className="h-7 w-7 p-0"
-                      onClick={handleViewLogs}
                       disabled={!attemptId}
-                      aria-label={t('attempt.viewDevLogs')}
+                      onClick={handleViewLogs}
+                      size="sm"
+                      variant="ghost"
                     >
                       <Terminal className="h-3.5 w-3.5" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>{t('attempt.viewDevLogs')}</TooltipContent>
+                  <TooltipContent>{t("attempt.viewDevLogs")}</TooltipContent>
                 </Tooltip>
               )}
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    aria-label={t("attempt.gitActions")}
                     className="h-7 w-7 p-0"
-                    onClick={handleGitActions}
                     disabled={!attemptId}
-                    aria-label={t('attempt.gitActions')}
+                    onClick={handleGitActions}
+                    size="sm"
+                    variant="ghost"
                   >
                     <GitBranch className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{t('attempt.gitActions')}</TooltipContent>
+                <TooltipContent>{t("attempt.gitActions")}</TooltipContent>
               </Tooltip>
             </div>
           )}

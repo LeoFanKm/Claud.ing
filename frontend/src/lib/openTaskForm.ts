@@ -1,5 +1,5 @@
-import { TaskFormDialog } from '@/components/dialogs/tasks/TaskFormDialog';
-import type { TaskFormDialogProps } from '@/components/dialogs/tasks/TaskFormDialog';
+import type { TaskFormDialogProps } from "@/components/dialogs/tasks/TaskFormDialog";
+import { TaskFormDialog } from "@/components/dialogs/tasks/TaskFormDialog";
 
 /**
  * Open the task form dialog programmatically

@@ -11,10 +11,7 @@
           "Custom": {
             "name": "member_role",
             "kind": {
-              "Enum": [
-                "admin",
-                "member"
-              ]
+              "Enum": ["admin", "member"]
             }
           }
         }

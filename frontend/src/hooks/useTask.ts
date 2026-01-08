@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { tasksApi } from '@/lib/api';
-import type { Task } from 'shared/types';
+import { useQuery } from "@tanstack/react-query";
+import type { Task } from "shared/types";
+import { tasksApi } from "@/lib/api";
 
 export const taskKeys = {
-  all: ['tasks'] as const,
-  byId: (taskId: string | undefined) => ['tasks', taskId] as const,
+  all: ["tasks"] as const,
+  byId: (taskId: string | undefined) => ["tasks", taskId] as const,
 };
 
 type Options = {

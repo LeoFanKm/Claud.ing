@@ -1,5 +1,6 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
+use moka::future::Cache;
 use sqlx::PgPool;
 
 use crate::{
@@ -9,6 +10,9 @@ use crate::{
     mail::Mailer,
     r2::R2Service,
 };
+
+/// Type alias for string-keyed cache with string values
+pub type StringCache = Cache<String, String>;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -22,6 +26,8 @@ pub struct AppState {
     oauth_token_validator: Arc<OAuthTokenValidator>,
     r2: Option<R2Service>,
     github_app: Option<Arc<GitHubAppService>>,
+    /// In-memory cache for frequently accessed data (e.g., GitHub tokens, user info)
+    cache: StringCache,
 }
 
 impl AppState {
@@ -38,6 +44,12 @@ impl AppState {
         r2: Option<R2Service>,
         github_app: Option<Arc<GitHubAppService>>,
     ) -> Self {
+        // Initialize cache with 10,000 max entries and 5 minute TTL
+        let cache = Cache::builder()
+            .max_capacity(10_000)
+            .time_to_live(Duration::from_secs(300))
+            .build();
+
         Self {
             pool,
             config,
@@ -49,6 +61,7 @@ impl AppState {
             oauth_token_validator,
             r2,
             github_app,
+            cache,
         }
     }
 
@@ -82,5 +95,10 @@ impl AppState {
 
     pub fn github_app(&self) -> Option<&GitHubAppService> {
         self.github_app.as_deref()
+    }
+
+    /// Get a reference to the in-memory cache
+    pub fn cache(&self) -> &StringCache {
+        &self.cache
     }
 }

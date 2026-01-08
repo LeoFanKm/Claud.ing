@@ -1,30 +1,35 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { isLoggedIn } from "../auth";
 import {
-  getOrganization,
-  updateOrganization,
-  deleteOrganization,
-  listMembers,
-  removeMember,
-  updateMemberRole,
-  listInvitations,
-  createInvitation,
-  revokeInvitation,
-  getProfile,
-  getGitHubAppStatus,
-  getGitHubAppInstallUrl,
-  disconnectGitHubApp,
-  updateRepositoryReviewEnabled,
-  fetchGitHubAppRepositories,
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import {
   bulkUpdateRepositoryReviewEnabled,
-  type Organization,
-  type OrganizationMemberWithProfile,
-  type OrganizationInvitation,
-  type MemberRole,
-  type GitHubAppStatus,
+  createInvitation,
+  deleteOrganization,
+  disconnectGitHubApp,
+  fetchGitHubAppRepositories,
   type GitHubAppRepository,
+  type GitHubAppStatus,
+  getGitHubAppInstallUrl,
+  getGitHubAppStatus,
+  getOrganization,
+  getProfile,
+  listInvitations,
+  listMembers,
+  type MemberRole,
+  type Organization,
+  type OrganizationInvitation,
+  type OrganizationMemberWithProfile,
+  removeMember,
+  revokeInvitation,
+  updateMemberRole,
+  updateOrganization,
+  updateRepositoryReviewEnabled,
 } from "../api";
+import { isLoggedIn } from "../auth";
 
 export default function OrganizationPage() {
   const { orgId } = useParams<{ orgId: string }>();
@@ -40,16 +45,22 @@ export default function OrganizationPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // GitHub App state
-  const [githubAppStatus, setGithubAppStatus] = useState<GitHubAppStatus | null>(null);
+  const [githubAppStatus, setGithubAppStatus] =
+    useState<GitHubAppStatus | null>(null);
   const [githubAppLoading, setGithubAppLoading] = useState(false);
   const [githubAppError, setGithubAppError] = useState<string | null>(null);
-  const [showGithubDisconnectConfirm, setShowGithubDisconnectConfirm] = useState(false);
+  const [showGithubDisconnectConfirm, setShowGithubDisconnectConfirm] =
+    useState(false);
   const [githubAppSuccess, setGithubAppSuccess] = useState<string | null>(null);
-  const [repoToggleLoading, setRepoToggleLoading] = useState<string | null>(null);
+  const [repoToggleLoading, setRepoToggleLoading] = useState<string | null>(
+    null
+  );
   const [repositories, setRepositories] = useState<GitHubAppRepository[]>([]);
   const [reposLoading, setReposLoading] = useState(false);
   const [repoSearch, setRepoSearch] = useState("");
-  const [repoFilter, setRepoFilter] = useState<"all" | "enabled" | "disabled">("all");
+  const [repoFilter, setRepoFilter] = useState<"all" | "enabled" | "disabled">(
+    "all"
+  );
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Edit name state
@@ -146,7 +157,7 @@ export default function OrganizationPage() {
 
   const handleUpdateName = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orgId || !editedName.trim()) return;
+    if (!(orgId && editedName.trim())) return;
 
     setEditNameLoading(true);
     setEditNameError(null);
@@ -200,7 +211,7 @@ export default function OrganizationPage() {
     try {
       await updateMemberRole(orgId, userId, newRole);
       setMembers(
-        members.map((m) => (m.user_id === userId ? { ...m, role: newRole } : m)),
+        members.map((m) => (m.user_id === userId ? { ...m, role: newRole } : m))
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update role");
@@ -211,7 +222,7 @@ export default function OrganizationPage() {
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orgId || !inviteEmail.trim()) return;
+    if (!(orgId && inviteEmail.trim())) return;
 
     setInviteLoading(true);
     setInviteError(null);
@@ -220,7 +231,7 @@ export default function OrganizationPage() {
       const invitation = await createInvitation(
         orgId,
         inviteEmail.trim(),
-        inviteRole,
+        inviteRole
       );
       setInvitations([...invitations, invitation]);
       setInviteEmail("");
@@ -258,7 +269,9 @@ export default function OrganizationPage() {
       // Redirect to GitHub to install the app
       window.location.href = install_url;
     } catch (e) {
-      setGithubAppError(e instanceof Error ? e.message : "Failed to start installation");
+      setGithubAppError(
+        e instanceof Error ? e.message : "Failed to start installation"
+      );
       setGithubAppLoading(false);
     }
   };
@@ -271,11 +284,17 @@ export default function OrganizationPage() {
 
     try {
       await disconnectGitHubApp(orgId);
-      setGithubAppStatus({ installed: false, installation: null, repositories: [] });
+      setGithubAppStatus({
+        installed: false,
+        installation: null,
+        repositories: [],
+      });
       setShowGithubDisconnectConfirm(false);
       setGithubAppSuccess("GitHub App disconnected");
     } catch (e) {
-      setGithubAppError(e instanceof Error ? e.message : "Failed to disconnect");
+      setGithubAppError(
+        e instanceof Error ? e.message : "Failed to disconnect"
+      );
     } finally {
       setGithubAppLoading(false);
     }
@@ -287,7 +306,9 @@ export default function OrganizationPage() {
       const repos = await fetchGitHubAppRepositories(organizationId);
       setRepositories(repos);
     } catch (e) {
-      setGithubAppError(e instanceof Error ? e.message : "Failed to load repositories");
+      setGithubAppError(
+        e instanceof Error ? e.message : "Failed to load repositories"
+      );
     } finally {
       setReposLoading(false);
     }
@@ -299,14 +320,22 @@ export default function OrganizationPage() {
     setRepoToggleLoading(repoId);
 
     try {
-      const updatedRepo = await updateRepositoryReviewEnabled(orgId, repoId, enabled);
+      const updatedRepo = await updateRepositoryReviewEnabled(
+        orgId,
+        repoId,
+        enabled
+      );
       setRepositories((prev) =>
         prev.map((r) =>
-          r.id === repoId ? { ...r, review_enabled: updatedRepo.review_enabled } : r,
-        ),
+          r.id === repoId
+            ? { ...r, review_enabled: updatedRepo.review_enabled }
+            : r
+        )
       );
     } catch (e) {
-      setGithubAppError(e instanceof Error ? e.message : "Failed to update repository");
+      setGithubAppError(
+        e instanceof Error ? e.message : "Failed to update repository"
+      );
     } finally {
       setRepoToggleLoading(null);
     }
@@ -319,10 +348,12 @@ export default function OrganizationPage() {
     try {
       await bulkUpdateRepositoryReviewEnabled(orgId, enabled);
       setRepositories((prev) =>
-        prev.map((r) => ({ ...r, review_enabled: enabled })),
+        prev.map((r) => ({ ...r, review_enabled: enabled }))
       );
     } catch (e) {
-      setGithubAppError(e instanceof Error ? e.message : "Failed to update repositories");
+      setGithubAppError(
+        e instanceof Error ? e.message : "Failed to update repositories"
+      );
     } finally {
       setBulkLoading(false);
     }
@@ -330,7 +361,7 @@ export default function OrganizationPage() {
 
   const filteredRepositories = repositories
     .filter((repo) =>
-      repo.repo_full_name.toLowerCase().includes(repoSearch.toLowerCase()),
+      repo.repo_full_name.toLowerCase().includes(repoSearch.toLowerCase())
     )
     .filter((repo) => {
       if (repoFilter === "enabled") return repo.review_enabled;
@@ -341,7 +372,7 @@ export default function OrganizationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-gray-50">
+      <div className="grid min-h-screen place-items-center bg-gray-50">
         <div className="text-gray-600">Loading...</div>
       </div>
     );
@@ -349,13 +380,13 @@ export default function OrganizationPage() {
 
   if (error && !organization) {
     return (
-      <div className="min-h-screen grid place-items-center bg-gray-50 p-4">
-        <div className="max-w-md w-full bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-600">Error</h2>
-          <p className="text-gray-600 mt-2">{error}</p>
+      <div className="grid min-h-screen place-items-center bg-gray-50 p-4">
+        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow">
+          <h2 className="font-semibold text-lg text-red-600">Error</h2>
+          <p className="mt-2 text-gray-600">{error}</p>
           <Link
+            className="mt-4 inline-block text-gray-600 text-sm hover:text-gray-900"
             to="/account"
-            className="mt-4 inline-block text-sm text-gray-600 hover:text-gray-900"
           >
             &larr; Back to account
           </Link>
@@ -366,23 +397,23 @@ export default function OrganizationPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="mx-auto max-w-2xl space-y-6">
         {/* Back link */}
         <Link
+          className="inline-flex items-center text-gray-600 text-sm hover:text-gray-900"
           to="/account"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
         >
           <svg
-            className="w-4 h-4 mr-1"
+            className="mr-1 h-4 w-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path
+              d="M15 19l-7-7 7-7"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M15 19l-7-7 7-7"
             />
           </svg>
           Back to account
@@ -390,11 +421,11 @@ export default function OrganizationPage() {
 
         {/* Error banner */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+            <p className="text-red-600 text-sm">{error}</p>
             <button
+              className="mt-1 text-red-500 text-xs hover:text-red-700"
               onClick={() => setError(null)}
-              className="text-xs text-red-500 hover:text-red-700 mt-1"
             >
               Dismiss
             </button>
@@ -402,37 +433,37 @@ export default function OrganizationPage() {
         )}
 
         {/* Organization Details Card */}
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="rounded-lg bg-white p-6 shadow">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               {isEditingName ? (
-                <form onSubmit={handleUpdateName} className="space-y-2">
+                <form className="space-y-2" onSubmit={handleUpdateName}>
                   <input
+                    autoFocus
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 font-bold text-lg focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    onChange={(e) => setEditedName(e.target.value)}
                     type="text"
                     value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-lg font-bold"
-                    autoFocus
                   />
                   {editNameError && (
-                    <p className="text-sm text-red-600">{editNameError}</p>
+                    <p className="text-red-600 text-sm">{editNameError}</p>
                   )}
                   <div className="flex gap-2">
                     <button
-                      type="submit"
+                      className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-800 disabled:opacity-50"
                       disabled={editNameLoading}
-                      className="px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                      type="submit"
                     >
                       {editNameLoading ? "Saving..." : "Save"}
                     </button>
                     <button
-                      type="button"
+                      className="px-3 py-1.5 text-gray-600 text-sm hover:text-gray-900"
                       onClick={() => {
                         setIsEditingName(false);
                         setEditedName(organization?.name || "");
                         setEditNameError(null);
                       }}
-                      className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900"
+                      type="button"
                     >
                       Cancel
                     </button>
@@ -440,42 +471,42 @@ export default function OrganizationPage() {
                 </form>
               ) : (
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-gray-900">
+                  <h1 className="font-bold text-gray-900 text-xl">
                     {organization?.name}
                   </h1>
                   {isAdmin && !organization?.is_personal && (
                     <button
-                      onClick={() => setIsEditingName(true)}
                       className="text-gray-400 hover:text-gray-600"
+                      onClick={() => setIsEditingName(true)}
                       title="Edit name"
                     >
                       <svg
-                        className="w-4 h-4"
+                        className="h-4 w-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                         />
                       </svg>
                     </button>
                   )}
                 </div>
               )}
-              <p className="text-gray-600 mt-1">@{organization?.slug}</p>
+              <p className="mt-1 text-gray-600">@{organization?.slug}</p>
             </div>
             <div className="flex items-center gap-2">
               {organization?.is_personal && (
-                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                <span className="rounded bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
                   Personal
                 </span>
               )}
               <span
-                className={`text-xs px-2 py-0.5 rounded ${
+                className={`rounded px-2 py-0.5 text-xs ${
                   userRole === "ADMIN"
                     ? "bg-green-100 text-green-700"
                     : "bg-gray-100 text-gray-700"
@@ -488,24 +519,24 @@ export default function OrganizationPage() {
 
           {/* Delete button (admin only, non-personal) */}
           {isAdmin && !organization?.is_personal && (
-            <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="mt-6 border-gray-200 border-t pt-4">
               {showDeleteConfirm ? (
-                <div className="bg-red-50 rounded-lg p-4">
-                  <p className="text-sm text-red-700 mb-3">
+                <div className="rounded-lg bg-red-50 p-4">
+                  <p className="mb-3 text-red-700 text-sm">
                     Are you sure you want to delete this organization? This
                     action cannot be undone.
                   </p>
                   <div className="flex gap-2">
                     <button
-                      onClick={handleDelete}
+                      className="rounded-lg bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 disabled:opacity-50"
                       disabled={deleteLoading}
-                      className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50"
+                      onClick={handleDelete}
                     >
                       {deleteLoading ? "Deleting..." : "Yes, delete"}
                     </button>
                     <button
+                      className="px-3 py-1.5 text-gray-600 text-sm hover:text-gray-900"
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900"
                     >
                       Cancel
                     </button>
@@ -513,8 +544,8 @@ export default function OrganizationPage() {
                 </div>
               ) : (
                 <button
+                  className="text-red-600 text-sm hover:text-red-700"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="text-sm text-red-600 hover:text-red-700"
                 >
                   Delete organization
                 </button>
@@ -524,13 +555,13 @@ export default function OrganizationPage() {
         </div>
 
         {/* Members Card */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Members</h2>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-900 text-lg">Members</h2>
             {isAdmin && !organization?.is_personal && (
               <button
+                className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm text-white transition-colors hover:bg-gray-800"
                 onClick={() => setShowInviteForm(!showInviteForm)}
-                className="text-sm px-3 py-1.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 {showInviteForm ? "Cancel" : "Invite Member"}
               </button>
@@ -540,42 +571,42 @@ export default function OrganizationPage() {
           {/* Invite form */}
           {showInviteForm && (
             <form
+              className="mb-4 space-y-3 rounded-lg bg-gray-50 p-4"
               onSubmit={handleInvite}
-              className="mb-4 p-4 bg-gray-50 rounded-lg space-y-3"
             >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block font-medium text-gray-700 text-sm">
                   Email address
                 </label>
                 <input
-                  type="email"
-                  value={inviteEmail}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-900"
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="user@example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   required
+                  type="email"
+                  value={inviteEmail}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block font-medium text-gray-700 text-sm">
                   Role
                 </label>
                 <select
-                  value={inviteRole}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-900"
                   onChange={(e) => setInviteRole(e.target.value as MemberRole)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  value={inviteRole}
                 >
                   <option value="MEMBER">Member</option>
                   <option value="ADMIN">Admin</option>
                 </select>
               </div>
               {inviteError && (
-                <p className="text-sm text-red-600">{inviteError}</p>
+                <p className="text-red-600 text-sm">{inviteError}</p>
               )}
               <button
-                type="submit"
+                className="w-full rounded-lg bg-gray-900 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={inviteLoading}
-                className="w-full py-2 px-4 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
               >
                 {inviteLoading ? "Sending..." : "Send Invitation"}
               </button>
@@ -586,20 +617,24 @@ export default function OrganizationPage() {
           <div className="divide-y divide-gray-200">
             {members.map((member) => (
               <div
-                key={member.user_id}
                 className="flex items-center justify-between py-3"
+                key={member.user_id}
               >
                 <div className="flex items-center gap-3">
                   {member.avatar_url ? (
                     <img
-                      src={member.avatar_url}
                       alt=""
-                      className="w-8 h-8 rounded-full"
+                      className="h-8 w-8 rounded-full"
+                      src={member.avatar_url}
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-xs text-gray-500">
-                        {(member.first_name?.[0] || member.email?.[0] || "?").toUpperCase()}
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
+                      <span className="text-gray-500 text-xs">
+                        {(
+                          member.first_name?.[0] ||
+                          member.email?.[0] ||
+                          "?"
+                        ).toUpperCase()}
                       </span>
                     </div>
                   )}
@@ -607,40 +642,40 @@ export default function OrganizationPage() {
                     <p className="font-medium text-gray-900">
                       {member.first_name || member.username || member.email}
                       {member.user_id === currentUserId && (
-                        <span className="text-gray-500 font-normal">
+                        <span className="font-normal text-gray-500">
                           {" "}
                           (you)
                         </span>
                       )}
                     </p>
-                    <p className="text-sm text-gray-500">{member.email}</p>
+                    <p className="text-gray-500 text-sm">{member.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {isAdmin && !organization?.is_personal ? (
                     <>
                       <select
-                        value={member.role}
-                        onChange={(e) =>
-                          handleUpdateRole(
-                            member.user_id,
-                            e.target.value as MemberRole,
-                          )
-                        }
+                        className="rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
                         disabled={
                           actionLoading === member.user_id ||
                           member.user_id === currentUserId
                         }
-                        className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
+                        onChange={(e) =>
+                          handleUpdateRole(
+                            member.user_id,
+                            e.target.value as MemberRole
+                          )
+                        }
+                        value={member.role}
                       >
                         <option value="MEMBER">Member</option>
                         <option value="ADMIN">Admin</option>
                       </select>
                       {member.user_id !== currentUserId && (
                         <button
-                          onClick={() => handleRemoveMember(member.user_id)}
+                          className="text-red-600 text-sm hover:text-red-700 disabled:opacity-50"
                           disabled={actionLoading === member.user_id}
-                          className="text-red-600 hover:text-red-700 text-sm disabled:opacity-50"
+                          onClick={() => handleRemoveMember(member.user_id)}
                         >
                           Remove
                         </button>
@@ -648,7 +683,7 @@ export default function OrganizationPage() {
                     </>
                   ) : (
                     <span
-                      className={`text-xs px-2 py-0.5 rounded ${
+                      className={`rounded px-2 py-0.5 text-xs ${
                         member.role === "ADMIN"
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-700"
@@ -665,29 +700,29 @@ export default function OrganizationPage() {
 
         {/* Pending Invitations Card (admin only) */}
         {isAdmin && invitations.length > 0 && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 font-semibold text-gray-900 text-lg">
               Pending Invitations
             </h2>
             <div className="divide-y divide-gray-200">
               {invitations.map((invitation) => (
                 <div
-                  key={invitation.id}
                   className="flex items-center justify-between py-3"
+                  key={invitation.id}
                 >
                   <div>
                     <p className="font-medium text-gray-900">
                       {invitation.email}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-gray-500 text-sm">
                       Role: {invitation.role} &middot; Expires{" "}
                       {new Date(invitation.expires_at).toLocaleDateString()}
                     </p>
                   </div>
                   <button
-                    onClick={() => handleRevokeInvitation(invitation.id)}
+                    className="text-red-600 text-sm hover:text-red-700 disabled:opacity-50"
                     disabled={actionLoading === invitation.id}
-                    className="text-red-600 hover:text-red-700 text-sm disabled:opacity-50"
+                    onClick={() => handleRevokeInvitation(invitation.id)}
                   >
                     {actionLoading === invitation.id ? "..." : "Revoke"}
                   </button>
@@ -699,21 +734,22 @@ export default function OrganizationPage() {
 
         {/* GitHub Integration Card (admin only, non-personal orgs) */}
         {isAdmin && !organization?.is_personal && githubAppStatus !== null && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-2 font-semibold text-gray-900 text-lg">
               GitHub Integration
             </h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Connect a GitHub App to automatically track pull requests from your repositories.
+            <p className="mb-4 text-gray-600 text-sm">
+              Connect a GitHub App to automatically track pull requests from
+              your repositories.
             </p>
 
             {/* Success message */}
             {githubAppSuccess && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-700">{githubAppSuccess}</p>
+              <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
+                <p className="text-green-700 text-sm">{githubAppSuccess}</p>
                 <button
+                  className="mt-1 text-green-600 text-xs hover:text-green-800"
                   onClick={() => setGithubAppSuccess(null)}
-                  className="text-xs text-green-600 hover:text-green-800 mt-1"
                 >
                   Dismiss
                 </button>
@@ -722,11 +758,11 @@ export default function OrganizationPage() {
 
             {/* Error message */}
             {githubAppError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-700">{githubAppError}</p>
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3">
+                <p className="text-red-700 text-sm">{githubAppError}</p>
                 <button
+                  className="mt-1 text-red-600 text-xs hover:text-red-800"
                   onClick={() => setGithubAppError(null)}
-                  className="text-xs text-red-600 hover:text-red-800 mt-1"
                 >
                   Dismiss
                 </button>
@@ -736,10 +772,10 @@ export default function OrganizationPage() {
             {githubAppStatus.installed && githubAppStatus.installation ? (
               // Installed state
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <svg
-                      className="w-5 h-5 text-gray-800"
+                      className="h-5 w-5 text-gray-800"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -749,12 +785,12 @@ export default function OrganizationPage() {
                       @{githubAppStatus.installation.github_account_login}
                     </span>
                     {githubAppStatus.installation.suspended_at && (
-                      <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded">
+                      <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
                         Suspended
                       </span>
                     )}
                   </div>
-                  <span className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded">
+                  <span className="rounded bg-green-100 px-2 py-0.5 text-green-700 text-xs">
                     Connected
                   </span>
                 </div>
@@ -762,32 +798,34 @@ export default function OrganizationPage() {
                 {/* Repository section */}
                 <div className="mb-4">
                   {reposLoading ? (
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                         <circle
                           className="opacity-25"
                           cx="12"
                           cy="12"
+                          fill="none"
                           r="10"
                           stroke="currentColor"
                           strokeWidth="4"
-                          fill="none"
                         />
                         <path
                           className="opacity-75"
-                          fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          fill="currentColor"
                         />
                       </svg>
                       Loading repositories...
                     </div>
                   ) : (
                     <>
-                      <div className="text-sm text-gray-600 mb-3">
+                      <div className="mb-3 text-gray-600 text-sm">
                         <p>
-                          {repositories.filter((r) => r.review_enabled).length} of{" "}
-                          {repositories.length}{" "}
-                          {repositories.length === 1 ? "repository" : "repositories"}{" "}
+                          {repositories.filter((r) => r.review_enabled).length}{" "}
+                          of {repositories.length}{" "}
+                          {repositories.length === 1
+                            ? "repository"
+                            : "repositories"}{" "}
                           have reviews enabled.
                         </p>
                       </div>
@@ -795,18 +833,25 @@ export default function OrganizationPage() {
                       {repositories.length > 0 && (
                         <>
                           {/* Search, filter, and bulk actions */}
-                          <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                          <div className="mb-3 flex flex-col gap-2 sm:flex-row">
                             <input
-                              type="text"
-                              placeholder="Search repositories..."
-                              value={repoSearch}
+                              className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-300"
                               onChange={(e) => setRepoSearch(e.target.value)}
-                              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
+                              placeholder="Search repositories..."
+                              type="text"
+                              value={repoSearch}
                             />
                             <select
+                              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                              onChange={(e) =>
+                                setRepoFilter(
+                                  e.target.value as
+                                    | "all"
+                                    | "enabled"
+                                    | "disabled"
+                                )
+                              }
                               value={repoFilter}
-                              onChange={(e) => setRepoFilter(e.target.value as "all" | "enabled" | "disabled")}
-                              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
                             >
                               <option value="all">All</option>
                               <option value="enabled">Enabled</option>
@@ -814,16 +859,16 @@ export default function OrganizationPage() {
                             </select>
                             <div className="flex gap-2">
                               <button
-                                onClick={() => handleBulkToggle(true)}
+                                className="rounded-lg bg-green-100 px-3 py-1.5 text-green-700 text-xs hover:bg-green-200 disabled:opacity-50"
                                 disabled={bulkLoading}
-                                className="px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded-lg hover:bg-green-200 disabled:opacity-50"
+                                onClick={() => handleBulkToggle(true)}
                               >
                                 Enable All
                               </button>
                               <button
-                                onClick={() => handleBulkToggle(false)}
+                                className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 text-xs hover:bg-gray-200 disabled:opacity-50"
                                 disabled={bulkLoading}
-                                className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                                onClick={() => handleBulkToggle(false)}
                               >
                                 Disable All
                               </button>
@@ -831,34 +876,40 @@ export default function OrganizationPage() {
                           </div>
 
                           {/* Repository list */}
-                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                          <div className="max-h-64 space-y-2 overflow-y-auto">
                             {filteredRepositories.length === 0 ? (
-                              <p className="text-sm text-gray-500 py-2">
+                              <p className="py-2 text-gray-500 text-sm">
                                 No repositories match "{repoSearch}"
                               </p>
                             ) : (
                               filteredRepositories.map((repo) => (
                                 <div
+                                  className="flex items-center justify-between rounded-lg bg-gray-50 p-2"
                                   key={repo.id}
-                                  className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                                 >
-                                  <span className="text-sm text-gray-700 truncate flex-1 mr-3">
+                                  <span className="mr-3 flex-1 truncate text-gray-700 text-sm">
                                     {repo.repo_full_name}
                                   </span>
-                                  <label className="relative inline-flex items-center cursor-pointer">
+                                  <label className="relative inline-flex cursor-pointer items-center">
                                     <input
-                                      type="checkbox"
                                       checked={repo.review_enabled}
-                                      onChange={(e) =>
-                                        handleToggleRepoReview(repo.id, e.target.checked)
+                                      className="peer sr-only"
+                                      disabled={
+                                        repoToggleLoading === repo.id ||
+                                        bulkLoading
                                       }
-                                      disabled={repoToggleLoading === repo.id || bulkLoading}
-                                      className="sr-only peer"
+                                      onChange={(e) =>
+                                        handleToggleRepoReview(
+                                          repo.id,
+                                          e.target.checked
+                                        )
+                                      }
+                                      type="checkbox"
                                     />
                                     <div
-                                      className={`w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 ${repoToggleLoading === repo.id || bulkLoading ? "opacity-50" : ""}`}
-                                    ></div>
-                                    <span className="ml-2 text-xs text-gray-500 whitespace-nowrap">
+                                      className={`peer h-5 w-9 rounded-full bg-gray-200 after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-green-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 ${repoToggleLoading === repo.id || bulkLoading ? "opacity-50" : ""}`}
+                                    />
+                                    <span className="ml-2 whitespace-nowrap text-gray-500 text-xs">
                                       {repo.review_enabled ? "On" : "Off"}
                                     </span>
                                   </label>
@@ -873,33 +924,39 @@ export default function OrganizationPage() {
                 </div>
 
                 {/* !reviewfast tip */}
-                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800 font-medium mb-1">
+                <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                  <p className="mb-1 font-medium text-blue-800 text-sm">
                     Tip: Trigger reviews on-demand
                   </p>
-                  <p className="text-sm text-blue-700">
-                    Comment <code className="px-1 py-0.5 bg-blue-100 rounded text-xs font-mono">!reviewfast</code> on any pull request to trigger an AI code review instantly.
+                  <p className="text-blue-700 text-sm">
+                    Comment{" "}
+                    <code className="rounded bg-blue-100 px-1 py-0.5 font-mono text-xs">
+                      !reviewfast
+                    </code>{" "}
+                    on any pull request to trigger an AI code review instantly.
                   </p>
                 </div>
 
                 {/* Disconnect section */}
                 {showGithubDisconnectConfirm ? (
-                  <div className="bg-red-50 rounded-lg p-4">
-                    <p className="text-sm text-red-700 mb-3">
-                      Are you sure you want to disconnect the GitHub App? You will need
-                      to reinstall it from GitHub to reconnect.
+                  <div className="rounded-lg bg-red-50 p-4">
+                    <p className="mb-3 text-red-700 text-sm">
+                      Are you sure you want to disconnect the GitHub App? You
+                      will need to reinstall it from GitHub to reconnect.
                     </p>
                     <div className="flex gap-2">
                       <button
-                        onClick={handleDisconnectGitHubApp}
+                        className="rounded-lg bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 disabled:opacity-50"
                         disabled={githubAppLoading}
-                        className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50"
+                        onClick={handleDisconnectGitHubApp}
                       >
-                        {githubAppLoading ? "Disconnecting..." : "Yes, disconnect"}
+                        {githubAppLoading
+                          ? "Disconnecting..."
+                          : "Yes, disconnect"}
                       </button>
                       <button
+                        className="px-3 py-1.5 text-gray-600 text-sm hover:text-gray-900"
                         onClick={() => setShowGithubDisconnectConfirm(false)}
-                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900"
                       >
                         Cancel
                       </button>
@@ -907,8 +964,8 @@ export default function OrganizationPage() {
                   </div>
                 ) : (
                   <button
+                    className="text-red-600 text-sm hover:text-red-700"
                     onClick={() => setShowGithubDisconnectConfirm(true)}
-                    className="text-sm text-red-600 hover:text-red-700"
                   >
                     Disconnect GitHub App
                   </button>
@@ -918,12 +975,12 @@ export default function OrganizationPage() {
               // Not installed state
               <div>
                 <button
-                  onClick={handleInstallGitHubApp}
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
                   disabled={githubAppLoading}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  onClick={handleInstallGitHubApp}
                 >
                   <svg
-                    className="w-5 h-5"
+                    className="h-5 w-5"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >

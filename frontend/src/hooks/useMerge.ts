@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { attemptsApi } from '@/lib/api';
-import { repoBranchKeys } from './useRepoBranches';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { attemptsApi } from "@/lib/api";
+import { repoBranchKeys } from "./useRepoBranches";
 
 type MergeParams = {
   repoId: string;
@@ -22,7 +22,7 @@ export function useMerge(
     },
     onSuccess: () => {
       // Refresh attempt-specific branch information
-      queryClient.invalidateQueries({ queryKey: ['branchStatus', attemptId] });
+      queryClient.invalidateQueries({ queryKey: ["branchStatus", attemptId] });
 
       // Invalidate all repo branches queries
       queryClient.invalidateQueries({ queryKey: repoBranchKeys.all });
@@ -30,7 +30,7 @@ export function useMerge(
       onSuccess?.();
     },
     onError: (err) => {
-      console.error('Failed to merge:', err);
+      console.error("Failed to merge:", err);
       onError?.(err);
     },
   });

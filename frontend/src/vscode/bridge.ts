@@ -45,38 +45,38 @@ function serializeKeyEvent(e: KeyboardEvent): KeyPayload {
 }
 
 /** Platform check used for shortcut detection. */
-const isMac = () => navigator.platform.toUpperCase().includes('MAC');
+const isMac = () => navigator.platform.toUpperCase().includes("MAC");
 
 /** True for Cmd/Ctrl+C (no Shift/Alt). */
 const isCopy = (e: KeyboardEvent) =>
   (isMac() ? e.metaKey : e.ctrlKey) &&
   !e.shiftKey &&
   !e.altKey &&
-  e.key.toLowerCase() === 'c';
+  e.key.toLowerCase() === "c";
 /** True for Cmd/Ctrl+X (no Shift/Alt). */
 const isCut = (e: KeyboardEvent) =>
   (isMac() ? e.metaKey : e.ctrlKey) &&
   !e.shiftKey &&
   !e.altKey &&
-  e.key.toLowerCase() === 'x';
+  e.key.toLowerCase() === "x";
 /** True for Cmd/Ctrl+V (no Shift/Alt). */
 const isPaste = (e: KeyboardEvent) =>
   (isMac() ? e.metaKey : e.ctrlKey) &&
   !e.shiftKey &&
   !e.altKey &&
-  e.key.toLowerCase() === 'v';
+  e.key.toLowerCase() === "v";
 /** True for Cmd/Ctrl+Z. */
 const isUndo = (e: KeyboardEvent) =>
   (isMac() ? e.metaKey : e.ctrlKey) &&
   !e.shiftKey &&
   !e.altKey &&
-  e.key.toLowerCase() === 'z';
+  e.key.toLowerCase() === "z";
 /** True for redo (Cmd+Shift+Z on macOS, Ctrl+Y elsewhere). */
 const isRedo = (e: KeyboardEvent) =>
   (isMac() ? e.metaKey : e.ctrlKey) &&
   !e.altKey &&
-  ((isMac() && e.shiftKey && e.key.toLowerCase() === 'z') ||
-    (!isMac() && !e.shiftKey && e.key.toLowerCase() === 'y'));
+  ((isMac() && e.shiftKey && e.key.toLowerCase() === "z") ||
+    (!(isMac() || e.shiftKey) && e.key.toLowerCase() === "y"));
 
 /**
  * Returns the currently focused editable element (input/textarea/contentEditable)
@@ -90,7 +90,7 @@ function activeEditable():
   const el = document.activeElement as HTMLElement | null;
   if (!el) return null;
   const tag = el.tagName?.toLowerCase();
-  if (tag === 'input' || tag === 'textarea')
+  if (tag === "input" || tag === "textarea")
     return el as HTMLInputElement | HTMLTextAreaElement;
   if (el.isContentEditable)
     return el as HTMLElement & { isContentEditable: boolean };
@@ -104,7 +104,7 @@ async function writeClipboardText(text: string): Promise<boolean> {
     return true;
   } catch {
     try {
-      return document.execCommand('copy');
+      return document.execCommand("copy");
     } catch {
       return false;
     }
@@ -116,7 +116,7 @@ async function readClipboardText(): Promise<string> {
   try {
     return await navigator.clipboard.readText();
   } catch {
-    return '';
+    return "";
   }
 }
 
@@ -131,10 +131,10 @@ function getSelectedText(): string {
     const input = el as HTMLInputElement | HTMLTextAreaElement;
     const start = input.selectionStart ?? 0;
     const end = input.selectionEnd ?? 0;
-    return start < end ? input.value.slice(start, end) : '';
+    return start < end ? input.value.slice(start, end) : "";
   }
   const sel = window.getSelection();
-  return sel ? sel.toString() : '';
+  return sel ? sel.toString() : "";
 }
 
 /** Perform a browser-like cut on an input/textarea and emit input/change events. */
@@ -144,8 +144,8 @@ function cutFromInput(el: HTMLInputElement | HTMLTextAreaElement) {
   if (end > start) {
     const selected = el.value.slice(start, end);
     void writeClipboardText(selected);
-    if (typeof el.setRangeText === 'function') {
-      el.setRangeText('', start, end, 'end');
+    if (typeof el.setRangeText === "function") {
+      el.setRangeText("", start, end, "end");
     } else {
       const before = el.value.slice(0, start);
       const after = el.value.slice(end);
@@ -153,15 +153,15 @@ function cutFromInput(el: HTMLInputElement | HTMLTextAreaElement) {
       el.setSelectionRange(start, start);
     }
     const ie: Event =
-      typeof InputEvent === 'function'
-        ? new InputEvent('input', {
+      typeof InputEvent === "function"
+        ? new InputEvent("input", {
             bubbles: true,
             composed: true,
-            inputType: 'deleteByCut',
+            inputType: "deleteByCut",
           })
-        : new Event('input', { bubbles: true });
+        : new Event("input", { bubbles: true });
     el.dispatchEvent(ie);
-    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
   }
 }
 
@@ -172,8 +172,8 @@ function pasteIntoInput(
 ) {
   const start = el.selectionStart ?? el.value.length;
   const end = el.selectionEnd ?? el.value.length;
-  if (typeof el.setRangeText === 'function') {
-    el.setRangeText(text, start, end, 'end');
+  if (typeof el.setRangeText === "function") {
+    el.setRangeText(text, start, end, "end");
   } else {
     const before = el.value.slice(0, start);
     const after = el.value.slice(end);
@@ -183,16 +183,16 @@ function pasteIntoInput(
   }
   el.focus();
   const ie: Event =
-    typeof InputEvent === 'function'
-      ? new InputEvent('input', {
+    typeof InputEvent === "function"
+      ? new InputEvent("input", {
           bubbles: true,
           composed: true,
-          inputType: 'insertFromPaste',
+          inputType: "insertFromPaste",
           data: text,
         })
-      : new Event('input', { bubbles: true });
+      : new Event("input", { bubbles: true });
   el.dispatchEvent(ie);
-  el.dispatchEvent(new Event('change', { bubbles: true }));
+  el.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 /**
@@ -208,15 +208,15 @@ function insertTextAtCaretGeneric(text: string) {
       | (HTMLElement & { isContentEditable: boolean })
       | null) ||
     (document.querySelector(
-      'textarea, input:not([type=checkbox]):not([type=radio])'
+      "textarea, input:not([type=checkbox]):not([type=radio])"
     ) as HTMLTextAreaElement | HTMLInputElement | null);
   if (!el) return;
   if ((el as HTMLInputElement).selectionStart !== undefined) {
     pasteIntoInput(el as HTMLInputElement | HTMLTextAreaElement, text);
   } else {
     try {
-      document.execCommand('insertText', false, text);
-      el.dispatchEvent(new Event('input', { bubbles: true }));
+      document.execCommand("insertText", false, text);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
     } catch {
       (el as HTMLElement).innerText += text;
     }
@@ -226,7 +226,7 @@ function insertTextAtCaretGeneric(text: string) {
 // Lightweight retry for cases where add-to arrives before an editable exists
 /** CSS selector for a reasonable first editable fallback. */
 const EDITABLE_SELECTOR =
-  'textarea, input:not([type=checkbox]):not([type=radio])';
+  "textarea, input:not([type=checkbox]):not([type=radio])";
 /** Interval (ms) between retries while we wait for an editable to appear. */
 const RETRY_INTERVAL_MS = 100;
 /** Maximum number of retry attempts before giving up. */
@@ -271,8 +271,8 @@ const pasteResolvers: Record<string, (text: string) => void> = {};
 export function parentClipboardWrite(text: string) {
   try {
     window.parent.postMessage(
-      { type: 'vscode-iframe-clipboard-copy', text },
-      '*'
+      { type: "vscode-iframe-clipboard-copy", text },
+      "*"
     );
   } catch (_err) {
     void 0;
@@ -286,11 +286,11 @@ export function parentClipboardRead(): Promise<string> {
     pasteResolvers[requestId] = (text: string) => resolve(text);
     try {
       window.parent.postMessage(
-        { type: 'vscode-iframe-clipboard-paste-request', requestId },
-        '*'
+        { type: "vscode-iframe-clipboard-paste-request", requestId },
+        "*"
       );
     } catch {
-      resolve('');
+      resolve("");
     }
   });
 }
@@ -304,18 +304,18 @@ type IframeMessage = {
 };
 
 // Handle messages from the parent webview (clipboard, add-to input)
-window.addEventListener('message', (e: MessageEvent) => {
+window.addEventListener("message", (e: MessageEvent) => {
   const data: unknown = e?.data;
-  if (!data || typeof data !== 'object') return;
+  if (!data || typeof data !== "object") return;
   const msg = data as IframeMessage;
-  if (msg.type === 'vscode-iframe-clipboard-paste-result' && msg.requestId) {
+  if (msg.type === "vscode-iframe-clipboard-paste-result" && msg.requestId) {
     const fn = pasteResolvers[msg.requestId];
     if (fn) {
-      fn(msg.text || '');
+      fn(msg.text || "");
       delete pasteResolvers[msg.requestId];
     }
   }
-  if (msg.type === 'VIBE_ADD_TO_INPUT' && typeof msg.text === 'string') {
+  if (msg.type === "VIBE_ADD_TO_INPUT" && typeof msg.text === "string") {
     const el =
       activeEditable() ||
       (document.querySelector(EDITABLE_SELECTOR) as
@@ -333,7 +333,7 @@ export function installVSCodeIframeKeyboardBridge() {
 
   const forward = (type: string, e: KeyboardEvent) => {
     try {
-      window.parent.postMessage({ type, event: serializeKeyEvent(e) }, '*');
+      window.parent.postMessage({ type, event: serializeKeyEvent(e) }, "*");
     } catch (_err) {
       void 0;
     }
@@ -365,7 +365,7 @@ export function installVSCodeIframeKeyboardBridge() {
       e.preventDefault();
       e.stopPropagation();
       try {
-        document.execCommand('undo');
+        document.execCommand("undo");
       } catch {
         /* empty */
       }
@@ -374,7 +374,7 @@ export function installVSCodeIframeKeyboardBridge() {
       e.preventDefault();
       e.stopPropagation();
       try {
-        document.execCommand('redo');
+        document.execCommand("redo");
       } catch {
         /* empty */
       }
@@ -395,19 +395,19 @@ export function installVSCodeIframeKeyboardBridge() {
       }
     }
     // Forward everything else so VS Code can handle global shortcuts
-    forward('vscode-iframe-keydown', e);
+    forward("vscode-iframe-keydown", e);
   };
 
-  const onKeyUp = (e: KeyboardEvent) => forward('vscode-iframe-keyup', e);
-  const onKeyPress = (e: KeyboardEvent) => forward('vscode-iframe-keypress', e);
+  const onKeyUp = (e: KeyboardEvent) => forward("vscode-iframe-keyup", e);
+  const onKeyPress = (e: KeyboardEvent) => forward("vscode-iframe-keypress", e);
 
   // Capture phase to run before app handlers
-  window.addEventListener('keydown', onKeyDown, true);
-  window.addEventListener('keyup', onKeyUp, true);
-  window.addEventListener('keypress', onKeyPress, true);
-  document.addEventListener('keydown', onKeyDown, true);
-  document.addEventListener('keyup', onKeyUp, true);
-  document.addEventListener('keypress', onKeyPress, true);
+  window.addEventListener("keydown", onKeyDown, true);
+  window.addEventListener("keyup", onKeyUp, true);
+  window.addEventListener("keypress", onKeyPress, true);
+  document.addEventListener("keydown", onKeyDown, true);
+  document.addEventListener("keyup", onKeyUp, true);
+  document.addEventListener("keypress", onKeyPress, true);
 }
 
 /** Copy helper that prefers navigator.clipboard and falls back to the bridge. */

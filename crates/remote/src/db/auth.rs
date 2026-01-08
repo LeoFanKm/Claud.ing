@@ -1,6 +1,6 @@
 use chrono::{DateTime, Duration, Utc};
-use serde::Serialize;
-use sqlx::{PgPool, query_as};
+use serde::{Deserialize, Serialize};
+use sqlx::{PgPool, query_as, types::Json};
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -20,7 +20,7 @@ pub enum AuthSessionError {
     Database(#[from] sqlx::Error),
 }
 
-#[derive(Debug, Clone, sqlx::FromRow, Serialize)]
+#[derive(Debug, Clone, sqlx::FromRow, Serialize, Deserialize)]
 pub struct AuthSession {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -95,11 +95,11 @@ impl<'a> AuthSessionRepository<'a> {
         sqlx::query!(
             r#"
             UPDATE auth_sessions
-            SET last_used_at = date_trunc('day', NOW())
+            SET last_used_at = NOW()
             WHERE id = $1
               AND (
                 last_used_at IS NULL
-                OR last_used_at < date_trunc('day', NOW())
+                OR last_used_at < NOW() - INTERVAL '1 hour'
               )
             "#,
             session_id
@@ -251,5 +251,85 @@ impl AuthSession {
 
     pub fn inactivity_duration(&self, now: DateTime<Utc>) -> Duration {
         now.signed_duration_since(self.last_activity_at())
+    }
+}
+
+/// OAuth provider data for auth status response (embedded in JSON)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuthProviderData {
+    pub provider: String,
+    pub username: Option<String>,
+    pub display_name: Option<String>,
+    pub email: Option<String>,
+    pub avatar_url: Option<String>,
+}
+
+/// Combined auth status data from JOIN query (session + user + oauth_accounts)
+#[derive(Debug, Clone)]
+pub struct AuthStatusData {
+    pub session_id: Uuid,
+    pub session_revoked_at: Option<DateTime<Utc>>,
+    pub user_id: Uuid,
+    pub email: String,
+    pub username: Option<String>,
+    pub providers: Vec<OAuthProviderData>,
+}
+
+/// Internal row type for the JOIN query
+#[derive(Debug, sqlx::FromRow)]
+struct AuthStatusRow {
+    session_id: Uuid,
+    session_revoked_at: Option<DateTime<Utc>>,
+    user_id: Uuid,
+    email: String,
+    username: Option<String>,
+    providers_json: Json<Vec<OAuthProviderData>>,
+}
+
+impl AuthSessionRepository<'_> {
+    /// Fetch auth status data with a single JOIN query.
+    /// Returns session + user + oauth_accounts in one round-trip.
+    pub async fn get_auth_status_data(
+        &self,
+        session_id: Uuid,
+    ) -> Result<Option<AuthStatusData>, AuthSessionError> {
+        let row = sqlx::query_as!(
+            AuthStatusRow,
+            r#"
+            SELECT
+                s.id             AS "session_id!",
+                s.revoked_at     AS "session_revoked_at?",
+                u.id             AS "user_id!: Uuid",
+                u.email          AS "email!",
+                u.username       AS "username?",
+                COALESCE(
+                    (SELECT json_agg(json_build_object(
+                        'provider', oa.provider,
+                        'username', oa.username,
+                        'display_name', oa.display_name,
+                        'email', oa.email,
+                        'avatar_url', oa.avatar_url
+                    ) ORDER BY oa.provider)
+                    FROM oauth_accounts oa
+                    WHERE oa.user_id = u.id),
+                    '[]'::json
+                )                AS "providers_json!: Json<Vec<OAuthProviderData>>"
+            FROM auth_sessions s
+            INNER JOIN users u ON u.id = s.user_id
+            WHERE s.id = $1
+            "#,
+            session_id
+        )
+        .fetch_optional(self.pool)
+        .await?;
+
+        Ok(row.map(|r| AuthStatusData {
+            session_id: r.session_id,
+            session_revoked_at: r.session_revoked_at,
+            user_id: r.user_id,
+            email: r.email,
+            username: r.username,
+            providers: r.providers_json.0,
+        }))
     }
 }

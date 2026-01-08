@@ -1,66 +1,82 @@
 import {
-  Loader2,
-  Send,
-  StopCircle,
   AlertCircle,
   Clock,
-  X,
-  Paperclip,
-  Terminal,
+  Loader2,
   MessageSquare,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+  Paperclip,
+  Send,
+  StopCircle,
+  Terminal,
+  X,
+} from "lucide-react";
+import { lazy, Suspense } from "react";
+
+// Lazy load heavy Lexical editor for code splitting
+const WYSIWYGEditor = lazy(() => import("@/components/ui/wysiwyg"));
+
+//
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeysContext } from "react-hotkeys-hook";
+import { useTranslation } from "react-i18next";
+import type {
+  DraftFollowUpData,
+  ExecutorAction,
+  ExecutorProfileId,
+  Session,
+} from "shared/types";
+import { ScratchType, type TaskWithAttemptStatus } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { GitHubCommentsDialog } from "@/components/dialogs/tasks/GitHubCommentsDialog";
+import { ClickedElementsBanner } from "@/components/tasks/ClickedElementsBanner";
+import { FollowUpConflictSection } from "@/components/tasks/follow-up/FollowUpConflictSection";
+//
+import { VariantSelector } from "@/components/tasks/VariantSelector";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
+import { useClickedElements } from "@/contexts/ClickedElementsProvider";
+import { useEntries } from "@/contexts/EntriesContext";
+import { useProject } from "@/contexts/ProjectContext";
+import { useRetryUi } from "@/contexts/RetryUiContext";
 //
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ScratchType, type TaskWithAttemptStatus } from 'shared/types';
-import { useBranchStatus } from '@/hooks';
-import { useAttemptRepo } from '@/hooks/useAttemptRepo';
-import { useAttemptExecution } from '@/hooks/useAttemptExecution';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { cn } from '@/lib/utils';
-//
-import { useReview } from '@/contexts/ReviewProvider';
-import { useClickedElements } from '@/contexts/ClickedElementsProvider';
-import { useEntries } from '@/contexts/EntriesContext';
-import { useKeySubmitFollowUp, Scope } from '@/keyboard';
-import { useHotkeysContext } from 'react-hotkeys-hook';
-import { useProject } from '@/contexts/ProjectContext';
-//
-import { VariantSelector } from '@/components/tasks/VariantSelector';
-import { useAttemptBranch } from '@/hooks/useAttemptBranch';
-import { FollowUpConflictSection } from '@/components/tasks/follow-up/FollowUpConflictSection';
-import { ClickedElementsBanner } from '@/components/tasks/ClickedElementsBanner';
-import WYSIWYGEditor from '@/components/ui/wysiwyg';
-import { useRetryUi } from '@/contexts/RetryUiContext';
-import { useFollowUpSend } from '@/hooks/useFollowUpSend';
-import { useVariant } from '@/hooks/useVariant';
-import type {
-  DraftFollowUpData,
-  ExecutorAction,
-  ExecutorProfileId,
-} from 'shared/types';
-import { buildResolveConflictsInstructions } from '@/lib/conflicts';
-import { useTranslation } from 'react-i18next';
-import { useScratch } from '@/hooks/useScratch';
-import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
-import { useQueueStatus } from '@/hooks/useQueueStatus';
-import { imagesApi, attemptsApi } from '@/lib/api';
-import { GitHubCommentsDialog } from '@/components/dialogs/tasks/GitHubCommentsDialog';
-import type { NormalizedComment } from '@/components/ui/wysiwyg/nodes/github-comment-node';
-import type { Session } from 'shared/types';
+import { useReview } from "@/contexts/ReviewProvider";
+import { useBranchStatus } from "@/hooks";
+import { useAttemptBranch } from "@/hooks/useAttemptBranch";
+import { useAttemptExecution } from "@/hooks/useAttemptExecution";
+import { useAttemptRepo } from "@/hooks/useAttemptRepo";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
+import { useFollowUpSend } from "@/hooks/useFollowUpSend";
+import { useQueueStatus } from "@/hooks/useQueueStatus";
+import { useScratch } from "@/hooks/useScratch";
+import { useVariant } from "@/hooks/useVariant";
+import { Scope, useKeySubmitFollowUp } from "@/keyboard";
+import { attemptsApi, imagesApi } from "@/lib/api";
+import { buildResolveConflictsInstructions } from "@/lib/conflicts";
+import { cn } from "@/lib/utils";
+
+// Inline type to avoid importing from wysiwyg module (breaks code splitting)
+interface NormalizedComment {
+  id: string;
+  comment_type: "general" | "review";
+  author: string;
+  body: string;
+  created_at: string;
+  url: string;
+  path?: string;
+  line?: number | null;
+  diff_hunk?: string;
+}
 
 interface TaskFollowUpSectionProps {
   task: TaskWithAttemptStatus;
@@ -71,7 +87,7 @@ export function TaskFollowUpSection({
   task,
   session,
 }: TaskFollowUpSectionProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const { projectId } = useProject();
 
   // Derive IDs from session
@@ -133,11 +149,11 @@ export function TaskFollowUpSection({
     scratch,
     updateScratch,
     isLoading: isScratchLoading,
-  } = useScratch(ScratchType.DRAFT_FOLLOW_UP, sessionId ?? '');
+  } = useScratch(ScratchType.DRAFT_FOLLOW_UP, sessionId ?? "");
 
   // Derive the message and variant from scratch
   const scratchData: DraftFollowUpData | undefined =
-    scratch?.payload?.type === 'DRAFT_FOLLOW_UP'
+    scratch?.payload?.type === "DRAFT_FOLLOW_UP"
       ? scratch.payload.data
       : undefined;
 
@@ -145,7 +161,7 @@ export function TaskFollowUpSection({
   const [isTextareaFocused, setIsTextareaFocused] = useState(false);
 
   // Local message state for immediate UI feedback (before debounced save)
-  const [localMessage, setLocalMessage] = useState('');
+  const [localMessage, setLocalMessage] = useState("");
 
   // Variant selection - derive default from latest process
   const latestProfileId = useMemo<ExecutorProfileId | null>(() => {
@@ -158,10 +174,10 @@ export function TaskFollowUpSection({
       while (curr) {
         const typ = curr.typ;
         switch (typ.type) {
-          case 'CodingAgentInitialRequest':
-          case 'CodingAgentFollowUpRequest':
+          case "CodingAgentInitialRequest":
+          case "CodingAgentFollowUpRequest":
             return typ.executor_profile_id;
-          case 'ScriptRequest':
+          case "ScriptRequest":
             curr = curr.next_action;
             continue;
         }
@@ -210,16 +226,16 @@ export function TaskFollowUpSection({
       if (!workspaceId) return;
       // Don't create empty scratch entries - only save if there's actual content,
       // a variant is selected, or scratch already exists (to allow clearing a draft)
-      if (!message.trim() && !variant && !scratchRef.current) return;
+      if (!(message.trim() || variant || scratchRef.current)) return;
       try {
         await updateScratch({
           payload: {
-            type: 'DRAFT_FOLLOW_UP',
+            type: "DRAFT_FOLLOW_UP",
             data: { message, variant },
           },
         });
       } catch (e) {
-        console.error('Failed to save follow-up draft', e);
+        console.error("Failed to save follow-up draft", e);
       }
     },
     [workspaceId, updateScratch]
@@ -249,7 +265,7 @@ export function TaskFollowUpSection({
   useEffect(() => {
     if (isScratchLoading) return;
     if (isTextareaFocused) return; // Don't overwrite while user is typing
-    setLocalMessage(scratchData?.message ?? '');
+    setLocalMessage(scratchData?.message ?? "");
   }, [isScratchLoading, scratchData?.message, isTextareaFocused]);
 
   // During retry, follow-up box is greyed/disabled (not hidden)
@@ -288,7 +304,7 @@ export function TaskFollowUpSection({
       refreshQueueStatus();
       // Re-sync local message from current scratch state
       // If scratch was deleted, scratchData will be undefined, so localMessage becomes ''
-      setLocalMessage(scratchData?.message ?? '');
+      setLocalMessage(scratchData?.message ?? "");
     }
   }, [
     isAttemptRunning,
@@ -306,11 +322,11 @@ export function TaskFollowUpSection({
   const { entries } = useEntries();
   const hasPendingApproval = useMemo(() => {
     return entries.some((entry) => {
-      if (entry.type !== 'NORMALIZED_ENTRY') return false;
+      if (entry.type !== "NORMALIZED_ENTRY") return false;
       const entryType = entry.content.entry_type;
       return (
-        entryType.type === 'tool_use' &&
-        entryType.status.status === 'pending_approval'
+        entryType.type === "tool_use" &&
+        entryType.status.status === "pending_approval"
       );
     });
   }, [entries]);
@@ -328,7 +344,7 @@ export function TaskFollowUpSection({
       clearClickedElements,
       onAfterSendCleanup: () => {
         cancelDebouncedSave(); // Cancel any pending debounced save to avoid race condition
-        setLocalMessage(''); // Clear local state immediately
+        setLocalMessage(""); // Clear local state immediately
         // Scratch deletion is handled by the backend when the queued message is consumed
       },
     });
@@ -370,7 +386,7 @@ export function TaskFollowUpSection({
     clickedMarkdown,
     localMessage,
   ]);
-  const isEditable = !isRetryActive && !hasPendingApproval;
+  const isEditable = !(isRetryActive || hasPendingApproval);
 
   const hasAnyScript = true;
 
@@ -379,7 +395,7 @@ export function TaskFollowUpSection({
     try {
       await attemptsApi.runSetupScript(workspaceId);
     } catch (error) {
-      console.error('Failed to run setup script:', error);
+      console.error("Failed to run setup script:", error);
     }
   }, [workspaceId, isAttemptRunning]);
 
@@ -388,17 +404,19 @@ export function TaskFollowUpSection({
     try {
       await attemptsApi.runCleanupScript(workspaceId);
     } catch (error) {
-      console.error('Failed to run cleanup script:', error);
+      console.error("Failed to run cleanup script:", error);
     }
   }, [workspaceId, isAttemptRunning]);
 
   // Handler to queue the current message for execution after agent finishes
   const handleQueueMessage = useCallback(async () => {
     if (
-      !localMessage.trim() &&
-      !conflictResolutionInstructions &&
-      !reviewMarkdown &&
-      !clickedMarkdown
+      !(
+        localMessage.trim() ||
+        conflictResolutionInstructions ||
+        reviewMarkdown ||
+        clickedMarkdown
+      )
     ) {
       return;
     }
@@ -415,7 +433,7 @@ export function TaskFollowUpSection({
       reviewMarkdown,
       localMessage,
     ].filter(Boolean);
-    const combinedMessage = parts.join('\n\n');
+    const combinedMessage = parts.join("\n\n");
     await queueMessage(combinedMessage, selectedVariant);
   }, [
     localMessage,
@@ -502,7 +520,7 @@ export function TaskFollowUpSection({
             });
           }
         } catch (error) {
-          console.error('Failed to upload image:', error);
+          console.error("Failed to upload image:", error);
         }
       }
     },
@@ -517,13 +535,13 @@ export function TaskFollowUpSection({
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []).filter((f) =>
-        f.type.startsWith('image/')
+        f.type.startsWith("image/")
       );
       if (files.length > 0) {
         handlePasteFiles(files);
       }
       // Reset input so same file can be selected again
-      e.target.value = '';
+      e.target.value = "";
     },
     [handlePasteFiles]
   );
@@ -543,7 +561,7 @@ export function TaskFollowUpSection({
       const markdownBlocks = result.comments.map((comment) => {
         const payload: NormalizedComment = {
           id:
-            comment.comment_type === 'general'
+            comment.comment_type === "general"
               ? comment.id
               : comment.id.toString(),
           comment_type: comment.comment_type,
@@ -552,16 +570,16 @@ export function TaskFollowUpSection({
           created_at: comment.created_at,
           url: comment.url,
           // Include review-specific fields when available
-          ...(comment.comment_type === 'review' && {
+          ...(comment.comment_type === "review" && {
             path: comment.path,
             line: comment.line != null ? Number(comment.line) : null,
             diff_hunk: comment.diff_hunk,
           }),
         };
-        return '```gh-comment\n' + JSON.stringify(payload, null, 2) + '\n```';
+        return "```gh-comment\n" + JSON.stringify(payload, null, 2) + "\n```";
       });
 
-      const markdown = markdownBlocks.join('\n\n');
+      const markdown = markdownBlocks.join("\n\n");
 
       // Same pattern as image paste
       if (isQueuedRef.current && queuedMessageRef.current) {
@@ -599,15 +617,15 @@ export function TaskFollowUpSection({
   const editorPlaceholder = useMemo(
     () =>
       hasExtraContext
-        ? '(Optional) Add additional instructions... Type @ to insert tags or search files.'
-        : 'Continue working on this task attempt... Type @ to insert tags or search files.',
+        ? "(Optional) Add additional instructions... Type @ to insert tags or search files."
+        : "Continue working on this task attempt... Type @ to insert tags or search files.",
     [hasExtraContext]
   );
 
   // Register keyboard shortcuts
   useKeySubmitFollowUp(handleSubmitShortcut, {
     scope: Scope.FOLLOW_UP_READY,
-    enableOnFormTags: ['textarea', 'TEXTAREA'],
+    enableOnFormTags: ["textarea", "TEXTAREA"],
     when: canSendFollowUp && isEditable,
   });
 
@@ -656,8 +674,8 @@ export function TaskFollowUpSection({
 
   if (isScratchLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="animate-spin h-6 w-6" />
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   }
@@ -665,12 +683,12 @@ export function TaskFollowUpSection({
   return (
     <div
       className={cn(
-        'grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] overflow-hidden',
-        isRetryActive && 'opacity-50'
+        "grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] overflow-hidden",
+        isRetryActive && "opacity-50"
       )}
     >
       {/* Scrollable content area */}
-      <div className="overflow-y-auto min-h-0 p-4">
+      <div className="min-h-0 overflow-y-auto p-4">
         <div className="space-y-2">
           {followUpError && (
             <Alert variant="destructive">
@@ -682,7 +700,7 @@ export function TaskFollowUpSection({
             {/* Review comments preview */}
             {reviewMarkdown && (
               <div className="mb-4">
-                <div className="text-sm whitespace-pre-wrap break-words rounded-md border bg-muted p-3">
+                <div className="whitespace-pre-wrap break-words rounded-md border bg-muted p-3 text-sm">
                   {reviewMarkdown}
                 </div>
               </div>
@@ -691,16 +709,16 @@ export function TaskFollowUpSection({
             {/* Conflict notice and actions (optional UI) */}
             {branchStatus && (
               <FollowUpConflictSection
-                workspaceId={workspaceId}
                 attemptBranch={attemptBranch}
                 branchStatus={branchStatus}
-                isEditable={isEditable}
-                onResolve={onSendFollowUp}
+                conflictResolutionInstructions={conflictResolutionInstructions}
+                enableAbort={canSendFollowUp && !isAttemptRunning}
                 enableResolve={
                   canSendFollowUp && !isAttemptRunning && isEditable
                 }
-                enableAbort={canSendFollowUp && !isAttemptRunning}
-                conflictResolutionInstructions={conflictResolutionInstructions}
+                isEditable={isEditable}
+                onResolve={onSendFollowUp}
+                workspaceId={workspaceId}
               />
             )}
 
@@ -709,12 +727,12 @@ export function TaskFollowUpSection({
 
             {/* Queued message indicator */}
             {isQueued && queuedMessage && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-md border">
+              <div className="flex items-center gap-2 rounded-md border bg-muted p-3 text-muted-foreground text-sm">
                 <Clock className="h-4 w-4 flex-shrink-0" />
                 <div className="font-medium">
                   {t(
-                    'followUp.queuedMessage',
-                    'Message queued - will execute when current run finishes'
+                    "followUp.queuedMessage",
+                    "Message queued - will execute when current run finishes"
                   )}
                 </div>
               </div>
@@ -722,25 +740,33 @@ export function TaskFollowUpSection({
 
             <div
               className="flex flex-col gap-2"
-              onFocus={() => setIsTextareaFocused(true)}
               onBlur={(e) => {
                 // Only blur if focus is leaving the container entirely
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                   setIsTextareaFocused(false);
                 }
               }}
+              onFocus={() => setIsTextareaFocused(true)}
             >
-              <WYSIWYGEditor
-                placeholder={editorPlaceholder}
-                value={displayMessage}
-                onChange={handleEditorChange}
-                disabled={!isEditable}
-                onPasteFiles={handlePasteFiles}
-                projectId={projectId}
-                taskAttemptId={workspaceId}
-                onCmdEnter={handleSubmitShortcut}
-                className="min-h-[40px]"
-              />
+              <Suspense
+                fallback={
+                  <div className="flex min-h-[40px] items-center justify-center rounded-md border bg-muted/50">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                }
+              >
+                <WYSIWYGEditor
+                  className="min-h-[40px]"
+                  disabled={!isEditable}
+                  onChange={handleEditorChange}
+                  onCmdEnter={handleSubmitShortcut}
+                  onPasteFiles={handlePasteFiles}
+                  placeholder={editorPlaceholder}
+                  projectId={projectId}
+                  taskAttemptId={workspaceId}
+                  value={displayMessage}
+                />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -748,46 +774,46 @@ export function TaskFollowUpSection({
 
       {/* Always-visible action bar */}
       <div className="p-4">
-        <div className="flex flex-row gap-2 items-center">
-          <div className="flex-1 flex gap-2">
+        <div className="flex flex-row items-center gap-2">
+          <div className="flex flex-1 gap-2">
             <VariantSelector
               currentProfile={currentProfile}
-              selectedVariant={selectedVariant}
-              onChange={setSelectedVariant}
               disabled={!isEditable}
+              onChange={setSelectedVariant}
+              selectedVariant={selectedVariant}
             />
           </div>
 
           {/* Hidden file input for attachment - always present */}
           <input
+            accept="image/*"
+            className="hidden"
+            multiple
+            onChange={handleFileInputChange}
             ref={fileInputRef}
             type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleFileInputChange}
           />
 
           {/* Attach button - always visible */}
           <Button
-            onClick={handleAttachClick}
-            disabled={!isEditable}
-            size="sm"
-            variant="outline"
-            title="Attach image"
             aria-label="Attach image"
+            disabled={!isEditable}
+            onClick={handleAttachClick}
+            size="sm"
+            title="Attach image"
+            variant="outline"
           >
             <Paperclip className="h-4 w-4" />
           </Button>
 
           {/* GitHub Comments button */}
           <Button
-            onClick={handleGitHubCommentClick}
-            disabled={!isEditable}
-            size="sm"
-            variant="outline"
-            title="Insert GitHub comment"
             aria-label="Insert GitHub comment"
+            disabled={!isEditable}
+            onClick={handleGitHubCommentClick}
+            size="sm"
+            title="Insert GitHub comment"
+            variant="outline"
           >
             <MessageSquare className="h-4 w-4" />
           </Button>
@@ -800,10 +826,10 @@ export function TaskFollowUpSection({
                   <TooltipTrigger asChild>
                     <DropdownMenuTrigger asChild>
                       <Button
+                        aria-label="Run scripts"
+                        disabled={isAttemptRunning}
                         size="sm"
                         variant="outline"
-                        disabled={isAttemptRunning}
-                        aria-label="Run scripts"
                       >
                         <Terminal className="h-4 w-4" />
                       </Button>
@@ -811,17 +837,17 @@ export function TaskFollowUpSection({
                   </TooltipTrigger>
                   {isAttemptRunning && (
                     <TooltipContent side="bottom">
-                      {t('followUp.scriptsDisabledWhileRunning')}
+                      {t("followUp.scriptsDisabledWhileRunning")}
                     </TooltipContent>
                   )}
                 </Tooltip>
               </TooltipProvider>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleRunSetupScript}>
-                  {t('followUp.runSetupScript')}
+                  {t("followUp.runSetupScript")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleRunCleanupScript}>
-                  {t('followUp.runCleanupScript')}
+                  {t("followUp.runCleanupScript")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -832,54 +858,56 @@ export function TaskFollowUpSection({
               {/* Queue/Cancel Queue button when running */}
               {isQueued ? (
                 <Button
-                  onClick={cancelQueue}
                   disabled={isQueueLoading}
+                  onClick={cancelQueue}
                   size="sm"
                   variant="outline"
                 >
                   {isQueueLoading ? (
-                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <X className="h-4 w-4 mr-2" />
-                      {t('followUp.cancelQueue', 'Cancel Queue')}
+                      <X className="mr-2 h-4 w-4" />
+                      {t("followUp.cancelQueue", "Cancel Queue")}
                     </>
                   )}
                 </Button>
               ) : (
                 <Button
-                  onClick={handleQueueMessage}
                   disabled={
                     isQueueLoading ||
-                    (!localMessage.trim() &&
-                      !conflictResolutionInstructions &&
-                      !reviewMarkdown &&
-                      !clickedMarkdown)
+                    !(
+                      localMessage.trim() ||
+                      conflictResolutionInstructions ||
+                      reviewMarkdown ||
+                      clickedMarkdown
+                    )
                   }
+                  onClick={handleQueueMessage}
                   size="sm"
                 >
                   {isQueueLoading ? (
-                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <Clock className="h-4 w-4 mr-2" />
-                      {t('followUp.queue', 'Queue')}
+                      <Clock className="mr-2 h-4 w-4" />
+                      {t("followUp.queue", "Queue")}
                     </>
                   )}
                 </Button>
               )}
               <Button
-                onClick={stopExecution}
                 disabled={isStopping}
+                onClick={stopExecution}
                 size="sm"
                 variant="destructive"
               >
                 {isStopping ? (
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    <StopCircle className="h-4 w-4 mr-2" />
-                    {t('followUp.stop')}
+                    <StopCircle className="mr-2 h-4 w-4" />
+                    {t("followUp.stop")}
                   </>
                 )}
               </Button>
@@ -888,27 +916,27 @@ export function TaskFollowUpSection({
             <div className="flex items-center gap-2">
               {comments.length > 0 && (
                 <Button
+                  disabled={!isEditable}
                   onClick={clearComments}
                   size="sm"
                   variant="destructive"
-                  disabled={!isEditable}
                 >
-                  {t('followUp.clearReviewComments')}
+                  {t("followUp.clearReviewComments")}
                 </Button>
               )}
               <Button
+                disabled={!(canSendFollowUp && isEditable)}
                 onClick={onSendFollowUp}
-                disabled={!canSendFollowUp || !isEditable}
                 size="sm"
               >
                 {isSendingFollowUp ? (
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="mr-2 h-4 w-4" />
                     {conflictResolutionInstructions
-                      ? t('followUp.resolveConflicts')
-                      : t('followUp.send')}
+                      ? t("followUp.resolveConflicts")
+                      : t("followUp.send")}
                   </>
                 )}
               </Button>

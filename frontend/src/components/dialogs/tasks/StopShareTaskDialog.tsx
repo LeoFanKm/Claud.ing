@@ -1,4 +1,8 @@
-import { useRef, useState } from 'react';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,15 +10,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
-import { useTranslation } from 'react-i18next';
-import type { SharedTaskRecord } from '@/hooks/useProjectTasks';
-import { useTaskMutations } from '@/hooks/useTaskMutations';
-import { useProject } from '@/contexts/ProjectContext';
+} from "@/components/ui/dialog";
+import { useProject } from "@/contexts/ProjectContext";
+import type { SharedTaskRecord } from "@/hooks/useProjectTasks";
+import { useTaskMutations } from "@/hooks/useTaskMutations";
+import { defineModal } from "@/lib/modals";
 
 export interface StopShareTaskDialogProps {
   sharedTask: SharedTaskRecord;
@@ -23,7 +23,7 @@ export interface StopShareTaskDialogProps {
 const StopShareTaskDialogImpl = NiceModal.create<StopShareTaskDialogProps>(
   ({ sharedTask }) => {
     const modal = useModal();
-    const { t } = useTranslation('tasks');
+    const { t } = useTranslation("tasks");
     const { projectId } = useProject();
     const { stopShareTask } = useTaskMutations(projectId ?? undefined);
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ const StopShareTaskDialogImpl = NiceModal.create<StopShareTaskDialogProps>(
     const getReadableError = (err: unknown) =>
       err instanceof Error && err.message
         ? err.message
-        : t('stopShareDialog.genericError');
+        : t("stopShareDialog.genericError");
 
     const requestClose = (didConfirm: boolean) => {
       if (stopShareTask.isPending) {
@@ -60,7 +60,6 @@ const StopShareTaskDialogImpl = NiceModal.create<StopShareTaskDialogProps>(
 
     return (
       <Dialog
-        open={modal.visible}
         onOpenChange={(open) => {
           if (open) {
             stopShareTask.reset();
@@ -87,42 +86,43 @@ const StopShareTaskDialogImpl = NiceModal.create<StopShareTaskDialogProps>(
             modal.reject();
           }
         }}
+        open={modal.visible}
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('stopShareDialog.title')}</DialogTitle>
+            <DialogTitle>{t("stopShareDialog.title")}</DialogTitle>
             <DialogDescription>
-              {t('stopShareDialog.description', { title: sharedTask.title })}
+              {t("stopShareDialog.description", { title: sharedTask.title })}
             </DialogDescription>
           </DialogHeader>
 
-          <Alert variant="destructive" className="mb-4">
-            {t('stopShareDialog.warning')}
+          <Alert className="mb-4" variant="destructive">
+            {t("stopShareDialog.warning")}
           </Alert>
 
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert className="mb-4" variant="destructive">
               {error}
             </Alert>
           )}
 
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={stopShareTask.isPending}
               autoFocus
+              disabled={stopShareTask.isPending}
+              onClick={handleCancel}
+              variant="outline"
             >
-              {t('common:buttons.cancel')}
+              {t("common:buttons.cancel")}
             </Button>
             <Button
-              variant="destructive"
-              onClick={handleConfirm}
               disabled={stopShareTask.isPending}
+              onClick={handleConfirm}
+              variant="destructive"
             >
               {stopShareTask.isPending
-                ? t('stopShareDialog.inProgress')
-                : t('stopShareDialog.confirm')}
+                ? t("stopShareDialog.inProgress")
+                : t("stopShareDialog.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

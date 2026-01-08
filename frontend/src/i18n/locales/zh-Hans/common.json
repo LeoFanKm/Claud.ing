@@ -19,7 +19,11 @@
     "saving": "保存中...",
     "error": "错误",
     "success": "成功",
-    "reconnecting": "重新连接中"
+    "reconnecting": "重新连接中",
+    "reconnectingWithCountdown": "{{seconds}}秒后重新连接...",
+    "connectionLost": "连接已断开",
+    "retryNow": "立即重试",
+    "maxAttemptsReached": "已达最大重连次数"
   },
   "language": {
     "browserDefault": "浏览器默认"
@@ -79,7 +83,7 @@
     "banner": "开发模式 - 这是开发版本"
   },
   "oauth": {
-    "title": "登录 Vibe Kanban",
+    "title": "登录 Kanban by Claud.ing",
     "description": "登录以加入组织并与团队共享任务",
     "continueWithGitHub": "使用 GitHub 继续",
     "continueWithGoogle": "使用 Google 继续",

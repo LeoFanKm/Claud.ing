@@ -1,30 +1,30 @@
-import { Circle, Check, CircleDot, ChevronUp } from 'lucide-react';
-import { useEntries } from '@/contexts/EntriesContext';
-import { usePinnedTodos } from '@/hooks/usePinnedTodos';
-import { Card } from '../ui/card';
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Check, ChevronUp, Circle, CircleDot } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useEntries } from "@/contexts/EntriesContext";
+import { usePinnedTodos } from "@/hooks/usePinnedTodos";
+import { Card } from "../ui/card";
 
-const TODO_PANEL_OPEN_KEY = 'todo-panel-open';
+const TODO_PANEL_OPEN_KEY = "todo-panel-open";
 
 function getStatusIcon(status?: string) {
-  const s = (status || '').toLowerCase();
-  if (s === 'completed')
+  const s = (status || "").toLowerCase();
+  if (s === "completed")
     return <Check aria-hidden className="h-4 w-4 text-success" />;
-  if (s === 'in_progress' || s === 'in-progress')
+  if (s === "in_progress" || s === "in-progress")
     return <CircleDot aria-hidden className="h-4 w-4 text-blue-500" />;
-  if (s === 'cancelled')
+  if (s === "cancelled")
     return <Circle aria-hidden className="h-4 w-4 text-gray-400" />;
   return <Circle aria-hidden className="h-4 w-4 text-muted-foreground" />;
 }
 
 function TodoPanel() {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const { entries } = useEntries();
   const { todos } = usePinnedTodos(entries);
   const [isOpen, setIsOpen] = useState(() => {
     const stored = localStorage.getItem(TODO_PANEL_OPEN_KEY);
-    return stored === null ? true : stored === 'true';
+    return stored === null ? true : stored === "true";
   });
 
   useEffect(() => {
@@ -36,12 +36,12 @@ function TodoPanel() {
   return (
     <details
       className="group"
-      open={isOpen}
       onToggle={(e) => setIsOpen(e.currentTarget.open)}
+      open={isOpen}
     >
-      <summary className="list-none cursor-pointer">
-        <Card className="bg-muted p-3 text-sm flex items-center justify-between">
-          <span>{t('todos.title', { count: todos.length })}</span>
+      <summary className="cursor-pointer list-none">
+        <Card className="flex items-center justify-between bg-muted p-3 text-sm">
+          <span>{t("todos.title", { count: todos.length })}</span>
           <ChevronUp
             aria-hidden
             className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180"
@@ -52,14 +52,14 @@ function TodoPanel() {
         <ul className="space-y-2">
           {todos.map((todo, index) => (
             <li
-              key={`${todo.content}-${index}`}
               className="flex items-start gap-2"
+              key={`${todo.content}-${index}`}
             >
-              <span className="mt-0.5 h-4 w-4 flex items-center justify-center shrink-0">
+              <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center">
                 {getStatusIcon(todo.status)}
               </span>
-              <span className="text-sm leading-5 break-words">
-                {todo.status?.toLowerCase() === 'cancelled' ? (
+              <span className="break-words text-sm leading-5">
+                {todo.status?.toLowerCase() === "cancelled" ? (
                   <s className="text-gray-400">{todo.content}</s>
                 ) : (
                   todo.content

@@ -1,13 +1,13 @@
-import { useMemo, useCallback } from 'react';
-import { useQueries } from '@tanstack/react-query';
-import { attemptsApi, executionProcessesApi } from '@/lib/api';
-import { useTaskStopping } from '@/stores/useTaskDetailsUiStore';
-import { useExecutionProcessesContext } from '@/contexts/ExecutionProcessesContext';
-import type { AttemptData } from '@/lib/types';
-import type { ExecutionProcess } from 'shared/types';
+import { useQueries } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
+import type { ExecutionProcess } from "shared/types";
+import { useExecutionProcessesContext } from "@/contexts/ExecutionProcessesContext";
+import { attemptsApi, executionProcessesApi } from "@/lib/api";
+import type { AttemptData } from "@/lib/types";
+import { useTaskStopping } from "@/stores/useTaskDetailsUiStore";
 
 export function useAttemptExecution(attemptId?: string, taskId?: string) {
-  const { isStopping, setIsStopping } = useTaskStopping(taskId || '');
+  const { isStopping, setIsStopping } = useTaskStopping(taskId || "");
 
   const {
     executionProcessesVisible: executionProcesses,
@@ -18,13 +18,13 @@ export function useAttemptExecution(attemptId?: string, taskId?: string) {
   // Get setup script processes that need detailed info
   const setupProcesses = useMemo(() => {
     if (!executionProcesses.length) return [] as ExecutionProcess[];
-    return executionProcesses.filter((p) => p.run_reason === 'setupscript');
+    return executionProcesses.filter((p) => p.run_reason === "setupscript");
   }, [executionProcesses]);
 
   // Fetch details for setup processes
   const processDetailQueries = useQueries({
     queries: setupProcesses.map((process) => ({
-      queryKey: ['processDetails', process.id],
+      queryKey: ["processDetails", process.id],
       queryFn: () => executionProcessesApi.getDetails(process.id),
       enabled: !!process.id,
     })),
@@ -54,13 +54,13 @@ export function useAttemptExecution(attemptId?: string, taskId?: string) {
 
   // Stop execution function
   const stopExecution = useCallback(async () => {
-    if (!attemptId || !isAttemptRunning || isStopping) return;
+    if (!(attemptId && isAttemptRunning) || isStopping) return;
 
     try {
       setIsStopping(true);
       await attemptsApi.stop(attemptId);
     } catch (error) {
-      console.error('Failed to stop executions:', error);
+      console.error("Failed to stop executions:", error);
       throw error;
     } finally {
       setIsStopping(false);

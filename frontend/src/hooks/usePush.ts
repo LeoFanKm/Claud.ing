@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { attemptsApi } from '@/lib/api';
-import type { PushError, PushTaskAttemptRequest } from 'shared/types';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { PushError, PushTaskAttemptRequest } from "shared/types";
+import { attemptsApi } from "@/lib/api";
 
 class PushErrorWithData extends Error {
   constructor(
@@ -8,7 +8,7 @@ class PushErrorWithData extends Error {
     public errorData?: PushError
   ) {
     super(message);
-    this.name = 'PushErrorWithData';
+    this.name = "PushErrorWithData";
   }
 }
 
@@ -29,18 +29,18 @@ export function usePush(
       const result = await attemptsApi.push(attemptId, params);
       if (!result.success) {
         throw new PushErrorWithData(
-          result.message || 'Push failed',
+          result.message || "Push failed",
           result.error
         );
       }
     },
     onSuccess: () => {
       // A push only affects remote status; invalidate the same branchStatus
-      queryClient.invalidateQueries({ queryKey: ['branchStatus', attemptId] });
+      queryClient.invalidateQueries({ queryKey: ["branchStatus", attemptId] });
       onSuccess?.();
     },
     onError: (err, variables) => {
-      console.error('Failed to push:', err);
+      console.error("Failed to push:", err);
       const errorData =
         err instanceof PushErrorWithData ? err.errorData : undefined;
       onError?.(err, errorData, variables);

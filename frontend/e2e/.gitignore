@@ -1,0 +1,5 @@
+# Auth state storage (contains sensitive session data)
+.auth/
+
+# Test artifacts
+test-results/

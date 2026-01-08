@@ -1,0 +1,10 @@
+/**
+ * @file {{文件名}}
+ * @description {{功能描述}}
+ *
+ * @input {{输入参数/依赖说明}}
+ * @output {{输出/返回说明}}
+ * @position {{在项目架构中的位置}}
+ *
+ * @lastModified {{日期}}
+ */

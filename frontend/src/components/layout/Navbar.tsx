@@ -1,72 +1,58 @@
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { useCallback } from 'react';
-import { siDiscord } from 'simple-icons';
-import { Button } from '@/components/ui/button';
+import {
+  BookOpen,
+  FolderOpen,
+  Menu,
+  MessageCircleQuestion,
+  Plus,
+  Settings,
+} from "lucide-react";
+import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { ClerkAuthButtons, SignedIn } from "@/components/auth/ClerkAuth";
+import { OpenInIdeButton } from "@/components/ide/OpenInIdeButton";
+import { Logo } from "@/components/Logo";
+import { SearchBar } from "@/components/SearchBar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  FolderOpen,
-  Settings,
-  BookOpen,
-  MessageCircleQuestion,
-  MessageCircle,
-  Menu,
-  Plus,
-  LogOut,
-  LogIn,
-} from 'lucide-react';
-import { Logo } from '@/components/Logo';
-import { SearchBar } from '@/components/SearchBar';
-import { useSearch } from '@/contexts/SearchContext';
-import { openTaskForm } from '@/lib/openTaskForm';
-import { useProject } from '@/contexts/ProjectContext';
-import { useOpenProjectInEditor } from '@/hooks/useOpenProjectInEditor';
-import { OpenInIdeButton } from '@/components/ide/OpenInIdeButton';
-import { useProjectRepos } from '@/hooks';
-import { useDiscordOnlineCount } from '@/hooks/useDiscordOnlineCount';
-import { useTranslation } from 'react-i18next';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { OAuthDialog } from '@/components/dialogs/global/OAuthDialog';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { oauthApi } from '@/lib/api';
+} from "@/components/ui/tooltip";
+import { useProject } from "@/contexts/ProjectContext";
+import { useSearch } from "@/contexts/SearchContext";
+import { useProjectRepos } from "@/hooks";
+import { useOpenProjectInEditor } from "@/hooks/useOpenProjectInEditor";
+import { openTaskForm } from "@/lib/openTaskForm";
 
-const INTERNAL_NAV = [{ label: 'Projects', icon: FolderOpen, to: '/projects' }];
+const INTERNAL_NAV = [
+  { label: "Projects", icon: FolderOpen, to: "/projects" },
+  { label: "Docs", icon: BookOpen, to: "/docs" },
+];
 
 const EXTERNAL_LINKS = [
   {
-    label: 'Docs',
-    icon: BookOpen,
-    href: 'https://vibekanban.com/docs',
-  },
-  {
-    label: 'Support',
+    label: "Support",
     icon: MessageCircleQuestion,
-    href: 'https://github.com/BloopAI/vibe-kanban/issues',
-  },
-  {
-    label: 'Discord',
-    icon: MessageCircle,
-    href: 'https://discord.gg/AC4nwVtJM3',
+    href: "https://github.com/LeoFanKm/Claud.ing/issues",
   },
 ];
 
 function NavDivider() {
   return (
     <div
+      aria-orientation="vertical"
       className="mx-2 h-6 w-px bg-border/60"
       role="separator"
-      aria-orientation="vertical"
     />
   );
 }
@@ -77,8 +63,6 @@ export function Navbar() {
   const { projectId, project } = useProject();
   const { query, setQuery, active, clear, registerInputRef } = useSearch();
   const handleOpenInEditor = useOpenProjectInEditor(project || null);
-  const { data: onlineCount } = useDiscordOnlineCount();
-  const { loginStatus, reloadSystem } = useUserSystem();
 
   const { data: repos } = useProjectRepos(projectId);
   const isSingleRepoProject = repos?.length === 1;
@@ -89,10 +73,10 @@ export function Navbar() {
     },
     [registerInputRef]
   );
-  const { t } = useTranslation(['tasks', 'common']);
+  const { t } = useTranslation(["tasks", "common"]);
   // Navbar is global, but the share tasks toggle only makes sense on the tasks route
   const isTasksRoute = /^\/projects\/[^/]+\/tasks/.test(location.pathname);
-  const showSharedTasks = searchParams.get('shared') !== 'off';
+  const showSharedTasks = searchParams.get("shared") !== "off";
   const shouldShowSharedToggle =
     isTasksRoute && active && project?.remote_project_id != null;
 
@@ -100,9 +84,9 @@ export function Navbar() {
     (checked: boolean) => {
       const params = new URLSearchParams(searchParams);
       if (checked) {
-        params.delete('shared');
+        params.delete("shared");
       } else {
-        params.set('shared', 'off');
+        params.set("shared", "off");
       }
       setSearchParams(params, { replace: true });
     },
@@ -111,7 +95,7 @@ export function Navbar() {
 
   const handleCreateTask = () => {
     if (projectId) {
-      openTaskForm({ mode: 'create', projectId });
+      openTaskForm({ mode: "create", projectId });
     }
   };
 
@@ -119,112 +103,70 @@ export function Navbar() {
     handleOpenInEditor();
   };
 
-  const handleOpenOAuth = async () => {
-    const profile = await OAuthDialog.show();
-    if (profile) {
-      await reloadSystem();
-    }
-  };
-
-  const handleOAuthLogout = async () => {
-    try {
-      await oauthApi.logout();
-      await reloadSystem();
-    } catch (err) {
-      console.error('Error logging out:', err);
-    }
-  };
-
-  const isOAuthLoggedIn = loginStatus?.status === 'loggedin';
-
   return (
     <div className="border-b bg-background">
       <div className="w-full px-3">
-        <div className="flex items-center h-12 py-2">
-          <div className="flex-1 flex items-center">
-            <Link to="/projects">
+        <div className="flex h-12 items-center py-2">
+          <div className="flex flex-1 items-center">
+            <Link to="/">
               <Logo />
             </Link>
-            <a
-              href="https://discord.gg/AC4nwVtJM3"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Join our Discord"
-              className="hidden sm:inline-flex items-center ml-3 text-xs font-medium overflow-hidden border h-6"
-            >
-              <span className="bg-muted text-foreground flex items-center p-2 border-r">
-                <svg
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d={siDiscord.path} />
-                </svg>
-              </span>
-              <span
-                className=" h-full items-center flex p-2"
-                aria-live="polite"
-              >
-                {onlineCount != null
-                  ? `${onlineCount.toLocaleString()} online`
-                  : 'online'}
-              </span>
-            </a>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="hidden items-center gap-2 sm:flex">
             <SearchBar
-              ref={setSearchBarRef}
               className="shrink-0"
-              value={query}
-              onChange={setQuery}
               disabled={!active}
+              onChange={setQuery}
               onClear={clear}
               project={project || null}
+              ref={setSearchBarRef}
+              value={query}
             />
           </div>
 
           <div className="flex flex-1 items-center justify-end gap-1">
-            {isOAuthLoggedIn && shouldShowSharedToggle ? (
-              <>
-                <div className="flex items-center gap-4">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <Switch
-                            checked={showSharedTasks}
-                            onCheckedChange={handleSharedToggle}
-                            aria-label={t('tasks:filters.sharedToggleAria')}
-                          />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        {t('tasks:filters.sharedToggleTooltip')}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <NavDivider />
-              </>
-            ) : null}
+            <SignedIn>
+              {shouldShowSharedToggle ? (
+                <>
+                  <div className="flex items-center gap-4">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Switch
+                              aria-label={t("tasks:filters.sharedToggleAria")}
+                              checked={showSharedTasks}
+                              onCheckedChange={handleSharedToggle}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          {t("tasks:filters.sharedToggleTooltip")}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <NavDivider />
+                </>
+              ) : null}
+            </SignedIn>
 
             {projectId ? (
               <>
                 <div className="flex items-center gap-1">
                   {isSingleRepoProject && (
                     <OpenInIdeButton
-                      onClick={handleOpenInIDE}
                       className="h-9 w-9"
+                      onClick={handleOpenInIDE}
                     />
                   )}
                   <Button
-                    variant="ghost"
-                    size="icon"
+                    aria-label="Create new task"
                     className="h-9 w-9"
                     onClick={handleCreateTask}
-                    aria-label="Create new task"
+                    size="icon"
+                    variant="ghost"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -235,17 +177,17 @@ export function Navbar() {
 
             <div className="flex items-center gap-1">
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9"
-                asChild
                 aria-label="Settings"
+                asChild
+                className="h-9 w-9"
+                size="icon"
+                variant="ghost"
               >
                 <Link
                   to={
                     projectId
                       ? `/settings/projects?projectId=${projectId}`
-                      : '/settings'
+                      : "/settings"
                   }
                 >
                   <Settings className="h-4 w-4" />
@@ -255,10 +197,10 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9"
                     aria-label="Main navigation"
+                    className="h-9 w-9"
+                    size="icon"
+                    variant="ghost"
                   >
                     <Menu className="h-4 w-4" />
                   </Button>
@@ -266,13 +208,13 @@ export function Navbar() {
 
                 <DropdownMenuContent align="end">
                   {INTERNAL_NAV.map((item) => {
-                    const active = location.pathname.startsWith(item.to);
+                    const isActive = location.pathname.startsWith(item.to);
                     const Icon = item.icon;
                     return (
                       <DropdownMenuItem
-                        key={item.to}
                         asChild
-                        className={active ? 'bg-accent' : ''}
+                        className={isActive ? "bg-accent" : ""}
+                        key={item.to}
                       >
                         <Link to={item.to}>
                           <Icon className="mr-2 h-4 w-4" />
@@ -287,11 +229,11 @@ export function Navbar() {
                   {EXTERNAL_LINKS.map((item) => {
                     const Icon = item.icon;
                     return (
-                      <DropdownMenuItem key={item.href} asChild>
+                      <DropdownMenuItem asChild key={item.href}>
                         <a
                           href={item.href}
-                          target="_blank"
                           rel="noopener noreferrer"
+                          target="_blank"
                         >
                           <Icon className="mr-2 h-4 w-4" />
                           {item.label}
@@ -299,22 +241,12 @@ export function Navbar() {
                       </DropdownMenuItem>
                     );
                   })}
-
-                  <DropdownMenuSeparator />
-
-                  {isOAuthLoggedIn ? (
-                    <DropdownMenuItem onSelect={handleOAuthLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      {t('common:signOut')}
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem onSelect={handleOpenOAuth}>
-                      <LogIn className="mr-2 h-4 w-4" />
-                      Sign in
-                    </DropdownMenuItem>
-                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              <NavDivider />
+
+              <ClerkAuthButtons />
             </div>
           </div>
         </div>

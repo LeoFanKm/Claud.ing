@@ -1,10 +1,10 @@
 import {
   createContext,
+  type ReactNode,
+  useCallback,
   useContext,
   useState,
-  ReactNode,
-  useCallback,
-} from 'react';
+} from "react";
 
 interface ApprovalFormState {
   isEnteringReason: boolean;
@@ -25,13 +25,13 @@ const ApprovalFormContext = createContext<ApprovalFormContextType | null>(null);
 
 const defaultState: ApprovalFormState = {
   isEnteringReason: false,
-  denyReason: '',
+  denyReason: "",
 };
 
 export function useApprovalForm(approvalId: string) {
   const context = useContext(ApprovalFormContext);
   if (!context) {
-    throw new Error('useApprovalForm must be used within ApprovalFormProvider');
+    throw new Error("useApprovalForm must be used within ApprovalFormProvider");
   }
 
   const state = context.getState(approvalId);

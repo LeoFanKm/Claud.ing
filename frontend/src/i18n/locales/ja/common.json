@@ -58,6 +58,10 @@
     "error": "エラー",
     "loading": "読み込み中...",
     "reconnecting": "再接続中",
+    "reconnectingWithCountdown": "{{seconds}}秒後に再接続...",
+    "connectionLost": "接続が切断されました",
+    "retryNow": "今すぐ再試行",
+    "maxAttemptsReached": "最大再接続回数に達しました",
     "saving": "保存中...",
     "success": "成功"
   },
@@ -79,7 +83,7 @@
     "banner": "開発モード - これは開発ビルドです"
   },
   "oauth": {
-    "title": "Vibe Kanbanにサインイン",
+    "title": "Kanban by Claud.ingにサインイン",
     "description": "サインインして組織に参加し、チームとタスクを共有します",
     "continueWithGitHub": "GitHubで続行",
     "continueWithGoogle": "Googleで続行",

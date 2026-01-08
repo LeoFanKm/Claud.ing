@@ -1,9 +1,9 @@
+export * from "./fields";
+export * from "./templates";
 export {
-  shadcnTheme,
-  customWidgets,
-  customTemplates,
   customFields,
-} from './theme';
-export * from './widgets';
-export * from './templates';
-export * from './fields';
+  customTemplates,
+  customWidgets,
+  shadcnTheme,
+} from "./theme";
+export * from "./widgets";

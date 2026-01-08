@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   readClipboardViaBridge,
   writeClipboardViaBridge,
-} from '@/vscode/bridge';
+} from "@/vscode/bridge";
 
 type Point = { x: number; y: number };
 
@@ -23,7 +24,7 @@ function isEditable(
   const el = target as HTMLElement | null;
   if (!el) return false;
   const tag = el.tagName?.toLowerCase();
-  if (tag === 'input' || tag === 'textarea') return true;
+  if (tag === "input" || tag === "textarea") return true;
   return !!el.isContentEditable;
 }
 
@@ -36,7 +37,7 @@ async function writeClipboardText(text: string): Promise<boolean> {
 
 function getSelectedText(): string {
   const sel = window.getSelection();
-  return sel ? sel.toString() : '';
+  return sel ? sel.toString() : "";
 }
 
 function cutFromInput(el: HTMLInputElement | HTMLTextAreaElement) {
@@ -49,7 +50,7 @@ function cutFromInput(el: HTMLInputElement | HTMLTextAreaElement) {
     const after = el.value.slice(end);
     el.value = before + after;
     el.setSelectionRange(start, start);
-    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event("input", { bubbles: true }));
   }
 }
 
@@ -64,7 +65,7 @@ function pasteIntoInput(
   el.value = before + text + after;
   const caret = start + text.length;
   el.setSelectionRange(caret, caret);
-  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 export const WebviewContextMenu: React.FC = () => {
@@ -91,7 +92,7 @@ export const WebviewContextMenu: React.FC = () => {
         const start = el.selectionStart ?? 0;
         const end = el.selectionEnd ?? 0;
         cut = end > start && !el.readOnly && !el.disabled;
-        paste = !el.readOnly && !el.disabled;
+        paste = !(el.readOnly || el.disabled);
       } else if (isEditable(tgt)) {
         const sel = window.getSelection();
         cut = !!sel && sel.toString().length > 0;
@@ -105,13 +106,13 @@ export const WebviewContextMenu: React.FC = () => {
       setVisible(true);
     };
     const onClick = () => setVisible(false);
-    document.addEventListener('contextmenu', onContext);
-    document.addEventListener('click', onClick);
-    window.addEventListener('blur', onClick);
+    document.addEventListener("contextmenu", onContext);
+    document.addEventListener("click", onClick);
+    window.addEventListener("blur", onClick);
     return () => {
-      document.removeEventListener('contextmenu', onContext);
-      document.removeEventListener('click', onClick);
-      window.removeEventListener('blur', onClick);
+      document.removeEventListener("contextmenu", onContext);
+      document.removeEventListener("click", onClick);
+      window.removeEventListener("blur", onClick);
     };
   }, []);
 
@@ -159,7 +160,7 @@ export const WebviewContextMenu: React.FC = () => {
     }
     if (!copied) {
       try {
-        document.execCommand('copy');
+        document.execCommand("copy");
       } catch {
         /* empty */
       }
@@ -182,7 +183,7 @@ export const WebviewContextMenu: React.FC = () => {
       if (sel) {
         await writeClipboardText(sel);
         try {
-          document.execCommand('delete');
+          document.execCommand("delete");
         } catch {
           /* empty */
         }
@@ -203,14 +204,14 @@ export const WebviewContextMenu: React.FC = () => {
       pasteIntoInput(tgt as HTMLInputElement | HTMLTextAreaElement, text);
     } else if (isEditable(tgt)) {
       (tgt as HTMLElement).focus();
-      document.execCommand('insertText', false, text);
+      document.execCommand("insertText", false, text);
     }
     close();
   };
 
   const onUndo = () => {
     try {
-      document.execCommand('undo');
+      document.execCommand("undo");
     } catch {
       /* empty */
     }
@@ -218,7 +219,7 @@ export const WebviewContextMenu: React.FC = () => {
   };
   const onRedo = () => {
     try {
-      document.execCommand('redo');
+      document.execCommand("redo");
     } catch {
       /* empty */
     }
@@ -226,7 +227,7 @@ export const WebviewContextMenu: React.FC = () => {
   };
   const onSelectAll = () => {
     try {
-      document.execCommand('selectAll');
+      document.execCommand("selectAll");
     } catch {
       /* empty */
     }
@@ -237,15 +238,15 @@ export const WebviewContextMenu: React.FC = () => {
 
   return (
     <div
-      ref={menuRef}
-      style={{
-        position: 'fixed',
-        left: (adjustedPos ?? pos).x,
-        top: (adjustedPos ?? pos).y,
-        zIndex: 99999,
-      }}
       className="min-w-[160px] rounded-md border border-gray-300 bg-white text-gray-900 shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
       onContextMenu={(e) => e.preventDefault()}
+      ref={menuRef}
+      style={{
+        position: "fixed",
+        left: (adjustedPos ?? pos).x,
+        top: (adjustedPos ?? pos).y,
+        zIndex: 99_999,
+      }}
     >
       <MenuItem label="Copy" onClick={onCopy} />
       {canCut && <MenuItem label="Cut" onClick={onCut} />}

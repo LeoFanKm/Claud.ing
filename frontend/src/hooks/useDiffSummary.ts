@@ -1,5 +1,5 @@
-import { useDiffStream } from '@/hooks/useDiffStream';
-import { useMemo } from 'react';
+import { useMemo } from "react";
+import { useDiffStream } from "@/hooks/useDiffStream";
 
 export function useDiffSummary(attemptId: string | null) {
   const { diffs, error } = useDiffStream(attemptId, true, {

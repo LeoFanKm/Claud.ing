@@ -1,9 +1,9 @@
-import { useUserSystem } from '@/components/ConfigProvider';
+import { useUserSystem } from "@/components/ConfigProvider";
 import {
   createScriptPlaceholderStrategy,
   ScriptPlaceholderContext,
   type ScriptPlaceholders,
-} from '@/utils/scriptPlaceholders';
+} from "@/utils/scriptPlaceholders";
 
 export function useScriptPlaceholders(): ScriptPlaceholders {
   const { system } = useUserSystem();
@@ -15,9 +15,9 @@ export function useScriptPlaceholders(): ScriptPlaceholders {
   }
 
   return {
-    setup: '#!/bin/bash\nnpm install\n# Add any setup commands here...',
-    dev: '#!/bin/bash\nnpm run dev\n# Add dev server start command here...',
+    setup: "#!/bin/bash\nnpm install\n# Add any setup commands here...",
+    dev: "#!/bin/bash\nnpm run dev\n# Add dev server start command here...",
     cleanup:
-      '#!/bin/bash\n# Add cleanup commands here...\n# This runs after coding agent execution',
+      "#!/bin/bash\n# Add cleanup commands here...\n# This runs after coding agent execution",
   };
 }

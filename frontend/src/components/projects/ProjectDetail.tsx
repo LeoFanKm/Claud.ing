@@ -1,18 +1,3 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import { useNavigateWithSearch } from '@/hooks';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { projectsApi } from '@/lib/api';
-import { useProjects } from '@/hooks/useProjects';
 import {
   AlertCircle,
   ArrowLeft,
@@ -22,7 +7,22 @@ import {
   Edit,
   Loader2,
   Trash2,
-} from 'lucide-react';
+} from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useNavigateWithSearch } from "@/hooks";
+import { useProjects } from "@/hooks/useProjects";
+import { projectsApi } from "@/lib/api";
 
 interface ProjectDetailProps {
   projectId: string;
@@ -30,10 +30,10 @@ interface ProjectDetailProps {
 }
 
 export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
-  const { t } = useTranslation('projects');
+  const { t } = useTranslation("projects");
   const navigate = useNavigateWithSearch();
   const { projectsById, isLoading, error: projectsError } = useProjects();
-  const [deleteError, setDeleteError] = useState('');
+  const [deleteError, setDeleteError] = useState("");
 
   const project = projectsById[projectId] || null;
 
@@ -50,10 +50,10 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
       await projectsApi.delete(projectId);
       onBack();
     } catch (error) {
-      console.error('Failed to delete project:', error);
+      console.error("Failed to delete project:", error);
       // @ts-expect-error it is type ApiError
-      setDeleteError(error.message || t('errors.deleteFailed'));
-      setTimeout(() => setDeleteError(''), 5000);
+      setDeleteError(error.message || t("errors.deleteFailed"));
+      setTimeout(() => setDeleteError(""), 5000);
     }
   };
 
@@ -70,13 +70,13 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
     );
   }
 
-  if ((!project && !isLoading) || projectsError) {
+  if (!(project || isLoading) || projectsError) {
     const errorMsg = projectsError
       ? projectsError.message
-      : t('projectNotFound');
+      : t("projectNotFound");
     return (
-      <div className="space-y-4 py-12 px-4">
-        <Button variant="outline" onClick={onBack}>
+      <div className="space-y-4 px-4 py-12">
+        <Button onClick={onBack} variant="outline">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Projects
         </Button>
@@ -85,8 +85,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
               <AlertCircle className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold">Project not found</h3>
-            <p className="mt-2 text-sm text-muted-foreground">{errorMsg}</p>
+            <h3 className="mt-4 font-semibold text-lg">Project not found</h3>
+            <p className="mt-2 text-muted-foreground text-sm">{errorMsg}</p>
             <Button className="mt-4" onClick={onBack}>
               Back to Projects
             </Button>
@@ -97,18 +97,18 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
   }
 
   return (
-    <div className="space-y-6 py-12 px-4">
-      <div className="flex justify-between items-start">
+    <div className="space-y-6 px-4 py-12">
+      <div className="flex items-start justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={onBack}>
+          <Button onClick={onBack} variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Projects
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">{project.name}</h1>
+              <h1 className="font-bold text-2xl">{project.name}</h1>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Project details and settings
             </p>
           </div>
@@ -118,14 +118,14 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             <CheckSquare className="mr-2 h-4 w-4" />
             View Tasks
           </Button>
-          <Button variant="outline" onClick={handleEditClick}>
+          <Button onClick={handleEditClick} variant="outline">
             <Edit className="mr-2 h-4 w-4" />
             Edit
           </Button>
           <Button
-            variant="outline"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive-foreground"
             onClick={handleDelete}
-            className="text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
+            variant="outline"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
@@ -150,7 +150,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="font-medium text-muted-foreground text-sm">
                 Status
               </span>
               <Badge variant="secondary">Active</Badge>
@@ -183,15 +183,15 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground">
+              <h4 className="font-medium text-muted-foreground text-sm">
                 Project ID
               </h4>
-              <code className="mt-1 block text-xs bg-muted p-2 rounded font-mono">
+              <code className="mt-1 block rounded bg-muted p-2 font-mono text-xs">
                 {project.id}
               </code>
             </div>
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground">
+              <h4 className="font-medium text-muted-foreground text-sm">
                 Created At
               </h4>
               <p className="mt-1 text-sm">
@@ -199,7 +199,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
               </p>
             </div>
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground">
+              <h4 className="font-medium text-muted-foreground text-sm">
                 Last Modified
               </h4>
               <p className="mt-1 text-sm">

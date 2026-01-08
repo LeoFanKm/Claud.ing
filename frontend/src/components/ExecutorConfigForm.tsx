@@ -1,15 +1,15 @@
-import { useMemo, useEffect, useState, useCallback } from 'react';
-import Form from '@rjsf/core';
-import type { IChangeEvent } from '@rjsf/core';
-import { RJSFValidationError } from '@rjsf/utils';
-import validator from '@rjsf/validator-ajv8';
+import type { IChangeEvent } from "@rjsf/core";
+import Form from "@rjsf/core";
+import type { RJSFValidationError } from "@rjsf/utils";
+import validator from "@rjsf/validator-ajv8";
+import { Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { BaseCodingAgent } from "shared/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { shadcnTheme } from "./rjsf";
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { shadcnTheme } from './rjsf';
-import { BaseCodingAgent } from 'shared/types';
 // Using custom shadcn/ui widgets instead of @rjsf/shadcn theme
 
 interface ExecutorConfigFormProps {
@@ -23,7 +23,7 @@ interface ExecutorConfigFormProps {
   isDirty?: boolean;
 }
 
-import schemas from 'virtual:executor-schemas';
+import schemas from "virtual:executor-schemas";
 
 export function ExecutorConfigForm({
   executor,
@@ -62,7 +62,7 @@ export function ExecutorConfigForm({
   const uiSchema = useMemo(
     () => ({
       env: {
-        'ui:field': 'KeyValueField',
+        "ui:field": "KeyValueField",
       },
     }),
     []
@@ -118,26 +118,26 @@ export function ExecutorConfigForm({
       <Card>
         <CardContent className="p-0">
           <Form
-            schema={schema}
-            uiSchema={uiSchema}
-            formData={formData}
-            formContext={formContext}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            onError={handleError}
-            validator={validator}
             disabled={disabled}
-            liveValidate
-            showErrorList={false}
-            widgets={shadcnTheme.widgets}
-            templates={shadcnTheme.templates}
             fields={shadcnTheme.fields}
+            formContext={formContext}
+            formData={formData}
+            liveValidate
+            onChange={handleChange}
+            onError={handleError}
+            onSubmit={handleSubmit}
+            schema={schema}
+            showErrorList={false}
+            templates={shadcnTheme.templates}
+            uiSchema={uiSchema}
+            validator={validator}
+            widgets={shadcnTheme.widgets}
           >
             {onSave && (
               <div className="flex justify-end pt-4">
                 <Button
-                  type="submit"
                   disabled={!isDirty || validationErrors.length > 0 || isSaving}
+                  type="submit"
                 >
                   {isSaving && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -153,7 +153,7 @@ export function ExecutorConfigForm({
       {validationErrors.length > 0 && (
         <Alert variant="destructive">
           <AlertDescription>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-inside list-disc space-y-1">
               {validationErrors.map((error, index) => (
                 <li key={index}>
                   {error.property}: {error.message}

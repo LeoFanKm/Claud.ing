@@ -1,6 +1,6 @@
-export { SettingsLayout } from './SettingsLayout';
-export { GeneralSettings } from './GeneralSettings';
-export { ProjectSettings } from './ProjectSettings';
-export { OrganizationSettings } from './OrganizationSettings';
-export { AgentSettings } from './AgentSettings';
-export { McpSettings } from './McpSettings';
+export { AgentSettings } from "./AgentSettings";
+export { GeneralSettings } from "./GeneralSettings";
+export { McpSettings } from "./McpSettings";
+export { OrganizationSettings } from "./OrganizationSettings";
+export { ProjectSettings } from "./ProjectSettings";
+export { SettingsLayout } from "./SettingsLayout";

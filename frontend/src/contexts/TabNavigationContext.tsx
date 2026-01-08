@@ -1,5 +1,5 @@
-import { createContext } from 'react';
-import type { TabType } from '@/types/tabs';
+import { createContext } from "react";
+import type { TabType } from "@/types/tabs";
 
 interface TabNavContextType {
   activeTab: TabType;

@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
-import type { PatchType } from 'shared/types';
+import { useEffect, useRef, useState } from "react";
+import type { PatchType } from "shared/types";
 
-type LogEntry = Extract<PatchType, { type: 'STDOUT' } | { type: 'STDERR' }>;
+type LogEntry = Extract<PatchType, { type: "STDOUT" } | { type: "STDERR" }>;
 
 interface UseLogStreamResult {
   logs: LogEntry[];
@@ -26,7 +26,7 @@ export const useLogStream = (processId: string): UseLogStreamResult => {
     setError(null);
 
     const open = () => {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const host = window.location.host;
       const ws = new WebSocket(
         `${protocol}//${host}/api/execution-processes/${processId}/raw-logs/ws`
@@ -51,15 +51,15 @@ export const useLogStream = (processId: string): UseLogStreamResult => {
           const data = JSON.parse(event.data);
 
           // Handle different message types based on LogMsg enum
-          if ('JsonPatch' in data) {
+          if ("JsonPatch" in data) {
             const patches = data.JsonPatch as Array<{ value?: PatchType }>;
             patches.forEach((patch) => {
               const value = patch?.value;
-              if (!value || !value.type) return;
+              if (!(value && value.type)) return;
 
               switch (value.type) {
-                case 'STDOUT':
-                case 'STDERR':
+                case "STDOUT":
+                case "STDERR":
                   addLogEntry({ type: value.type, content: value.content });
                   break;
                 // Ignore other patch types (NORMALIZED_ENTRY, DIFF, etc.)
@@ -72,12 +72,12 @@ export const useLogStream = (processId: string): UseLogStreamResult => {
             ws.close();
           }
         } catch (e) {
-          console.error('Failed to parse message:', e);
+          console.error("Failed to parse message:", e);
         }
       };
 
       ws.onerror = () => {
-        setError('Connection failed');
+        setError("Connection failed");
       };
 
       ws.onclose = (event) => {

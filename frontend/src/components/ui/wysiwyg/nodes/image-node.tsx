@@ -1,19 +1,19 @@
-import { useCallback } from 'react';
-import { NodeKey, SerializedLexicalNode, Spread } from 'lexical';
-import { HelpCircle, Loader2 } from 'lucide-react';
+import type { NodeKey, SerializedLexicalNode, Spread } from "lexical";
+import { HelpCircle, Loader2 } from "lucide-react";
+import { useCallback } from "react";
+import { ImagePreviewDialog } from "@/components/dialogs/wysiwyg/ImagePreviewDialog";
+import { useImageMetadata } from "@/hooks/useImageMetadata";
+import { formatFileSize } from "@/lib/utils";
 import {
+  useLocalImages,
   useTaskAttemptId,
   useTaskId,
-  useLocalImages,
-} from '../context/task-attempt-context';
-import { useImageMetadata } from '@/hooks/useImageMetadata';
-import { ImagePreviewDialog } from '@/components/dialogs/wysiwyg/ImagePreviewDialog';
-import { formatFileSize } from '@/lib/utils';
+} from "../context/task-attempt-context";
 import {
   createDecoratorNode,
   type DecoratorNodeConfig,
   type GeneratedDecoratorNode,
-} from '../lib/create-decorator-node';
+} from "../lib/create-decorator-node";
 
 export interface ImageData {
   src: string;
@@ -29,9 +29,9 @@ export type SerializedImageNode = Spread<
 >;
 
 function truncatePath(path: string, maxLength = 24): string {
-  const filename = path.split('/').pop() || path;
+  const filename = path.split("/").pop() || path;
   if (filename.length <= maxLength) return filename;
-  return filename.slice(0, maxLength - 3) + '...';
+  return filename.slice(0, maxLength - 3) + "...";
 }
 
 function ImageComponent({
@@ -47,7 +47,7 @@ function ImageComponent({
   const taskId = useTaskId();
   const localImages = useLocalImages();
 
-  const isVibeImage = src.startsWith('.vibe-images/');
+  const isVibeImage = src.startsWith(".vibe-images/");
 
   // Use TanStack Query for caching metadata across component recreations
   // Pass both taskAttemptId and taskId - the hook prefers taskAttemptId when available
@@ -91,18 +91,18 @@ function ImageComponent({
   if (isVibeImage && (hasLocalImage || hasContext)) {
     if (loading) {
       thumbnailContent = (
-        <div className="w-10 h-10 flex items-center justify-center bg-muted rounded flex-shrink-0">
-          <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-muted">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       );
       displayName = truncatePath(src);
     } else if (metadata?.exists && metadata.proxy_url) {
       thumbnailContent = (
         <img
-          src={metadata.proxy_url}
           alt={altText}
-          className="w-10 h-10 object-cover rounded flex-shrink-0"
+          className="h-10 w-10 flex-shrink-0 rounded object-cover"
           draggable={false}
+          src={metadata.proxy_url}
         />
       );
       displayName = truncatePath(metadata.file_name || altText || src);
@@ -116,50 +116,50 @@ function ImageComponent({
         parts.push(sizeStr);
       }
       if (parts.length > 0) {
-        metadataLine = parts.join(' · ');
+        metadataLine = parts.join(" · ");
       }
     } else {
       // Vibe image but not found or error
       thumbnailContent = (
-        <div className="w-10 h-10 flex items-center justify-center bg-muted rounded flex-shrink-0">
-          <HelpCircle className="w-5 h-5 text-muted-foreground" />
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-muted">
+          <HelpCircle className="h-5 w-5 text-muted-foreground" />
         </div>
       );
       displayName = truncatePath(src);
     }
-  } else if (!isVibeImage) {
-    // Non-vibe-image: show question mark and path
-    thumbnailContent = (
-      <div className="w-10 h-10 flex items-center justify-center bg-muted rounded flex-shrink-0">
-        <HelpCircle className="w-5 h-5 text-muted-foreground" />
-      </div>
-    );
-    displayName = truncatePath(altText || src);
-  } else {
+  } else if (isVibeImage) {
     // isVibeImage but no context available - fallback to question mark
     thumbnailContent = (
-      <div className="w-10 h-10 flex items-center justify-center bg-muted rounded flex-shrink-0">
-        <HelpCircle className="w-5 h-5 text-muted-foreground" />
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-muted">
+        <HelpCircle className="h-5 w-5 text-muted-foreground" />
       </div>
     );
     displayName = truncatePath(src);
+  } else {
+    // Non-vibe-image: show question mark and path
+    thumbnailContent = (
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-muted">
+        <HelpCircle className="h-5 w-5 text-muted-foreground" />
+      </div>
+    );
+    displayName = truncatePath(altText || src);
   }
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 px-1.5 py-1 bg-muted rounded border align-bottom cursor-pointer border-border hover:border-muted-foreground"
+      className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-border bg-muted px-1.5 py-1 align-bottom hover:border-muted-foreground"
       onClick={handleClick}
       onDoubleClick={onDoubleClickEdit}
       role="button"
       tabIndex={0}
     >
       {thumbnailContent}
-      <span className="flex flex-col min-w-0">
-        <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+      <span className="flex min-w-0 flex-col">
+        <span className="max-w-[120px] truncate text-muted-foreground text-xs">
           {displayName}
         </span>
         {metadataLine && (
-          <span className="text-[10px] text-muted-foreground/70 truncate max-w-[120px]">
+          <span className="max-w-[120px] truncate text-[10px] text-muted-foreground/70">
             {metadataLine}
           </span>
         )}
@@ -169,11 +169,11 @@ function ImageComponent({
 }
 
 const config: DecoratorNodeConfig<ImageData> = {
-  type: 'image',
+  type: "image",
   serialization: {
-    format: 'inline',
+    format: "inline",
     pattern: /!\[([^\]]*)\]\(([^)]+)\)/,
-    trigger: ')',
+    trigger: ")",
     serialize: (data) => `![${data.altText}](${data.src})`,
     deserialize: (match) => ({ src: match[2], altText: match[1] }),
   },
@@ -184,8 +184,8 @@ const config: DecoratorNodeConfig<ImageData> = {
         const img = el as HTMLImageElement;
         return {
           node: createNode({
-            src: img.getAttribute('src') || '',
-            altText: img.getAttribute('alt') || '',
+            src: img.getAttribute("src") || "",
+            altText: img.getAttribute("alt") || "",
           }),
         };
       },
@@ -193,9 +193,9 @@ const config: DecoratorNodeConfig<ImageData> = {
     }),
   }),
   exportDOM: (data) => {
-    const img = document.createElement('img');
-    img.setAttribute('src', data.src);
-    img.setAttribute('alt', data.altText);
+    const img = document.createElement("img");
+    img.setAttribute("src", data.src);
+    img.setAttribute("alt", data.altText);
     return img;
   },
 };

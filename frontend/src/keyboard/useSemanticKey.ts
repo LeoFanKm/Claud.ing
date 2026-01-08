@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import type { EnableOnFormTags } from './types';
-import { Action, Scope, getKeysFor } from './registry';
-import { useHotkeys } from 'react-hotkeys-hook';
+import { useMemo } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { type Action, getKeysFor, type Scope } from "./registry";
+import type { EnableOnFormTags } from "./types";
 
 export interface SemanticKeyOptions {
   scope?: Scope;
@@ -55,7 +55,7 @@ export function createSemanticHook<A extends Action>(action: A) {
         enableOnContentEditable,
         enableOnFormTags,
         preventDefault,
-        scopes: scope ? [scope] : ['*'],
+        scopes: scope ? [scope] : ["*"],
       },
       [
         keys,

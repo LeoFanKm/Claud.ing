@@ -1,6 +1,6 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-export type DiffViewMode = 'unified' | 'split';
+export type DiffViewMode = "unified" | "split";
 
 type State = {
   mode: DiffViewMode;
@@ -13,10 +13,10 @@ type State = {
 };
 
 export const useDiffViewStore = create<State>((set) => ({
-  mode: 'unified',
+  mode: "unified",
   setMode: (mode) => set({ mode }),
   toggle: () =>
-    set((s) => ({ mode: s.mode === 'unified' ? 'split' : 'unified' })),
+    set((s) => ({ mode: s.mode === "unified" ? "split" : "unified" })),
   ignoreWhitespace: true,
   setIgnoreWhitespace: (value) => set({ ignoreWhitespace: value }),
   wrapText: false,

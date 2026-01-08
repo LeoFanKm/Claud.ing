@@ -1,26 +1,26 @@
+import { DiffModeEnum, DiffView } from "@git-diff-view/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { DiffView, DiffModeEnum } from "@git-diff-view/react";
 import "@git-diff-view/react/styles/diff-view.css";
 import "../styles/diff-overrides.css";
 import {
-  getReview,
-  getFileContent,
   getDiff,
+  getFileContent,
+  getReview,
   getReviewMetadata,
   type ReviewMetadata,
 } from "../api";
-import type { ReviewResult, ReviewComment } from "../types/review";
+import { CodeFragmentCard } from "../components/CodeFragmentCard";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 import {
-  parseUnifiedDiff,
   getFileDiff,
-  synthesizeFragmentDiff,
   type ParsedFileDiff,
+  parseUnifiedDiff,
+  synthesizeFragmentDiff,
 } from "../lib/diff-parser";
 import { getHighlightLanguageFromPath } from "../lib/extToLanguage";
-import { CodeFragmentCard } from "../components/CodeFragmentCard";
 import { cn } from "../lib/utils";
+import type { ReviewComment, ReviewResult } from "../types/review";
 
 const DIFF_VIEW_MODE_KEY = "diff-view-mode";
 
@@ -61,7 +61,7 @@ export default function ReviewPage() {
     setDiffViewMode(mode);
     localStorage.setItem(
       DIFF_VIEW_MODE_KEY,
-      mode === DiffModeEnum.Split ? "split" : "unified",
+      mode === DiffModeEnum.Split ? "split" : "unified"
     );
   }, []);
 
@@ -97,7 +97,7 @@ export default function ReviewPage() {
 
   const fetchFile = useCallback(
     async (filePath: string) => {
-      if (!id || !review) return;
+      if (!(id && review)) return;
 
       const hash = pathToHash.get(filePath);
       if (!hash) return;
@@ -120,7 +120,7 @@ export default function ReviewPage() {
         });
       }
     },
-    [id, review, pathToHash],
+    [id, review, pathToHash]
   );
 
   useEffect(() => {
@@ -159,13 +159,13 @@ export default function ReviewPage() {
     }
     // Parse gh_pr_url: https://github.com/owner/repo/pull/123
     const match = metadata.gh_pr_url.match(
-      /github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/,
+      /github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/
     );
     if (match) {
       return {
         org: match[1],
         repo: match[2],
-        number: parseInt(match[3], 10),
+        number: Number.parseInt(match[3], 10),
         title: metadata.pr_title,
       };
     }
@@ -180,9 +180,9 @@ export default function ReviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-foreground border-b-2" />
           <p className="text-muted-foreground text-sm">Loading review...</p>
         </div>
       </div>
@@ -191,24 +191,24 @@ export default function ReviewPage() {
 
   if (error || !review) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div className="max-w-md text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
             <svg
-              className="w-6 h-6 text-destructive"
+              className="h-6 w-6 text-destructive"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
               />
             </svg>
           </div>
-          <h1 className="text-lg font-semibold text-foreground mb-2">
+          <h1 className="mb-2 font-semibold text-foreground text-lg">
             {error || "Review not found"}
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -225,9 +225,9 @@ export default function ReviewPage() {
   const hasDiff = parsedDiffs.length > 0;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Scroll Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-muted z-50">
+      <div className="fixed top-0 right-0 left-0 z-50 h-1 bg-muted">
         <div
           className="h-full bg-primary transition-[width] duration-75"
           style={{ width: `${scrollProgress * 100}%` }}
@@ -235,10 +235,10 @@ export default function ReviewPage() {
       </div>
 
       {/* Header - Two Column Layout - Full Height */}
-      <div className="min-h-screen border-b px-4 py-5 mt-1 flex flex-col justify-center items-center">
-        <div className="w-full max-w-2xl p-8 space-y-40">
+      <div className="mt-1 flex min-h-screen flex-col items-center justify-center border-b px-4 py-5">
+        <div className="w-full max-w-2xl space-y-40 p-8">
           <div className="space-y-4">
-            <div className="flex gap-2 items-center text-secondary-foreground">
+            <div className="flex items-center gap-2 text-secondary-foreground">
               <svg
                 className="h-4 w-4 shrink-0"
                 fill="currentColor"
@@ -248,10 +248,10 @@ export default function ReviewPage() {
               </svg>
               <h2>
                 <a
-                  href={prUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="hover:underline"
+                  href={prUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   {prMetadata.org}/{prMetadata.repo}
                 </a>
@@ -261,10 +261,10 @@ export default function ReviewPage() {
               <h1 className="text-2xl">
                 {prMetadata.title} (
                 <a
-                  href={prUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="hover:underline"
+                  href={prUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   #{prMetadata.number}
                 </a>
@@ -273,18 +273,18 @@ export default function ReviewPage() {
             </div>
             <div>
               <MarkdownRenderer
-                content={review.summary}
                 className="text-base text-secondary-foreground"
+                content={review.summary}
               />
             </div>
           </div>
           <div>
-            <div className="bg-muted p-4 rounded-sm space-y-2 border">
-              <a href="https://review.fast" target="_blank">
+            <div className="space-y-2 rounded-sm border bg-muted p-4">
+              <a href="https://review.fast" rel="noopener" target="_blank">
                 <img
-                  src="/review_fast_logo_dark.svg"
                   alt="Logo"
                   className="w-32"
+                  src="/review_fast_logo_dark.svg"
                 />
               </a>
               <p className="text-base text-secondary-foreground">
@@ -293,8 +293,9 @@ export default function ReviewPage() {
                 clear, logical order, with concise, AI-generated comments that
                 explain context and highlight what matters.{" "}
                 <a
-                  href="https://review.fast"
                   className="text-primary-foreground"
+                  href="https://review.fast"
+                  rel="noopener"
                   target="_blank"
                 >
                   Learn more.
@@ -309,68 +310,68 @@ export default function ReviewPage() {
       {/* Comments List - Two Column Grid Layout */}
       {review.comments.map((comment, idx) => (
         <CommentStoryRow
-          key={idx}
-          index={idx + 1}
-          totalComments={review.comments.length}
           comment={comment}
+          diffViewMode={diffViewMode}
           fileCache={fileCache}
+          hasDiff={hasDiff}
+          index={idx + 1}
+          key={idx}
           loadingFiles={loadingFiles}
           parsedDiffs={parsedDiffs}
-          hasDiff={hasDiff}
-          diffViewMode={diffViewMode}
+          totalComments={review.comments.length}
         />
       ))}
 
       {/* Footer - Promotional */}
-      <div className="border-t px-4 py-6 bg-muted/30 pb-16">
+      <div className="border-t bg-muted/30 px-4 py-6 pb-16">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-2">
+          <p className="mb-2 text-muted-foreground text-sm">
             Generate AI-powered code reviews for your pull requests
           </p>
-          <code className="inline-block bg-secondary px-3 py-2 rounded-md text-sm font-mono text-foreground">
+          <code className="inline-block rounded-md bg-secondary px-3 py-2 font-mono text-foreground text-sm">
             npx vibe-kanban review https://github.com/owner/repo/pull/123
           </code>
         </div>
       </div>
 
       {/* Fixed Footer Toolbar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t z-50 px-4 py-2 opacity-50 hover:opacity-100 transition-opacity">
-        <div className="flex justify-between items-center">
+      <div className="fixed right-0 bottom-0 left-0 z-50 border-t bg-background/95 px-4 py-2 opacity-50 backdrop-blur transition-opacity hover:opacity-100">
+        <div className="flex items-center justify-between">
           {/* Left: Logo */}
           <a
             href="https://review.fast"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             <img
-              src="/review_fast_logo_dark.svg"
               alt="review.fast"
               className="h-3"
+              src="/review_fast_logo_dark.svg"
             />
           </a>
 
           {/* Right: View Toggle */}
           <div className="flex items-center gap-1">
-            <span className="text-sm text-muted-foreground mr-2">View:</span>
+            <span className="mr-2 text-muted-foreground text-sm">View:</span>
             <button
-              onClick={() => handleViewModeChange(DiffModeEnum.Unified)}
               className={cn(
-                "px-3 py-1 text-sm rounded-l border",
+                "rounded-l border px-3 py-1 text-sm",
                 diffViewMode === DiffModeEnum.Unified
                   ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80",
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
+              onClick={() => handleViewModeChange(DiffModeEnum.Unified)}
             >
               Unified
             </button>
             <button
-              onClick={() => handleViewModeChange(DiffModeEnum.Split)}
               className={cn(
-                "px-3 py-1 text-sm rounded-r border-t border-r border-b",
+                "rounded-r border-t border-r border-b px-3 py-1 text-sm",
                 diffViewMode === DiffModeEnum.Split
                   ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80",
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
+              onClick={() => handleViewModeChange(DiffModeEnum.Split)}
             >
               Split
             </button>
@@ -405,25 +406,25 @@ function CommentStoryRow({
   const hasComment = comment.comment && comment.comment.trim().length > 0;
 
   return (
-    <div className="min-h-screen flex flex-row justify-center px-8 2xl:px-[10vw] space-x-8 2xl:space-x-[5vw]">
-      <div className="flex-1 flex  w-1/2 2xl:w-1/3">
-        <div className="h-screen sticky top-0 flex items-center">
+    <div className="flex min-h-screen flex-row justify-center space-x-8 px-8 2xl:space-x-[5vw] 2xl:px-[10vw]">
+      <div className="flex w-1/2 flex-1 2xl:w-1/3">
+        <div className="sticky top-0 flex h-screen items-center">
           <div className="flex space-x-4">
-            <span className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-muted shrink-0">
-              <div className="inline-flex items-baseline text-primary-foreground text-xl font-bold">
+            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted">
+              <div className="inline-flex items-baseline font-bold text-primary-foreground text-xl">
                 {index}
-                <span className="text-sm text-muted-foreground font-medium">
+                <span className="font-medium text-muted-foreground text-sm">
                   /{totalComments}
                 </span>
               </div>
             </span>
             {hasComment ? (
               <MarkdownRenderer
+                className="min-w-0 text-lg text-secondary-foreground"
                 content={comment.comment}
-                className="text-lg min-w-0 text-secondary-foreground"
               />
             ) : (
-              <span className="text-sm text-muted-foreground italic">
+              <span className="text-muted-foreground text-sm italic">
                 (No comment text)
               </span>
             )}
@@ -432,24 +433,24 @@ function CommentStoryRow({
       </div>
 
       {/* Right Column - Code Fragments */}
-      <div className="pt-[100vh] pb-[50vh] w-1/2 2xl:w-2/3 space-y-[50vh]">
+      <div className="w-1/2 space-y-[50vh] pt-[100vh] pb-[50vh] 2xl:w-2/3">
         {comment.fragments.length > 0 ? (
           comment.fragments.map((fragment, fIdx) => (
             <DiffFragmentCard
-              key={`${fragment.file}:${fragment.start_line}-${fragment.end_line}:${fIdx}`}
-              file={fragment.file}
-              startLine={fragment.start_line}
+              diffViewMode={diffViewMode}
               endLine={fragment.end_line}
+              file={fragment.file}
+              fileContent={fileCache.get(fragment.file)}
+              hasDiff={hasDiff}
+              isLoading={loadingFiles.has(fragment.file)}
+              key={`${fragment.file}:${fragment.start_line}-${fragment.end_line}:${fIdx}`}
               message={fragment.message}
               parsedDiffs={parsedDiffs}
-              fileContent={fileCache.get(fragment.file)}
-              isLoading={loadingFiles.has(fragment.file)}
-              hasDiff={hasDiff}
-              diffViewMode={diffViewMode}
+              startLine={fragment.start_line}
             />
           ))
         ) : (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             No code fragments for this comment.
           </div>
         )}
@@ -483,7 +484,7 @@ function DiffFragmentCard({
 }: DiffFragmentCardProps) {
   const fileDiff = useMemo(
     () => getFileDiff(parsedDiffs, file),
-    [parsedDiffs, file],
+    [parsedDiffs, file]
   );
   const lang = getHighlightLanguageFromPath(file);
 
@@ -497,7 +498,7 @@ function DiffFragmentCard({
       fileContent,
       startLine,
       endLine,
-      3,
+      3
     );
 
     if (!diffString) return null;
@@ -510,29 +511,29 @@ function DiffFragmentCard({
     };
   }, [fileDiff, file, lang, startLine, endLine, fileContent]);
 
-  if (!hasDiff || !fileDiff) {
+  if (!(hasDiff && fileDiff)) {
     return (
-      <div className="border rounded bg-muted/40 p-3">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="font-mono truncate">{file}</span>
+      <div className="rounded border bg-muted/40 p-3">
+        <div className="flex items-center gap-2 text-muted-foreground text-xs">
+          <span className="truncate font-mono">{file}</span>
           <span className="shrink-0">
             Lines {startLine}
             {endLine !== startLine && `–${endLine}`}
           </span>
         </div>
         {message && (
-          <div className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400 mt-1.5 italic">
+          <div className="mt-1.5 flex items-start gap-1.5 text-amber-600 text-xs italic dark:text-amber-400">
             <svg
-              className="h-3.5 w-3.5 shrink-0 mt-0.5"
+              className="mt-0.5 h-3.5 w-3.5 shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path
+                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
               />
             </svg>
             <span>{message}</span>
@@ -540,11 +541,11 @@ function DiffFragmentCard({
         )}
         {isLoading ? (
           <div className="mt-2 flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-muted-foreground/60"></div>
-            <span className="text-xs text-muted-foreground">Loading...</span>
+            <div className="h-4 w-4 animate-spin rounded-full border-muted-foreground/60 border-b-2" />
+            <span className="text-muted-foreground text-xs">Loading...</span>
           </div>
         ) : (
-          <div className="mt-2 text-xs text-muted-foreground">
+          <div className="mt-2 text-muted-foreground text-xs">
             No diff available for this file.
           </div>
         )}
@@ -555,7 +556,7 @@ function DiffFragmentCard({
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex">
-        <div className="font-mono bg-muted py-1 px-2 rounded-sm border text-secondary-foreground break-words max-w-full">
+        <div className="max-w-full break-words rounded-sm border bg-muted px-2 py-1 font-mono text-secondary-foreground">
           {file}
         </div>
       </div>
@@ -566,45 +567,45 @@ function DiffFragmentCard({
           </span>
         </div>
       )}
-      <div className="border rounded bg-muted/40 overflow-hidden">
+      <div className="overflow-hidden rounded border bg-muted/40">
         {diffData ? (
           diffData.hasChanges ? (
             <div className="diff-view-container">
               <DiffView
                 data={diffData}
+                diffViewFontSize={12}
+                diffViewHighlight
                 diffViewMode={diffViewMode}
                 diffViewTheme="dark"
-                diffViewHighlight
-                diffViewFontSize={12}
                 diffViewWrap={false}
               />
             </div>
           ) : fileContent ? (
             <CodeFragmentCard
+              fileContent={fileContent}
               fragment={{
                 file,
                 start_line: startLine,
                 end_line: endLine,
                 message: "",
               }}
-              fileContent={fileContent}
-              isLoading={isLoading}
               hideHeader
+              isLoading={isLoading}
             />
           ) : (
-            <div className="px-3 py-4 text-xs text-muted-foreground">
+            <div className="px-3 py-4 text-muted-foreground text-xs">
               No changes in this fragment range.
             </div>
           )
         ) : isLoading ? (
-          <div className="px-3 py-4 flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-muted-foreground/60"></div>
-            <span className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 px-3 py-4">
+            <div className="h-4 w-4 animate-spin rounded-full border-muted-foreground/60 border-b-2" />
+            <span className="text-muted-foreground text-xs">
               Loading file content...
             </span>
           </div>
         ) : (
-          <div className="px-3 py-4 text-xs text-muted-foreground">
+          <div className="px-3 py-4 text-muted-foreground text-xs">
             No diff hunks match this fragment range.
           </div>
         )}

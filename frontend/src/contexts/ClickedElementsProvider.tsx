@@ -1,18 +1,18 @@
 import {
   createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
+  type ReactNode,
   useCallback,
-} from 'react';
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import type { Workspace } from "shared/types";
+import { genId } from "@/utils/id";
 import type {
-  OpenInEditorPayload,
   ComponentInfo,
+  OpenInEditorPayload,
   SelectedComponent,
-} from '@/utils/previewBridge';
-import type { Workspace } from 'shared/types';
-import { genId } from '@/utils/id';
+} from "@/utils/previewBridge";
 
 export interface ClickedEntry {
   id: string;
@@ -39,7 +39,7 @@ export function useClickedElements() {
   const context = useContext(ClickedElementsContext);
   if (!context) {
     throw new Error(
-      'useClickedElements must be used within a ClickedElementsProvider'
+      "useClickedElements must be used within a ClickedElementsProvider"
     );
   }
   return context;
@@ -55,11 +55,11 @@ const MAX_ELEMENTS = 20;
 // Helpers
 
 function stripPrefixes(p?: string): string {
-  if (!p) return '';
+  if (!p) return "";
   return p
-    .replace(/^file:\/\//, '')
-    .replace(/^webpack:\/\/\//, '')
-    .replace(/^webpack:\/\//, '')
+    .replace(/^file:\/\//, "")
+    .replace(/^webpack:\/\/\//, "")
+    .replace(/^webpack:\/\//, "")
     .trim();
 }
 
@@ -67,12 +67,12 @@ function stripPrefixes(p?: string): string {
 function normalizeMacPrivateAliases(p: string): string {
   if (!p) return p;
   // Very light normalization mimicking path.rs logic
-  if (p === '/private/var') return '/var';
-  if (p.startsWith('/private/var/'))
-    return '/var/' + p.slice('/private/var/'.length);
-  if (p === '/private/tmp') return '/tmp';
-  if (p.startsWith('/private/tmp/'))
-    return '/tmp/' + p.slice('/private/tmp/'.length);
+  if (p === "/private/var") return "/var";
+  if (p.startsWith("/private/var/"))
+    return "/var/" + p.slice("/private/var/".length);
+  if (p === "/private/tmp") return "/tmp";
+  if (p.startsWith("/private/tmp/"))
+    return "/tmp/" + p.slice("/private/tmp/".length);
   return p;
 }
 
@@ -84,11 +84,11 @@ function parsePathWithLineCol(raw?: string): {
   col?: number;
 } {
   const s = stripPrefixes(raw);
-  if (!s) return { path: '' };
+  if (!s) return { path: "" };
   const normalized = normalizeMacPrivateAliases(s);
 
   // Try to split trailing :line(:col). Last and second-to-last tokens must be numbers.
-  const parts = normalized.split(':');
+  const parts = normalized.split(":");
   if (parts.length <= 2) return { path: normalized };
 
   const last = parts[parts.length - 1];
@@ -100,48 +100,48 @@ function parsePathWithLineCol(raw?: string): {
   if (!Number.isFinite(maybeLine)) return { path: normalized };
 
   // Windows drive (e.g., "C") is at index 0; this still works because we only strip the end
-  const basePath = parts.slice(0, parts.length - 2).join(':');
+  const basePath = parts.slice(0, parts.length - 2).join(":");
   return { path: basePath, line: maybeLine, col: maybeCol };
 }
 
 function relativizePath(p: string, workspaceRoot?: string): string {
-  if (!p) return '';
+  if (!p) return "";
   const normalized = normalizeMacPrivateAliases(stripPrefixes(p));
 
   if (!workspaceRoot) return normalized;
 
   // Simple prefix strip; robust handling is on backend (path.rs).
   // This keeps the UI stable even when run inside macOS /private/var containers.
-  const wr = normalizeMacPrivateAliases(workspaceRoot.replace(/\/+$/, ''));
+  const wr = normalizeMacPrivateAliases(workspaceRoot.replace(/\/+$/, ""));
   if (
-    normalized.startsWith(wr.endsWith('/') ? wr : wr + '/') ||
+    normalized.startsWith(wr.endsWith("/") ? wr : wr + "/") ||
     normalized === wr
   ) {
     const rel = normalized.slice(wr.length);
-    return rel.startsWith('/') ? rel.slice(1) : rel || '.';
+    return rel.startsWith("/") ? rel.slice(1) : rel || ".";
   }
   return normalized;
 }
 
 function formatLoc(path: string, line?: number, col?: number) {
-  if (!path) return '';
+  if (!path) return "";
   if (line == null) return path;
-  return `${path}:${line}${col != null ? `:${col}` : ''}`;
+  return `${path}:${line}${col != null ? `:${col}` : ""}`;
 }
 
-function formatDomBits(ce?: OpenInEditorPayload['clickedElement']) {
+function formatDomBits(ce?: OpenInEditorPayload["clickedElement"]) {
   const bits: string[] = [];
   if (ce?.tag) bits.push(ce.tag.toLowerCase());
   if (ce?.id) bits.push(`#${ce.id}`);
   const classes = normalizeClassName(ce?.className);
   if (classes) bits.push(`.${classes}`);
   if (ce?.role) bits.push(`@${ce.role}`);
-  return bits.join('') || '(unknown)';
+  return bits.join("") || "(unknown)";
 }
 
 function normalizeClassName(className?: string): string {
-  if (!className) return '';
-  return className.split(/\s+/).filter(Boolean).sort().join('.');
+  if (!className) return "";
+  return className.split(/\s+/).filter(Boolean).sort().join(".");
 }
 
 function makeDedupeKey(
@@ -163,10 +163,10 @@ function makeDedupeKey(
 
   const locKey = [
     rel,
-    s.source?.lineNumber ?? '',
-    s.source?.columnNumber ?? '',
-  ].join(':');
-  return `${s.name}|${locKey}|${domBits.join('')}`;
+    s.source?.lineNumber ?? "",
+    s.source?.columnNumber ?? "",
+  ].join(":");
+  return `${s.name}|${locKey}|${domBits.join("")}`;
 }
 
 // Remove heavy or unsafe props while retaining debuggability
@@ -176,18 +176,18 @@ function pruneValue(
   maxString = 200,
   maxArray = 20
 ): unknown {
-  if (depth <= 0) return '[MaxDepth]';
+  if (depth <= 0) return "[MaxDepth]";
 
   if (value == null) return value;
   const t = typeof value;
-  if (t === 'string')
+  if (t === "string")
     return (value as string).length > maxString
-      ? (value as string).slice(0, maxString) + '…'
+      ? (value as string).slice(0, maxString) + "…"
       : value;
-  if (t === 'number' || t === 'boolean') return value;
-  if (t === 'function') return '[Function]';
-  if (t === 'bigint') return value.toString() + 'n';
-  if (t === 'symbol') return value.toString();
+  if (t === "number" || t === "boolean") return value;
+  if (t === "function") return "[Function]";
+  if (t === "bigint") return value.toString() + "n";
+  if (t === "symbol") return value.toString();
 
   if (Array.isArray(value)) {
     const lim = (value as unknown[])
@@ -198,14 +198,14 @@ function pruneValue(
     return lim;
   }
 
-  if (t === 'object') {
+  if (t === "object") {
     const obj = value as Record<string, unknown>;
     const out: Record<string, unknown> = {};
     let count = 0;
     for (const k of Object.keys(obj)) {
       // Cap keys to keep small
       if (count++ > 50) {
-        out['[TruncatedKeys]'] = true;
+        out["[TruncatedKeys]"] = true;
         break;
       }
       out[k] = pruneValue(obj[k], depth - 1, maxString, maxArray);
@@ -213,7 +213,7 @@ function pruneValue(
     return out;
   }
 
-  return '[Unknown]';
+  return "[Unknown]";
 }
 
 function stripHeavyProps(payload: OpenInEditorPayload): OpenInEditorPayload {
@@ -306,22 +306,22 @@ function formatClickedMarkdown(
       c.source?.lineNumber ?? p.line,
       c.source?.columnNumber ?? p.col
     );
-    const indent = '  '.repeat(i);
-    const arrow = i > 0 ? '└─ ' : '';
-    const tag = i === 0 ? ' ← start' : '';
-    return `${indent}${arrow}${c.name} (\`${l || 'no source'}\`)${tag}`;
+    const indent = "  ".repeat(i);
+    const arrow = i > 0 ? "└─ " : "";
+    const tag = i === 0 ? " ← start" : "";
+    return `${indent}${arrow}${c.name} (\`${l || "no source"}\`)${tag}`;
   });
 
   return [
-    `From preview click:`,
+    "From preview click:",
     `- DOM: ${dom}`,
-    `- Selected start: ${first.name} (${loc ? `\`${loc}\`` : 'no source'})`,
+    `- Selected start: ${first.name} (${loc ? `\`${loc}\`` : "no source"})`,
     effectiveChain.length > 1
-      ? ['- Component hierarchy:', ...items].join('\n')
-      : '',
+      ? ["- Component hierarchy:", ...items].join("\n")
+      : "",
   ]
     .filter(Boolean)
-    .join('\n');
+    .join("\n");
 }
 
 export function ClickedElementsProvider({
@@ -375,11 +375,11 @@ export function ClickedElementsProvider({
   };
 
   const generateMarkdown = useCallback(() => {
-    if (elements.length === 0) return '';
+    if (elements.length === 0) return "";
     const header = `## Clicked Elements (${elements.length})\n\n`;
     const body = elements
       .map((e) => formatClickedMarkdown(e, workspaceRoot || undefined))
-      .join('\n\n');
+      .join("\n\n");
     return header + body;
   }, [elements, workspaceRoot]);
 

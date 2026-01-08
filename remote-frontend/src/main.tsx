@@ -1,7 +1,7 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
+import React from "react";
+import ReactDOM from "react-dom/client";
 import AppRouter from "./AppRouter.tsx";
 import "./index.css";
 
@@ -16,5 +16,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <PostHogProvider client={posthog}>
       <AppRouter />
     </PostHogProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );

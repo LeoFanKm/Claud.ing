@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { stripAnsi } from 'fancy-ansi';
+import { stripAnsi } from "fancy-ansi";
+import { useEffect, useRef, useState } from "react";
 
 const urlPatterns = [
   /(https?:\/\/(?:\[[0-9a-f:]+\]|localhost|127\.0\.0\.1|0\.0\.0\.0|\d{1,3}(?:\.\d{1,3}){3})(?::\d{2,5})?(?:\/\S*)?)/i,
@@ -9,15 +9,15 @@ const urlPatterns = [
 export type DevserverUrlInfo = {
   url: string;
   port?: number;
-  scheme: 'http' | 'https';
+  scheme: "http" | "https";
 };
 
 // Get the hostname from the current browser location, falling back to 'localhost'
 const getBrowserHostname = (): string => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     return window.location.hostname;
   }
-  return 'localhost';
+  return "localhost";
 };
 
 export const detectDevserverUrl = (line: string): DevserverUrlInfo | null => {
@@ -29,16 +29,16 @@ export const detectDevserverUrl = (line: string): DevserverUrlInfo | null => {
     try {
       const parsed = new URL(fullUrlMatch[1]);
       if (
-        parsed.hostname === '0.0.0.0' ||
-        parsed.hostname === '::' ||
-        parsed.hostname === '[::]'
+        parsed.hostname === "0.0.0.0" ||
+        parsed.hostname === "::" ||
+        parsed.hostname === "[::]"
       ) {
         parsed.hostname = browserHostname;
       }
       return {
         url: parsed.toString(),
         port: parsed.port ? Number(parsed.port) : undefined,
-        scheme: parsed.protocol === 'https:' ? 'https' : 'http',
+        scheme: parsed.protocol === "https:" ? "https" : "http",
       };
     } catch {
       // Ignore invalid URLs and fall through to host:port detection.
@@ -48,11 +48,11 @@ export const detectDevserverUrl = (line: string): DevserverUrlInfo | null => {
   const hostPortMatch = urlPatterns[1].exec(cleaned);
   if (hostPortMatch) {
     const port = Number(hostPortMatch[1]);
-    const scheme = /https/i.test(cleaned) ? 'https' : 'http';
+    const scheme = /https/i.test(cleaned) ? "https" : "http";
     return {
       url: `${scheme}://${browserHostname}:${port}`,
       port,
-      scheme: scheme as 'http' | 'https',
+      scheme: scheme as "http" | "https",
     };
   }
 

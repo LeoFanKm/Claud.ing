@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Loader } from '@/components/ui/loader';
-import { useVideoProgress } from '@/hooks/useVideoProgress';
-import type { ShowcaseMedia } from '@/types/showcase';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw } from "lucide-react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Loader } from "@/components/ui/loader";
+import { useVideoProgress } from "@/hooks/useVideoProgress";
+import type { ShowcaseMedia } from "@/types/showcase";
 
 interface ShowcaseStageMediaProps {
   media: ShowcaseMedia;
@@ -22,14 +22,14 @@ interface ShowcaseStageMediaProps {
  * @param media - ShowcaseMedia object with type ('image' or 'video') and src URL
  */
 export function ShowcaseStageMedia({ media }: ShowcaseStageMediaProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isLoading, playedPercent, bufferedPercent } =
     useVideoProgress(videoRef);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
 
-  if (media.type === 'video') {
+  if (media.type === "video") {
     const handleReplay = () => {
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
@@ -39,34 +39,34 @@ export function ShowcaseStageMedia({ media }: ShowcaseStageMediaProps) {
     };
 
     return (
-      <div className="relative w-full aspect-[16/10] bg-black">
+      <div className="relative aspect-[16/10] w-full bg-black">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <Loader size={32} />
           </div>
         )}
         <video
+          autoPlay
+          className="h-full w-full object-contain"
+          muted
+          onEnded={() => setVideoEnded(true)}
+          playsInline
+          poster={media.poster}
           ref={videoRef}
           src={media.src}
-          poster={media.poster}
-          autoPlay
-          muted
-          playsInline
-          onEnded={() => setVideoEnded(true)}
-          className="w-full h-full object-contain"
         />
         {videoEnded && (
           <div className="absolute inset-0 flex items-center justify-center">
             <button
+              className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-primary-foreground transition-colors hover:bg-primary/90"
               onClick={handleReplay}
-              className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               <RefreshCw size={20} />
-              {t('buttons.replay')}
+              {t("buttons.replay")}
             </button>
           </div>
         )}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-transparent">
+        <div className="absolute right-0 bottom-0 left-0 h-1 bg-transparent">
           <div
             className="h-1 bg-muted-foreground/30 transition-all"
             style={{ width: `${bufferedPercent}%` }}
@@ -81,17 +81,17 @@ export function ShowcaseStageMedia({ media }: ShowcaseStageMediaProps) {
   }
 
   return (
-    <div className="relative w-full aspect-[16/10] bg-muted">
+    <div className="relative aspect-[16/10] w-full bg-muted">
       {!imageLoaded && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Loader size={32} />
         </div>
       )}
       <img
-        src={media.src}
-        alt={media.alt || ''}
+        alt={media.alt || ""}
+        className="h-full w-full object-contain"
         onLoad={() => setImageLoaded(true)}
-        className="w-full h-full object-contain"
+        src={media.src}
       />
     </div>
   );

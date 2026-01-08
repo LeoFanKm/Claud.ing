@@ -1,12 +1,12 @@
-import React from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { json, jsonParseLinter } from '@codemirror/lang-json';
-import { linter } from '@codemirror/lint';
-import { indentOnInput } from '@codemirror/language';
-import { EditorView } from '@codemirror/view';
-import { useTheme } from '@/components/ThemeProvider';
-import { ThemeMode } from 'shared/types';
-import { cn } from '@/lib/utils';
+import { json, jsonParseLinter } from "@codemirror/lang-json";
+import { indentOnInput } from "@codemirror/language";
+import { linter } from "@codemirror/lint";
+import { EditorView } from "@codemirror/view";
+import CodeMirror from "@uiw/react-codemirror";
+import type React from "react";
+import { ThemeMode } from "shared/types";
+import { useTheme } from "@/components/ThemeProvider";
+import { cn } from "@/lib/utils";
 
 interface JSONEditorProps {
   value: string;
@@ -32,28 +32,26 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
   // Convert app theme to CodeMirror theme
   const getCodeMirrorTheme = () => {
     if (theme === ThemeMode.SYSTEM) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
     }
-    return theme === ThemeMode.DARK ? 'dark' : 'light';
+    return theme === ThemeMode.DARK ? "dark" : "light";
   };
 
   // Avoid SSR errors
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
 
   return (
     <div
-      id={id}
       className={cn(
-        'rounded-md border border-input bg-background overflow-hidden',
-        disabled && 'opacity-50 cursor-not-allowed',
+        "overflow-hidden rounded-md border border-input bg-background",
+        disabled && "cursor-not-allowed opacity-50",
         className
       )}
+      id={id}
     >
       <CodeMirror
-        value={value}
-        height={`${minHeight}px`}
         basicSetup={{
           lineNumbers: true,
           autocompletion: true,
@@ -68,14 +66,16 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
           EditorView.lineWrapping,
           disabled ? EditorView.editable.of(false) : [],
         ]}
-        theme={getCodeMirrorTheme()}
+        height={`${minHeight}px`}
         onChange={onChange}
         placeholder={placeholder}
         style={{
-          fontSize: '14px',
+          fontSize: "14px",
           fontFamily:
             'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
         }}
+        theme={getCodeMirrorTheme()}
+        value={value}
       />
     </div>
   );

@@ -4,7 +4,15 @@ const { execSync, spawn } = require("child_process");
 const AdmZip = require("adm-zip");
 const path = require("path");
 const fs = require("fs");
-const { ensureBinary, BINARY_TAG, CACHE_DIR, LOCAL_DEV_MODE, LOCAL_DIST_DIR, R2_BASE_URL, getLatestVersion } = require("./download");
+const {
+  ensureBinary,
+  BINARY_TAG,
+  CACHE_DIR,
+  LOCAL_DEV_MODE,
+  LOCAL_DIST_DIR,
+  R2_BASE_URL,
+  getLatestVersion,
+} = require("./download");
 
 const CLI_VERSION = require("../package.json").version;
 
@@ -80,7 +88,9 @@ function showProgress(downloaded, total) {
   const percent = total ? Math.round((downloaded / total) * 100) : 0;
   const mb = (downloaded / (1024 * 1024)).toFixed(1);
   const totalMb = total ? (total / (1024 * 1024)).toFixed(1) : "?";
-  process.stderr.write(`\r   Downloading: ${mb}MB / ${totalMb}MB (${percent}%)`);
+  process.stderr.write(
+    `\r   Downloading: ${mb}MB / ${totalMb}MB (${percent}%)`
+  );
 }
 
 async function extractAndRun(baseName, launch) {
@@ -127,7 +137,9 @@ async function extractAndRun(baseName, launch) {
 
   if (!fs.existsSync(binPath)) {
     console.error(`Extracted binary not found at: ${binPath}`);
-    console.error("This usually indicates a corrupt download. Please try again.");
+    console.error(
+      "This usually indicates a corrupt download. Please try again."
+    );
     process.exit(1);
   }
 
@@ -150,13 +162,13 @@ async function main() {
 
   // Non-blocking update check (skip in MCP mode, local dev mode, and when R2 URL not configured)
   const hasValidR2Url = !R2_BASE_URL.startsWith("__");
-  if (!isMcpMode && !LOCAL_DEV_MODE && hasValidR2Url) {
+  if (!(isMcpMode || LOCAL_DEV_MODE) && hasValidR2Url) {
     getLatestVersion()
       .then((latest) => {
         if (latest && latest !== CLI_VERSION) {
           setTimeout(() => {
             console.log(`\nUpdate available: ${CLI_VERSION} -> ${latest}`);
-            console.log(`Run: npx vibe-kanban@latest`);
+            console.log("Run: npx vibe-kanban@latest");
           }, 2000);
         }
       })

@@ -1,23 +1,23 @@
-import { useMemo, useState } from "react";
 import hljs from "highlight.js/lib/core";
-import javascript from "highlight.js/lib/languages/javascript";
-import typescript from "highlight.js/lib/languages/typescript";
-import python from "highlight.js/lib/languages/python";
-import rust from "highlight.js/lib/languages/rust";
-import go from "highlight.js/lib/languages/go";
-import java from "highlight.js/lib/languages/java";
-import css from "highlight.js/lib/languages/css";
-import json from "highlight.js/lib/languages/json";
-import xml from "highlight.js/lib/languages/xml";
 import bash from "highlight.js/lib/languages/bash";
-import sql from "highlight.js/lib/languages/sql";
-import yaml from "highlight.js/lib/languages/yaml";
-import markdown from "highlight.js/lib/languages/markdown";
 import cpp from "highlight.js/lib/languages/cpp";
 import csharp from "highlight.js/lib/languages/csharp";
-import ruby from "highlight.js/lib/languages/ruby";
-import swift from "highlight.js/lib/languages/swift";
+import css from "highlight.js/lib/languages/css";
+import go from "highlight.js/lib/languages/go";
+import java from "highlight.js/lib/languages/java";
+import javascript from "highlight.js/lib/languages/javascript";
+import json from "highlight.js/lib/languages/json";
 import kotlin from "highlight.js/lib/languages/kotlin";
+import markdown from "highlight.js/lib/languages/markdown";
+import python from "highlight.js/lib/languages/python";
+import ruby from "highlight.js/lib/languages/ruby";
+import rust from "highlight.js/lib/languages/rust";
+import sql from "highlight.js/lib/languages/sql";
+import swift from "highlight.js/lib/languages/swift";
+import typescript from "highlight.js/lib/languages/typescript";
+import xml from "highlight.js/lib/languages/xml";
+import yaml from "highlight.js/lib/languages/yaml";
+import { useMemo, useState } from "react";
 import type { CodeFragment } from "../types/review";
 
 // Register languages
@@ -118,11 +118,10 @@ export function CodeFragmentCard({
 
     if (viewMode === "fragment") {
       return getHighlightedLines(fileContent, start_line, end_line, lang);
-    } else {
-      // Full file view
-      const allLines = fileContent.split(/\r?\n/);
-      return getHighlightedLines(fileContent, 1, allLines.length, lang);
     }
+    // Full file view
+    const allLines = fileContent.split(/\r?\n/);
+    return getHighlightedLines(fileContent, 1, allLines.length, lang);
   }, [fileContent, start_line, end_line, lang, viewMode]);
 
   const isInFragment = (lineNumber: number) =>
@@ -130,31 +129,31 @@ export function CodeFragmentCard({
 
   return (
     <div
-      className={hideHeader ? "" : "border rounded bg-muted/40 overflow-hidden"}
+      className={hideHeader ? "" : "overflow-hidden rounded border bg-muted/40"}
     >
       {/* Header */}
       {!hideHeader && (
-        <div className="px-3 py-2 border-b bg-muted/60">
+        <div className="border-b bg-muted/60 px-3 py-2">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-              <span className="font-mono truncate">{file}</span>
+            <div className="flex min-w-0 items-center gap-2 text-muted-foreground text-xs">
+              <span className="truncate font-mono">{file}</span>
               <span className="shrink-0">
                 Lines {start_line}
                 {end_line !== start_line && `–${end_line}`}
               </span>
               {unchangedRegion && (
-                <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] bg-muted text-muted-foreground">
+                <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                   Unchanged
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1 shrink-0 ml-auto">
+            <div className="ml-auto flex shrink-0 items-center gap-1">
               {fileContent && (
                 <button
-                  className="h-6 px-2 rounded hover:bg-muted transition-colors flex items-center justify-center"
+                  className="flex h-6 items-center justify-center rounded px-2 transition-colors hover:bg-muted"
                   onClick={() =>
                     setViewMode((prev) =>
-                      prev === "fragment" ? "file" : "fragment",
+                      prev === "fragment" ? "file" : "fragment"
                     )
                   }
                   title={
@@ -171,10 +170,10 @@ export function CodeFragmentCard({
                       viewBox="0 0 24 24"
                     >
                       <path
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
                       />
                     </svg>
                   ) : (
@@ -185,10 +184,10 @@ export function CodeFragmentCard({
                       viewBox="0 0 24 24"
                     >
                       <path
+                        d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"
                       />
                     </svg>
                   )}
@@ -197,18 +196,18 @@ export function CodeFragmentCard({
             </div>
           </div>
           {message && (
-            <div className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400 mt-1.5 italic">
+            <div className="mt-1.5 flex items-start gap-1.5 text-amber-600 text-xs italic dark:text-amber-400">
               <svg
-                className="h-3.5 w-3.5 shrink-0 mt-0.5"
+                className="mt-0.5 h-3.5 w-3.5 shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path
+                  d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
                 />
               </svg>
               <span>{message}</span>
@@ -219,28 +218,28 @@ export function CodeFragmentCard({
 
       {/* Code Content */}
       {isLoading ? (
-        <div className="px-3 py-4 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-muted-foreground/60"></div>
-          <span className="ml-2 text-xs text-muted-foreground">Loading...</span>
+        <div className="flex items-center justify-center px-3 py-4">
+          <div className="h-4 w-4 animate-spin rounded-full border-muted-foreground/60 border-b-2" />
+          <span className="ml-2 text-muted-foreground text-xs">Loading...</span>
         </div>
       ) : highlightedLines ? (
         <div className="overflow-x-auto">
-          <table className="w-full text-xs font-mono border-collapse">
+          <table className="w-full border-collapse font-mono text-xs">
             <tbody>
               {highlightedLines.map(({ lineNumber, html }) => (
                 <tr
-                  key={lineNumber}
-                  className={`hover:bg-muted/50 leading-5 ${
+                  className={`leading-5 hover:bg-muted/50 ${
                     viewMode === "file" && isInFragment(lineNumber)
                       ? "bg-amber-500/10"
                       : ""
                   }`}
+                  key={lineNumber}
                 >
-                  <td className="select-none px-3 py-0 text-right text-muted-foreground/60 border-r w-[1%] min-w-[40px] align-top">
+                  <td className="w-[1%] min-w-[40px] select-none border-r px-3 py-0 text-right align-top text-muted-foreground/60">
                     {lineNumber}
                   </td>
                   <td
-                    className="px-3 py-0 whitespace-pre"
+                    className="whitespace-pre px-3 py-0"
                     dangerouslySetInnerHTML={{ __html: html || "&nbsp;" }}
                   />
                 </tr>
@@ -249,7 +248,7 @@ export function CodeFragmentCard({
           </table>
         </div>
       ) : (
-        <div className="px-3 py-4 text-xs text-muted-foreground">
+        <div className="px-3 py-4 text-muted-foreground text-xs">
           File content unavailable for this fragment.
         </div>
       )}
@@ -261,7 +260,7 @@ function getHighlightedLines(
   content: string,
   startLine: number,
   endLine: number,
-  lang: string,
+  lang: string
 ): { lineNumber: number; html: string }[] {
   const allLines = content.split(/\r?\n/);
   const s = Math.max(1, startLine);

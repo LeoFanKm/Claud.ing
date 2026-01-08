@@ -1,10 +1,10 @@
-import type { TaskWithAttemptStatus } from 'shared/types';
-import type { WorkspaceWithSession } from '@/types/attempt';
-import VirtualizedList from '@/components/logs/VirtualizedList';
-import { TaskFollowUpSection } from '@/components/tasks/TaskFollowUpSection';
-import { EntriesProvider } from '@/contexts/EntriesContext';
-import { RetryUiProvider } from '@/contexts/RetryUiContext';
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
+import type { TaskWithAttemptStatus } from "shared/types";
+import VirtualizedList from "@/components/logs/VirtualizedList";
+import { TaskFollowUpSection } from "@/components/tasks/TaskFollowUpSection";
+import { EntriesProvider } from "@/contexts/EntriesContext";
+import { RetryUiProvider } from "@/contexts/RetryUiContext";
+import type { WorkspaceWithSession } from "@/types/attempt";
 
 interface TaskAttemptPanelProps {
   attempt: WorkspaceWithSession | undefined;
@@ -30,10 +30,10 @@ const TaskAttemptPanel = ({
       <RetryUiProvider attemptId={attempt.id}>
         {children({
           logs: (
-            <VirtualizedList key={attempt.id} attempt={attempt} task={task} />
+            <VirtualizedList attempt={attempt} key={attempt.id} task={task} />
           ),
           followUp: (
-            <TaskFollowUpSection task={task} session={attempt.session} />
+            <TaskFollowUpSection session={attempt.session} task={task} />
           ),
         })}
       </RetryUiProvider>

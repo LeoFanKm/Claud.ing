@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,18 +10,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
+} from "@/components/ui/dialog";
+import { defineModal } from "@/lib/modals";
 
 export interface DeleteConfigurationDialogProps {
   configName: string;
   executorType: string;
 }
 
-export type DeleteConfigurationResult = 'deleted' | 'canceled';
+export type DeleteConfigurationResult = "deleted" | "canceled";
 
 const DeleteConfigurationDialogImpl =
   NiceModal.create<DeleteConfigurationDialogProps>(
@@ -33,16 +33,16 @@ const DeleteConfigurationDialogImpl =
 
         try {
           // Resolve with 'deleted' to let parent handle the deletion
-          modal.resolve('deleted' as DeleteConfigurationResult);
+          modal.resolve("deleted" as DeleteConfigurationResult);
           modal.hide();
         } catch (error) {
-          setError('Failed to delete configuration. Please try again.');
+          setError("Failed to delete configuration. Please try again.");
           setIsDeleting(false);
         }
       };
 
       const handleCancel = () => {
-        modal.resolve('canceled' as DeleteConfigurationResult);
+        modal.resolve("canceled" as DeleteConfigurationResult);
         modal.hide();
       };
 
@@ -53,12 +53,12 @@ const DeleteConfigurationDialogImpl =
       };
 
       return (
-        <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
+        <Dialog onOpenChange={handleOpenChange} open={modal.visible}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Delete Configuration?</DialogTitle>
               <DialogDescription>
-                This will permanently remove "{configName}" from the{' '}
+                This will permanently remove "{configName}" from the{" "}
                 {executorType} executor. You can't undo this action.
               </DialogDescription>
             </DialogHeader>
@@ -71,16 +71,16 @@ const DeleteConfigurationDialogImpl =
 
             <DialogFooter>
               <Button
-                variant="outline"
-                onClick={handleCancel}
                 disabled={isDeleting}
+                onClick={handleCancel}
+                variant="outline"
               >
                 Cancel
               </Button>
               <Button
-                variant="destructive"
-                onClick={handleDelete}
                 disabled={isDeleting}
+                onClick={handleDelete}
+                variant="destructive"
               >
                 {isDeleting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

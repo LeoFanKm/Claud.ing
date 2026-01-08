@@ -1,12 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { projectsApi } from '@/lib/api';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   CreateProject,
-  UpdateProject,
-  Project,
-  LinkToExistingRequest,
   CreateRemoteProjectRequest,
-} from 'shared/types';
+  LinkToExistingRequest,
+  Project,
+  UpdateProject,
+} from "shared/types";
+import { projectsApi } from "@/lib/api";
 
 interface UseProjectMutationsOptions {
   onCreateSuccess?: (project: Project) => void;
@@ -23,21 +23,21 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
   const queryClient = useQueryClient();
 
   const createProject = useMutation({
-    mutationKey: ['createProject'],
+    mutationKey: ["createProject"],
     mutationFn: (data: CreateProject) => projectsApi.create(data),
     onSuccess: (project: Project) => {
-      queryClient.setQueryData(['project', project.id], project);
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.setQueryData(["project", project.id], project);
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       options?.onCreateSuccess?.(project);
     },
     onError: (err) => {
-      console.error('Failed to create project:', err);
+      console.error("Failed to create project:", err);
       options?.onCreateError?.(err);
     },
   });
 
   const updateProject = useMutation({
-    mutationKey: ['updateProject'],
+    mutationKey: ["updateProject"],
     mutationFn: ({
       projectId,
       data,
@@ -47,10 +47,10 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
     }) => projectsApi.update(projectId, data),
     onSuccess: (project: Project) => {
       // Update single project cache
-      queryClient.setQueryData(['project', project.id], project);
+      queryClient.setQueryData(["project", project.id], project);
 
       // Update the project in the projects list cache immediately
-      queryClient.setQueryData<Project[]>(['projects'], (old) => {
+      queryClient.setQueryData<Project[]>(["projects"], (old) => {
         if (!old) return old;
         return old.map((p) => (p.id === project.id ? project : p));
       });
@@ -58,13 +58,13 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
       options?.onUpdateSuccess?.(project);
     },
     onError: (err) => {
-      console.error('Failed to update project:', err);
+      console.error("Failed to update project:", err);
       options?.onUpdateError?.(err);
     },
   });
 
   const linkToExisting = useMutation({
-    mutationKey: ['linkToExisting'],
+    mutationKey: ["linkToExisting"],
     mutationFn: ({
       localProjectId,
       data,
@@ -73,25 +73,25 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
       data: LinkToExistingRequest;
     }) => projectsApi.linkToExisting(localProjectId, data),
     onSuccess: (project: Project) => {
-      queryClient.setQueryData(['project', project.id], project);
-      queryClient.setQueryData<Project[]>(['projects'], (old) => {
+      queryClient.setQueryData(["project", project.id], project);
+      queryClient.setQueryData<Project[]>(["projects"], (old) => {
         if (!old) return old;
         return old.map((p) => (p.id === project.id ? project : p));
       });
 
       // Invalidate to ensure fresh data from server
-      queryClient.invalidateQueries({ queryKey: ['project', project.id] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ["project", project.id] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Invalidate organization projects queries since linking affects remote projects
       queryClient.invalidateQueries({
-        queryKey: ['organizations'],
+        queryKey: ["organizations"],
         predicate: (query) => {
           const key = query.queryKey;
           return (
             key.length === 3 &&
-            key[0] === 'organizations' &&
-            key[2] === 'projects'
+            key[0] === "organizations" &&
+            key[2] === "projects"
           );
         },
       });
@@ -99,13 +99,13 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
       options?.onLinkSuccess?.(project);
     },
     onError: (err) => {
-      console.error('Failed to link project:', err);
+      console.error("Failed to link project:", err);
       options?.onLinkError?.(err);
     },
   });
 
   const createAndLink = useMutation({
-    mutationKey: ['createAndLink'],
+    mutationKey: ["createAndLink"],
     mutationFn: ({
       localProjectId,
       data,
@@ -114,25 +114,25 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
       data: CreateRemoteProjectRequest;
     }) => projectsApi.createAndLink(localProjectId, data),
     onSuccess: (project: Project) => {
-      queryClient.setQueryData(['project', project.id], project);
-      queryClient.setQueryData<Project[]>(['projects'], (old) => {
+      queryClient.setQueryData(["project", project.id], project);
+      queryClient.setQueryData<Project[]>(["projects"], (old) => {
         if (!old) return old;
         return old.map((p) => (p.id === project.id ? project : p));
       });
 
       // Invalidate to ensure fresh data from server
-      queryClient.invalidateQueries({ queryKey: ['project', project.id] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ["project", project.id] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Invalidate organization projects queries since linking affects remote projects
       queryClient.invalidateQueries({
-        queryKey: ['organizations'],
+        queryKey: ["organizations"],
         predicate: (query) => {
           const key = query.queryKey;
           return (
             key.length === 3 &&
-            key[0] === 'organizations' &&
-            key[2] === 'projects'
+            key[0] === "organizations" &&
+            key[2] === "projects"
           );
         },
       });
@@ -140,33 +140,33 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
       options?.onLinkSuccess?.(project);
     },
     onError: (err) => {
-      console.error('Failed to create and link project:', err);
+      console.error("Failed to create and link project:", err);
       options?.onLinkError?.(err);
     },
   });
 
   const unlinkProject = useMutation({
-    mutationKey: ['unlinkProject'],
+    mutationKey: ["unlinkProject"],
     mutationFn: (projectId: string) => projectsApi.unlink(projectId),
     onSuccess: (project: Project) => {
-      queryClient.setQueryData(['project', project.id], project);
-      queryClient.setQueryData<Project[]>(['projects'], (old) => {
+      queryClient.setQueryData(["project", project.id], project);
+      queryClient.setQueryData<Project[]>(["projects"], (old) => {
         if (!old) return old;
         return old.map((p) => (p.id === project.id ? project : p));
       });
 
       // Invalidate to ensure fresh data from server
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       // Invalidate organization projects queries since unlinking affects remote projects
       queryClient.invalidateQueries({
-        queryKey: ['organizations'],
+        queryKey: ["organizations"],
         predicate: (query) => {
           const key = query.queryKey;
           return (
             key.length === 3 &&
-            key[0] === 'organizations' &&
-            key[2] === 'projects'
+            key[0] === "organizations" &&
+            key[2] === "projects"
           );
         },
       });
@@ -174,7 +174,7 @@ export function useProjectMutations(options?: UseProjectMutationsOptions) {
       options?.onUnlinkSuccess?.(project);
     },
     onError: (err) => {
-      console.error('Failed to unlink project:', err);
+      console.error("Failed to unlink project:", err);
       options?.onUnlinkError?.(err);
     },
   });

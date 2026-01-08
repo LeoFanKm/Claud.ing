@@ -1,55 +1,57 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { cloneDeep, merge, isEqual } from 'lodash';
+import { cloneDeep, isEqual, merge } from "lodash";
+import { Loader2, Volume2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  DEFAULT_PR_DESCRIPTION_PROMPT,
+  EditorType,
+  SoundFile,
+  ThemeMode,
+  type UiLanguage,
+} from "shared/types";
+import { useClerkUser } from "@/components/auth/ClerkAuth";
+import { saveLocalConfig, useUserSystem } from "@/components/ConfigProvider";
+import { EditorAvailabilityIndicator } from "@/components/EditorAvailabilityIndicator";
+import { TagManager } from "@/components/TagManager";
+import { useTheme } from "@/components/ThemeProvider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Volume2 } from 'lucide-react';
-import {
-  DEFAULT_PR_DESCRIPTION_PROMPT,
-  EditorType,
-  SoundFile,
-  ThemeMode,
-  UiLanguage,
-} from 'shared/types';
-import { getLanguageOptions } from '@/i18n/languages';
-
-import { toPrettyCase } from '@/utils/string';
-import { useEditorAvailability } from '@/hooks/useEditorAvailability';
-import { EditorAvailabilityIndicator } from '@/components/EditorAvailabilityIndicator';
-import { useTheme } from '@/components/ThemeProvider';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { TagManager } from '@/components/TagManager';
+} from "@/components/ui/select";
+import { useEditorAvailability } from "@/hooks/useEditorAvailability";
+import { getLanguageOptions } from "@/i18n/languages";
+import { toPrettyCase } from "@/utils/string";
 
 export function GeneralSettings() {
-  const { t } = useTranslation(['settings', 'common']);
+  const { t } = useTranslation(["settings", "common"]);
+  const { isSignedIn } = useClerkUser();
 
   // Get language options with proper display names
   const languageOptions = getLanguageOptions(
-    t('language.browserDefault', {
-      ns: 'common',
-      defaultValue: 'Browser Default',
+    t("language.browserDefault", {
+      ns: "common",
+      defaultValue: "Browser Default",
     })
   );
   const {
     config,
     loading,
+    updateConfig,
     updateAndSaveConfig, // Use this on Save
   } = useUserSystem();
 
@@ -70,21 +72,21 @@ export function GeneralSettings() {
   const validateBranchPrefix = useCallback(
     (prefix: string): string | null => {
       if (!prefix) return null; // empty allowed
-      if (prefix.includes('/'))
-        return t('settings.general.git.branchPrefix.errors.slash');
-      if (prefix.startsWith('.'))
-        return t('settings.general.git.branchPrefix.errors.startsWithDot');
-      if (prefix.endsWith('.') || prefix.endsWith('.lock'))
-        return t('settings.general.git.branchPrefix.errors.endsWithDot');
-      if (prefix.includes('..') || prefix.includes('@{'))
-        return t('settings.general.git.branchPrefix.errors.invalidSequence');
+      if (prefix.includes("/"))
+        return t("settings.general.git.branchPrefix.errors.slash");
+      if (prefix.startsWith("."))
+        return t("settings.general.git.branchPrefix.errors.startsWithDot");
+      if (prefix.endsWith(".") || prefix.endsWith(".lock"))
+        return t("settings.general.git.branchPrefix.errors.endsWithDot");
+      if (prefix.includes("..") || prefix.includes("@{"))
+        return t("settings.general.git.branchPrefix.errors.invalidSequence");
       if (/[ \t~^:?*[\\]/.test(prefix))
-        return t('settings.general.git.branchPrefix.errors.invalidChars');
+        return t("settings.general.git.branchPrefix.errors.invalidChars");
       // Control chars check
       for (let i = 0; i < prefix.length; i++) {
         const code = prefix.charCodeAt(i);
         if (code < 0x20 || code === 0x7f)
-          return t('settings.general.git.branchPrefix.errors.controlChars');
+          return t("settings.general.git.branchPrefix.errors.controlChars");
       }
       return null;
     },
@@ -101,7 +103,7 @@ export function GeneralSettings() {
 
   // Check for unsaved changes
   const hasUnsavedChanges = useMemo(() => {
-    if (!draft || !config) return false;
+    if (!(draft && config)) return false;
     return !isEqual(draft, config);
   }, [draft, config]);
 
@@ -126,11 +128,11 @@ export function GeneralSettings() {
     const handler = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
   }, [hasUnsavedChanges]);
 
   const playSound = async (soundFile: SoundFile) => {
@@ -138,7 +140,7 @@ export function GeneralSettings() {
     try {
       await audio.play();
     } catch (err) {
-      console.error('Failed to play sound:', err);
+      console.error("Failed to play sound:", err);
     }
   };
 
@@ -150,14 +152,21 @@ export function GeneralSettings() {
     setSuccess(false);
 
     try {
-      await updateAndSaveConfig(draft); // Atomically apply + persist
+      if (isSignedIn) {
+        // Logged in: save to server
+        await updateAndSaveConfig(draft);
+      } else {
+        // Not logged in: save to localStorage and update local state
+        saveLocalConfig(draft);
+        updateConfig(draft);
+      }
       setTheme(draft.theme);
       setDirty(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(t('settings.general.save.error'));
-      console.error('Error saving config:', err);
+      setError(t("settings.general.save.error"));
+      console.error("Error saving config:", err);
     } finally {
       setSaving(false);
     }
@@ -183,7 +192,7 @@ export function GeneralSettings() {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">{t('settings.general.loading')}</span>
+        <span className="ml-2">{t("settings.general.loading")}</span>
       </div>
     );
   }
@@ -192,7 +201,7 @@ export function GeneralSettings() {
     return (
       <div className="py-8">
         <Alert variant="destructive">
-          <AlertDescription>{t('settings.general.loadError')}</AlertDescription>
+          <AlertDescription>{t("settings.general.loadError")}</AlertDescription>
         </Alert>
       </div>
     );
@@ -209,33 +218,52 @@ export function GeneralSettings() {
       {success && (
         <Alert variant="success">
           <AlertDescription className="font-medium">
-            {t('settings.general.save.success')}
+            {t("settings.general.save.success")}
+            {!isSignedIn && (
+              <span className="mt-1 block text-muted-foreground text-sm">
+                {t(
+                  "settings.general.save.localOnly",
+                  "Settings saved locally. Sign in to sync across devices."
+                )}
+              </span>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!(isSignedIn || success) && (
+        <Alert>
+          <AlertDescription>
+            {t(
+              "settings.general.guestMode",
+              "You are not signed in. Settings will be saved locally in your browser."
+            )}
           </AlertDescription>
         </Alert>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.appearance.title')}</CardTitle>
+          <CardTitle>{t("settings.general.appearance.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.appearance.description')}
+            {t("settings.general.appearance.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="theme">
-              {t('settings.general.appearance.theme.label')}
+              {t("settings.general.appearance.theme.label")}
             </Label>
             <Select
-              value={draft?.theme}
               onValueChange={(value: ThemeMode) =>
                 updateDraft({ theme: value })
               }
+              value={draft?.theme}
             >
               <SelectTrigger id="theme">
                 <SelectValue
                   placeholder={t(
-                    'settings.general.appearance.theme.placeholder'
+                    "settings.general.appearance.theme.placeholder"
                   )}
                 />
               </SelectTrigger>
@@ -247,25 +275,25 @@ export function GeneralSettings() {
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground">
-              {t('settings.general.appearance.theme.helper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.general.appearance.theme.helper")}
             </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="language">
-              {t('settings.general.appearance.language.label')}
+              {t("settings.general.appearance.language.label")}
             </Label>
             <Select
-              value={draft?.language}
               onValueChange={(value: UiLanguage) =>
                 updateDraft({ language: value })
               }
+              value={draft?.language}
             >
               <SelectTrigger id="language">
                 <SelectValue
                   placeholder={t(
-                    'settings.general.appearance.language.placeholder'
+                    "settings.general.appearance.language.placeholder"
                   )}
                 />
               </SelectTrigger>
@@ -277,8 +305,8 @@ export function GeneralSettings() {
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground">
-              {t('settings.general.appearance.language.helper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.general.appearance.language.helper")}
             </p>
           </div>
         </CardContent>
@@ -286,27 +314,27 @@ export function GeneralSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.editor.title')}</CardTitle>
+          <CardTitle>{t("settings.general.editor.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.editor.description')}
+            {t("settings.general.editor.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="editor-type">
-              {t('settings.general.editor.type.label')}
+              {t("settings.general.editor.type.label")}
             </Label>
             <Select
-              value={draft?.editor.editor_type}
               onValueChange={(value: EditorType) =>
                 updateDraft({
                   editor: { ...draft!.editor, editor_type: value },
                 })
               }
+              value={draft?.editor.editor_type}
             >
               <SelectTrigger id="editor-type">
                 <SelectValue
-                  placeholder={t('settings.general.editor.type.placeholder')}
+                  placeholder={t("settings.general.editor.type.placeholder")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -323,22 +351,18 @@ export function GeneralSettings() {
               <EditorAvailabilityIndicator availability={editorAvailability} />
             )}
 
-            <p className="text-sm text-muted-foreground">
-              {t('settings.general.editor.type.helper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.general.editor.type.helper")}
             </p>
           </div>
 
           {draft?.editor.editor_type === EditorType.CUSTOM && (
             <div className="space-y-2">
               <Label htmlFor="custom-command">
-                {t('settings.general.editor.customCommand.label')}
+                {t("settings.general.editor.customCommand.label")}
               </Label>
               <Input
                 id="custom-command"
-                placeholder={t(
-                  'settings.general.editor.customCommand.placeholder'
-                )}
-                value={draft?.editor.custom_command || ''}
                 onChange={(e) =>
                   updateDraft({
                     editor: {
@@ -347,9 +371,13 @@ export function GeneralSettings() {
                     },
                   })
                 }
+                placeholder={t(
+                  "settings.general.editor.customCommand.placeholder"
+                )}
+                value={draft?.editor.custom_command || ""}
               />
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.editor.customCommand.helper')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.editor.customCommand.helper")}
               </p>
             </div>
           )}
@@ -360,14 +388,10 @@ export function GeneralSettings() {
             <>
               <div className="space-y-2">
                 <Label htmlFor="remote-ssh-host">
-                  {t('settings.general.editor.remoteSsh.host.label')}
+                  {t("settings.general.editor.remoteSsh.host.label")}
                 </Label>
                 <Input
                   id="remote-ssh-host"
-                  placeholder={t(
-                    'settings.general.editor.remoteSsh.host.placeholder'
-                  )}
-                  value={draft?.editor.remote_ssh_host || ''}
                   onChange={(e) =>
                     updateDraft({
                       editor: {
@@ -376,23 +400,23 @@ export function GeneralSettings() {
                       },
                     })
                   }
+                  placeholder={t(
+                    "settings.general.editor.remoteSsh.host.placeholder"
+                  )}
+                  value={draft?.editor.remote_ssh_host || ""}
                 />
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.general.editor.remoteSsh.host.helper')}
+                <p className="text-muted-foreground text-sm">
+                  {t("settings.general.editor.remoteSsh.host.helper")}
                 </p>
               </div>
 
               {draft?.editor.remote_ssh_host && (
                 <div className="space-y-2">
                   <Label htmlFor="remote-ssh-user">
-                    {t('settings.general.editor.remoteSsh.user.label')}
+                    {t("settings.general.editor.remoteSsh.user.label")}
                   </Label>
                   <Input
                     id="remote-ssh-user"
-                    placeholder={t(
-                      'settings.general.editor.remoteSsh.user.placeholder'
-                    )}
-                    value={draft?.editor.remote_ssh_user || ''}
                     onChange={(e) =>
                       updateDraft({
                         editor: {
@@ -401,9 +425,13 @@ export function GeneralSettings() {
                         },
                       })
                     }
+                    placeholder={t(
+                      "settings.general.editor.remoteSsh.user.placeholder"
+                    )}
+                    value={draft?.editor.remote_ssh_user || ""}
                   />
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.general.editor.remoteSsh.user.helper')}
+                  <p className="text-muted-foreground text-sm">
+                    {t("settings.general.editor.remoteSsh.user.helper")}
                   </p>
                 </div>
               )}
@@ -414,48 +442,48 @@ export function GeneralSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.git.title')}</CardTitle>
+          <CardTitle>{t("settings.general.git.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.git.description')}
+            {t("settings.general.git.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="git-branch-prefix">
-              {t('settings.general.git.branchPrefix.label')}
+              {t("settings.general.git.branchPrefix.label")}
             </Label>
             <Input
+              aria-invalid={!!branchPrefixError}
+              className={branchPrefixError ? "border-destructive" : undefined}
               id="git-branch-prefix"
-              type="text"
-              placeholder={t('settings.general.git.branchPrefix.placeholder')}
-              value={draft?.git_branch_prefix ?? ''}
               onChange={(e) => {
                 const value = e.target.value.trim();
                 updateDraft({ git_branch_prefix: value });
                 setBranchPrefixError(validateBranchPrefix(value));
               }}
-              aria-invalid={!!branchPrefixError}
-              className={branchPrefixError ? 'border-destructive' : undefined}
+              placeholder={t("settings.general.git.branchPrefix.placeholder")}
+              type="text"
+              value={draft?.git_branch_prefix ?? ""}
             />
             {branchPrefixError && (
-              <p className="text-sm text-destructive">{branchPrefixError}</p>
+              <p className="text-destructive text-sm">{branchPrefixError}</p>
             )}
-            <p className="text-sm text-muted-foreground">
-              {t('settings.general.git.branchPrefix.helper')}{' '}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.general.git.branchPrefix.helper")}{" "}
               {draft?.git_branch_prefix ? (
                 <>
-                  {t('settings.general.git.branchPrefix.preview')}{' '}
-                  <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                    {t('settings.general.git.branchPrefix.previewWithPrefix', {
+                  {t("settings.general.git.branchPrefix.preview")}{" "}
+                  <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                    {t("settings.general.git.branchPrefix.previewWithPrefix", {
                       prefix: draft.git_branch_prefix,
                     })}
                   </code>
                 </>
               ) : (
                 <>
-                  {t('settings.general.git.branchPrefix.preview')}{' '}
-                  <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                    {t('settings.general.git.branchPrefix.previewNoPrefix')}
+                  {t("settings.general.git.branchPrefix.preview")}{" "}
+                  <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                    {t("settings.general.git.branchPrefix.previewNoPrefix")}
                   </code>
                 </>
               )}
@@ -466,33 +494,33 @@ export function GeneralSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.pullRequests.title')}</CardTitle>
+          <CardTitle>{t("settings.general.pullRequests.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.pullRequests.description')}
+            {t("settings.general.pullRequests.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="pr-auto-description"
               checked={draft?.pr_auto_description_enabled ?? false}
+              id="pr-auto-description"
               onCheckedChange={(checked: boolean) =>
                 updateDraft({ pr_auto_description_enabled: checked })
               }
             />
             <div className="space-y-0.5">
-              <Label htmlFor="pr-auto-description" className="cursor-pointer">
-                {t('settings.general.pullRequests.autoDescription.label')}
+              <Label className="cursor-pointer" htmlFor="pr-auto-description">
+                {t("settings.general.pullRequests.autoDescription.label")}
               </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.pullRequests.autoDescription.helper')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.pullRequests.autoDescription.helper")}
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="use-custom-prompt"
               checked={draft?.pr_auto_description_prompt != null}
+              id="use-custom-prompt"
               onCheckedChange={(checked: boolean) => {
                 if (checked) {
                   updateDraft({
@@ -503,31 +531,31 @@ export function GeneralSettings() {
                 }
               }}
             />
-            <Label htmlFor="use-custom-prompt" className="cursor-pointer">
-              {t('settings.general.pullRequests.customPrompt.useCustom')}
+            <Label className="cursor-pointer" htmlFor="use-custom-prompt">
+              {t("settings.general.pullRequests.customPrompt.useCustom")}
             </Label>
           </div>
           <div className="space-y-2">
             <textarea
-              id="pr-custom-prompt"
               className={`flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                 draft?.pr_auto_description_prompt == null
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
               }`}
-              value={
-                draft?.pr_auto_description_prompt ??
-                DEFAULT_PR_DESCRIPTION_PROMPT
-              }
               disabled={draft?.pr_auto_description_prompt == null}
+              id="pr-custom-prompt"
               onChange={(e) =>
                 updateDraft({
                   pr_auto_description_prompt: e.target.value,
                 })
               }
+              value={
+                draft?.pr_auto_description_prompt ??
+                DEFAULT_PR_DESCRIPTION_PROMPT
+              }
             />
-            <p className="text-sm text-muted-foreground">
-              {t('settings.general.pullRequests.customPrompt.helper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.general.pullRequests.customPrompt.helper")}
             </p>
           </div>
         </CardContent>
@@ -535,16 +563,16 @@ export function GeneralSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.notifications.title')}</CardTitle>
+          <CardTitle>{t("settings.general.notifications.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.notifications.description')}
+            {t("settings.general.notifications.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="sound-enabled"
               checked={draft?.notifications.sound_enabled}
+              id="sound-enabled"
               onCheckedChange={(checked: boolean) =>
                 updateDraft({
                   notifications: {
@@ -555,22 +583,21 @@ export function GeneralSettings() {
               }
             />
             <div className="space-y-0.5">
-              <Label htmlFor="sound-enabled" className="cursor-pointer">
-                {t('settings.general.notifications.sound.label')}
+              <Label className="cursor-pointer" htmlFor="sound-enabled">
+                {t("settings.general.notifications.sound.label")}
               </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.notifications.sound.helper')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.notifications.sound.helper")}
               </p>
             </div>
           </div>
           {draft?.notifications.sound_enabled && (
             <div className="ml-6 space-y-2">
               <Label htmlFor="sound-file">
-                {t('settings.general.notifications.sound.fileLabel')}
+                {t("settings.general.notifications.sound.fileLabel")}
               </Label>
               <div className="flex gap-2">
                 <Select
-                  value={draft.notifications.sound_file}
                   onValueChange={(value: SoundFile) =>
                     updateDraft({
                       notifications: {
@@ -579,11 +606,12 @@ export function GeneralSettings() {
                       },
                     })
                   }
+                  value={draft.notifications.sound_file}
                 >
-                  <SelectTrigger id="sound-file" className="flex-1">
+                  <SelectTrigger className="flex-1" id="sound-file">
                     <SelectValue
                       placeholder={t(
-                        'settings.general.notifications.sound.filePlaceholder'
+                        "settings.general.notifications.sound.filePlaceholder"
                       )}
                     />
                   </SelectTrigger>
@@ -596,23 +624,23 @@ export function GeneralSettings() {
                   </SelectContent>
                 </Select>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => playSound(draft.notifications.sound_file)}
                   className="px-3"
+                  onClick={() => playSound(draft.notifications.sound_file)}
+                  size="sm"
+                  variant="outline"
                 >
                   <Volume2 className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.notifications.sound.fileHelper')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.notifications.sound.fileHelper")}
               </p>
             </div>
           )}
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="push-notifications"
               checked={draft?.notifications.push_enabled}
+              id="push-notifications"
               onCheckedChange={(checked: boolean) =>
                 updateDraft({
                   notifications: {
@@ -623,11 +651,11 @@ export function GeneralSettings() {
               }
             />
             <div className="space-y-0.5">
-              <Label htmlFor="push-notifications" className="cursor-pointer">
-                {t('settings.general.notifications.push.label')}
+              <Label className="cursor-pointer" htmlFor="push-notifications">
+                {t("settings.general.notifications.push.label")}
               </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.notifications.push.helper')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.notifications.push.helper")}
               </p>
             </div>
           </div>
@@ -636,26 +664,26 @@ export function GeneralSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.privacy.title')}</CardTitle>
+          <CardTitle>{t("settings.general.privacy.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.privacy.description')}
+            {t("settings.general.privacy.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="analytics-enabled"
               checked={draft?.analytics_enabled ?? false}
+              id="analytics-enabled"
               onCheckedChange={(checked: boolean) =>
                 updateDraft({ analytics_enabled: checked })
               }
             />
             <div className="space-y-0.5">
-              <Label htmlFor="analytics-enabled" className="cursor-pointer">
-                {t('settings.general.privacy.telemetry.label')}
+              <Label className="cursor-pointer" htmlFor="analytics-enabled">
+                {t("settings.general.privacy.telemetry.label")}
               </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.privacy.telemetry.helper')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.privacy.telemetry.helper")}
               </p>
             </div>
           </div>
@@ -664,9 +692,9 @@ export function GeneralSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.taskTemplates.title')}</CardTitle>
+          <CardTitle>{t("settings.general.taskTemplates.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.taskTemplates.description')}
+            {t("settings.general.taskTemplates.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -676,65 +704,65 @@ export function GeneralSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.safety.title')}</CardTitle>
+          <CardTitle>{t("settings.general.safety.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.safety.description')}
+            {t("settings.general.safety.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">
-                {t('settings.general.safety.disclaimer.title')}
+                {t("settings.general.safety.disclaimer.title")}
               </p>
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.safety.disclaimer.description')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.safety.disclaimer.description")}
               </p>
             </div>
-            <Button variant="outline" onClick={resetDisclaimer}>
-              {t('settings.general.safety.disclaimer.button')}
+            <Button onClick={resetDisclaimer} variant="outline">
+              {t("settings.general.safety.disclaimer.button")}
             </Button>
           </div>
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">
-                {t('settings.general.safety.onboarding.title')}
+                {t("settings.general.safety.onboarding.title")}
               </p>
-              <p className="text-sm text-muted-foreground">
-                {t('settings.general.safety.onboarding.description')}
+              <p className="text-muted-foreground text-sm">
+                {t("settings.general.safety.onboarding.description")}
               </p>
             </div>
-            <Button variant="outline" onClick={resetOnboarding}>
-              {t('settings.general.safety.onboarding.button')}
+            <Button onClick={resetOnboarding} variant="outline">
+              {t("settings.general.safety.onboarding.button")}
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Sticky Save Button */}
-      <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t py-4">
+      <div className="sticky bottom-0 z-10 border-t bg-background/80 py-4 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           {hasUnsavedChanges ? (
-            <span className="text-sm text-muted-foreground">
-              {t('settings.general.save.unsavedChanges')}
+            <span className="text-muted-foreground text-sm">
+              {t("settings.general.save.unsavedChanges")}
             </span>
           ) : (
             <span />
           )}
           <div className="flex gap-2">
             <Button
-              variant="outline"
-              onClick={handleDiscard}
               disabled={!hasUnsavedChanges || saving}
+              onClick={handleDiscard}
+              variant="outline"
             >
-              {t('settings.general.save.discard')}
+              {t("settings.general.save.discard")}
             </Button>
             <Button
-              onClick={handleSave}
               disabled={!hasUnsavedChanges || saving || !!branchPrefixError}
+              onClick={handleSave}
             >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('settings.general.save.button')}
+              {t("settings.general.save.button")}
             </Button>
           </div>
         </div>

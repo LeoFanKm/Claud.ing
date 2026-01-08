@@ -4529,6 +4529,7 @@ dependencies = [
  "hmac",
  "ipnetwork",
  "jsonwebtoken 9.3.1",
+ "moka",
  "rand 0.9.2",
  "reqwest",
  "secrecy",

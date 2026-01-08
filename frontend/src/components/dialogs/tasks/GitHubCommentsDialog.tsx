@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { AlertCircle, Loader2, MessageSquare } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { UnifiedPrComment } from "shared/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { MessageSquare, AlertCircle, Loader2 } from 'lucide-react';
-import { usePrComments } from '@/hooks/usePrComments';
-import { GitHubCommentCard } from '@/components/ui/github-comment-card';
-import type { UnifiedPrComment } from 'shared/types';
+} from "@/components/ui/dialog";
+import { GitHubCommentCard } from "@/components/ui/github-comment-card";
+import { usePrComments } from "@/hooks/usePrComments";
+import { defineModal } from "@/lib/modals";
 
 export interface GitHubCommentsDialogProps {
   attemptId: string;
@@ -27,14 +27,14 @@ export interface GitHubCommentsDialogResult {
 }
 
 function getCommentId(comment: UnifiedPrComment): string {
-  return comment.comment_type === 'general'
+  return comment.comment_type === "general"
     ? comment.id
     : comment.id.toString();
 }
 
 const GitHubCommentsDialogImpl = NiceModal.create<GitHubCommentsDialogProps>(
   ({ attemptId, repoId }) => {
-    const { t } = useTranslation(['tasks', 'common']);
+    const { t } = useTranslation(["tasks", "common"]);
     const modal = useModal();
     const { data, isLoading, isError, error } = usePrComments(
       attemptId,
@@ -92,29 +92,29 @@ const GitHubCommentsDialogImpl = NiceModal.create<GitHubCommentsDialogProps>(
 
     return (
       <Dialog
-        open={modal.visible}
+        className="max-w-2xl overflow-hidden p-0"
         onOpenChange={handleOpenChange}
-        className="max-w-2xl p-0 overflow-hidden"
+        open={modal.visible}
       >
         <DialogContent
           className="p-0"
           onKeyDownCapture={(e) => {
-            if (e.key === 'Escape') {
+            if (e.key === "Escape") {
               e.stopPropagation();
               modal.resolve({ comments: [] });
               modal.hide();
             }
           }}
         >
-          <DialogHeader className="px-4 py-3 border-b">
+          <DialogHeader className="border-b px-4 py-3">
             <DialogTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              {t('tasks:githubComments.dialog.title')}
+              {t("tasks:githubComments.dialog.title")}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="max-h-[70vh] flex flex-col min-h-0">
-            <div className="p-4 overflow-auto flex-1 min-h-0">
+          <div className="flex max-h-[70vh] min-h-0 flex-col">
+            <div className="min-h-0 flex-1 overflow-auto p-4">
               {errorMessage ? (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -125,26 +125,26 @@ const GitHubCommentsDialogImpl = NiceModal.create<GitHubCommentsDialogProps>(
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               ) : comments.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  {t('tasks:githubComments.dialog.noComments')}
+                <p className="py-8 text-center text-muted-foreground">
+                  {t("tasks:githubComments.dialog.noComments")}
                 </p>
               ) : (
                 <>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-muted-foreground">
-                      {t('tasks:githubComments.dialog.selectedCount', {
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-muted-foreground text-sm">
+                      {t("tasks:githubComments.dialog.selectedCount", {
                         selected: selectedIds.size,
                         total: comments.length,
                       })}
                     </span>
                     <Button
-                      variant="ghost"
-                      size="sm"
                       onClick={isAllSelected ? deselectAll : selectAll}
+                      size="sm"
+                      variant="ghost"
                     >
                       {isAllSelected
-                        ? t('tasks:githubComments.dialog.deselectAll')
-                        : t('tasks:githubComments.dialog.selectAll')}
+                        ? t("tasks:githubComments.dialog.deselectAll")
+                        : t("tasks:githubComments.dialog.selectAll")}
                     </Button>
                   </div>
                   <div className="space-y-3">
@@ -152,39 +152,39 @@ const GitHubCommentsDialogImpl = NiceModal.create<GitHubCommentsDialogProps>(
                       const id = getCommentId(comment);
                       return (
                         <div
+                          className="flex min-w-0 items-start gap-3"
                           key={id}
-                          className="flex items-start gap-3 min-w-0"
                         >
                           <Checkbox
                             checked={selectedIds.has(id)}
-                            onCheckedChange={() => toggleSelection(id)}
                             className="mt-3"
+                            onCheckedChange={() => toggleSelection(id)}
                           />
                           <GitHubCommentCard
                             author={comment.author}
                             body={comment.body}
-                            createdAt={comment.created_at}
-                            url={comment.url}
+                            className="min-w-0 flex-1"
                             commentType={comment.comment_type}
-                            path={
-                              comment.comment_type === 'review'
-                                ? comment.path
+                            createdAt={comment.created_at}
+                            diffHunk={
+                              comment.comment_type === "review"
+                                ? comment.diff_hunk
                                 : undefined
                             }
                             line={
-                              comment.comment_type === 'review' &&
+                              comment.comment_type === "review" &&
                               comment.line != null
                                 ? Number(comment.line)
                                 : undefined
                             }
-                            diffHunk={
-                              comment.comment_type === 'review'
-                                ? comment.diff_hunk
+                            onClick={() => toggleSelection(id)}
+                            path={
+                              comment.comment_type === "review"
+                                ? comment.path
                                 : undefined
                             }
+                            url={comment.url}
                             variant="list"
-                            onClick={() => toggleSelection(id)}
-                            className="flex-1 min-w-0"
                           />
                         </div>
                       );
@@ -195,14 +195,14 @@ const GitHubCommentsDialogImpl = NiceModal.create<GitHubCommentsDialogProps>(
             </div>
           </div>
 
-          {!errorMessage && !isLoading && comments.length > 0 && (
-            <DialogFooter className="px-4 py-3 border-t">
-              <Button variant="outline" onClick={() => handleOpenChange(false)}>
-                {t('common:buttons.cancel')}
+          {!(errorMessage || isLoading) && comments.length > 0 && (
+            <DialogFooter className="border-t px-4 py-3">
+              <Button onClick={() => handleOpenChange(false)} variant="outline">
+                {t("common:buttons.cancel")}
               </Button>
-              <Button onClick={handleConfirm} disabled={selectedIds.size === 0}>
-                {t('tasks:githubComments.dialog.add')}
-                {selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
+              <Button disabled={selectedIds.size === 0} onClick={handleConfirm}>
+                {t("tasks:githubComments.dialog.add")}
+                {selectedIds.size > 0 ? ` (${selectedIds.size})` : ""}
               </Button>
             </DialogFooter>
           )}
@@ -214,19 +214,19 @@ const GitHubCommentsDialogImpl = NiceModal.create<GitHubCommentsDialogProps>(
 
 function getErrorMessage(error: unknown): string {
   // Check if it's an API error with error_data
-  if (error && typeof error === 'object' && 'error_data' in error) {
+  if (error && typeof error === "object" && "error_data" in error) {
     const errorData = (error as { error_data?: { type?: string } }).error_data;
-    if (errorData?.type === 'no_pr_attached') {
-      return 'No PR is attached to this task attempt. Create a PR first to see comments.';
+    if (errorData?.type === "no_pr_attached") {
+      return "No PR is attached to this task attempt. Create a PR first to see comments.";
     }
-    if (errorData?.type === 'github_cli_not_installed') {
-      return 'GitHub CLI is not installed. Please install it to fetch PR comments.';
+    if (errorData?.type === "github_cli_not_installed") {
+      return "GitHub CLI is not installed. Please install it to fetch PR comments.";
     }
-    if (errorData?.type === 'github_cli_not_logged_in') {
+    if (errorData?.type === "github_cli_not_logged_in") {
       return 'GitHub CLI is not logged in. Please run "gh auth login" to authenticate.';
     }
   }
-  return 'Failed to load PR comments. Please try again.';
+  return "Failed to load PR comments. Please try again.";
 }
 
 export const GitHubCommentsDialog = defineModal<

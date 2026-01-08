@@ -1,12 +1,12 @@
-import { projectsApi, tagsApi } from '@/lib/api';
-import type { SearchResult, Tag } from 'shared/types';
+import type { SearchResult, Tag } from "shared/types";
+import { projectsApi, tagsApi } from "@/lib/api";
 
 interface FileSearchResult extends SearchResult {
   name: string;
 }
 
 export interface SearchResultItem {
-  type: 'tag' | 'file';
+  type: "tag" | "file";
   tag?: Tag;
   file?: FileSearchResult;
 }
@@ -22,17 +22,17 @@ export async function searchTagsAndFiles(
   const filteredTags = tags.filter((tag) =>
     tag.tag_name.toLowerCase().includes(query.toLowerCase())
   );
-  results.push(...filteredTags.map((tag) => ({ type: 'tag' as const, tag })));
+  results.push(...filteredTags.map((tag) => ({ type: "tag" as const, tag })));
 
   // Fetch files (if projectId is available and query has content)
   if (projectId && query.length > 0) {
     const fileResults = await projectsApi.searchFiles(projectId, query);
     const fileSearchResults: FileSearchResult[] = fileResults.map((item) => ({
       ...item,
-      name: item.path.split('/').pop() || item.path,
+      name: item.path.split("/").pop() || item.path,
     }));
     results.push(
-      ...fileSearchResults.map((file) => ({ type: 'file' as const, file }))
+      ...fileSearchResults.map((file) => ({ type: "file" as const, file }))
     );
   }
 

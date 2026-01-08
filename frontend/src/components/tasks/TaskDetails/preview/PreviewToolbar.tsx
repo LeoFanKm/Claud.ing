@@ -1,16 +1,16 @@
-import { ExternalLink, RefreshCw, Copy, Loader2, Pause } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import { Copy, ExternalLink, Loader2, Pause, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { NewCardHeader } from "@/components/ui/new-card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { NewCardHeader } from '@/components/ui/new-card';
+} from "@/components/ui/tooltip";
 
 interface PreviewToolbarProps {
-  mode: 'noServer' | 'error' | 'ready';
+  mode: "noServer" | "error" | "ready";
   url?: string;
   onRefresh: () => void;
   onCopyUrl: () => void;
@@ -26,24 +26,24 @@ export function PreviewToolbar({
   onStop,
   isStopping,
 }: PreviewToolbarProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
 
   const actions =
-    mode !== 'noServer' ? (
+    mode !== "noServer" ? (
       <>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="icon"
-                aria-label={t('preview.toolbar.refresh')}
+                aria-label={t("preview.toolbar.refresh")}
                 onClick={onRefresh}
+                variant="icon"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('preview.toolbar.refresh')}
+              {t("preview.toolbar.refresh")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -52,16 +52,16 @@ export function PreviewToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="icon"
-                aria-label={t('preview.toolbar.copyUrl')}
-                onClick={onCopyUrl}
+                aria-label={t("preview.toolbar.copyUrl")}
                 disabled={!url}
+                onClick={onCopyUrl}
+                variant="icon"
               >
                 <Copy className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('preview.toolbar.copyUrl')}
+              {t("preview.toolbar.copyUrl")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -70,23 +70,23 @@ export function PreviewToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="icon"
-                aria-label={t('preview.toolbar.openInTab')}
+                aria-label={t("preview.toolbar.openInTab")}
                 asChild
                 disabled={!url}
+                variant="icon"
               >
                 <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="flex items-center"
+                  href={url}
+                  rel="noopener noreferrer"
+                  target="_blank"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('preview.toolbar.openInTab')}
+              {t("preview.toolbar.openInTab")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -97,10 +97,10 @@ export function PreviewToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="icon"
-                aria-label={t('preview.toolbar.stopDevServer')}
-                onClick={onStop}
+                aria-label={t("preview.toolbar.stopDevServer")}
                 disabled={isStopping}
+                onClick={onStop}
+                variant="icon"
               >
                 {isStopping ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -110,7 +110,7 @@ export function PreviewToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('preview.toolbar.stopDevServer')}
+              {t("preview.toolbar.stopDevServer")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -118,11 +118,11 @@ export function PreviewToolbar({
     ) : undefined;
 
   return (
-    <NewCardHeader className="shrink-0" actions={actions}>
+    <NewCardHeader actions={actions} className="shrink-0">
       <div className="flex items-center">
         <span
-          className="text-sm text-muted-foreground font-mono truncate whitespace-nowrap"
           aria-live="polite"
+          className="truncate whitespace-nowrap font-mono text-muted-foreground text-sm"
         >
           {url || <Loader2 className="h-4 w-4 animate-spin" />}
         </span>

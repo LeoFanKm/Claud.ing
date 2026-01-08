@@ -4,64 +4,37 @@
     "append_prompt": {
       "title": "Append Prompt",
       "description": "Extra text appended to the prompt",
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": ["string", "null"],
       "format": "textarea",
       "default": null
     },
     "claude_code_router": {
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "type": ["boolean", "null"]
     },
     "plan": {
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "type": ["boolean", "null"]
     },
     "approvals": {
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "type": ["boolean", "null"]
     },
     "model": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "dangerously_skip_permissions": {
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "type": ["boolean", "null"]
     },
     "disable_api_key": {
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "type": ["boolean", "null"]
     },
     "base_command_override": {
       "title": "Base Command Override",
       "description": "Override the base command with a custom command",
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "additional_params": {
       "title": "Additional Parameters",
       "description": "Additional parameters to append to the base command",
-      "type": [
-        "array",
-        "null"
-      ],
+      "type": ["array", "null"],
       "items": {
         "type": "string"
       }
@@ -69,10 +42,7 @@
     "env": {
       "title": "Environment Variables",
       "description": "Environment variables to set when running the executor",
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "additionalProperties": {
         "type": "string"
       }

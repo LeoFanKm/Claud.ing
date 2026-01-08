@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { UserAvatar } from './UserAvatar';
+import type { ReactNode } from "react";
+import { UserAvatar } from "./UserAvatar";
 
 interface HeaderAvatar {
   firstName?: string;
@@ -24,23 +24,23 @@ export function TaskCardHeader({
   titleClassName,
 }: TaskCardHeaderProps) {
   return (
-    <div className={`flex items-start gap-3 min-w-0 ${className ?? ''}`}>
+    <div className={`flex min-w-0 items-start gap-3 ${className ?? ""}`}>
       <h4
-        className={`flex-1 min-w-0 line-clamp-2 font-light text-sm ${titleClassName ?? ''}`}
+        className={`line-clamp-2 min-w-0 flex-1 font-light text-sm ${titleClassName ?? ""}`}
       >
         {avatar ? (
           <UserAvatar
+            className="mr-2 inline-flex h-5 w-5 align-middle"
             firstName={avatar.firstName}
+            imageUrl={avatar.imageUrl}
             lastName={avatar.lastName}
             username={avatar.username}
-            imageUrl={avatar.imageUrl}
-            className="mr-2 inline-flex align-middle h-5 w-5"
           />
         ) : null}
         <span className="align-middle">{title}</span>
       </h4>
       {right ? (
-        <div className="flex items-center gap-1 shrink-0">{right}</div>
+        <div className="flex shrink-0 items-center gap-1">{right}</div>
       ) : null}
     </div>
   );

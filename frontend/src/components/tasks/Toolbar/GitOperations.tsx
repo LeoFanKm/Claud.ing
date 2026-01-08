@@ -1,35 +1,35 @@
 import {
+  AlertTriangle,
   ArrowRight,
+  CheckCircle,
+  ExternalLink,
   GitBranch as GitBranchIcon,
   GitPullRequest,
   RefreshCw,
   Settings,
-  AlertTriangle,
-  CheckCircle,
-  ExternalLink,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button.tsx';
+} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type {
+  Merge,
+  RepoBranchStatus,
+  TaskWithAttemptStatus,
+  Workspace,
+} from "shared/types";
+import { ChangeTargetBranchDialog } from "@/components/dialogs/tasks/ChangeTargetBranchDialog";
+import { CreatePRDialog } from "@/components/dialogs/tasks/CreatePRDialog";
+import { RebaseDialog } from "@/components/dialogs/tasks/RebaseDialog";
+import RepoSelector from "@/components/tasks/RepoSelector";
+import { Button } from "@/components/ui/button.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip.tsx';
-import { useCallback, useMemo, useState } from 'react';
-import type {
-  RepoBranchStatus,
-  Merge,
-  TaskWithAttemptStatus,
-  Workspace,
-} from 'shared/types';
-import { ChangeTargetBranchDialog } from '@/components/dialogs/tasks/ChangeTargetBranchDialog';
-import RepoSelector from '@/components/tasks/RepoSelector';
-import { RebaseDialog } from '@/components/dialogs/tasks/RebaseDialog';
-import { CreatePRDialog } from '@/components/dialogs/tasks/CreatePRDialog';
-import { useTranslation } from 'react-i18next';
-import { useAttemptRepo } from '@/hooks/useAttemptRepo';
-import { useGitOperations } from '@/hooks/useGitOperations';
-import { useRepoBranches } from '@/hooks';
+} from "@/components/ui/tooltip.tsx";
+import { useRepoBranches } from "@/hooks";
+import { useAttemptRepo } from "@/hooks/useAttemptRepo";
+import { useGitOperations } from "@/hooks/useGitOperations";
 
 interface GitOperationsProps {
   selectedAttempt: Workspace;
@@ -37,10 +37,10 @@ interface GitOperationsProps {
   branchStatus: RepoBranchStatus[] | null;
   isAttemptRunning: boolean;
   selectedBranch: string | null;
-  layout?: 'horizontal' | 'vertical';
+  layout?: "horizontal" | "vertical";
 }
 
-export type GitOperationsInputs = Omit<GitOperationsProps, 'selectedAttempt'>;
+export type GitOperationsInputs = Omit<GitOperationsProps, "selectedAttempt">;
 
 function GitOperations({
   selectedAttempt,
@@ -48,9 +48,9 @@ function GitOperations({
   branchStatus,
   isAttemptRunning,
   selectedBranch,
-  layout = 'horizontal',
+  layout = "horizontal",
 }: GitOperationsProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
 
   const { repos, selectedRepoId, setSelectedRepoId } = useAttemptRepo(
     selectedAttempt.id
@@ -80,10 +80,10 @@ function GitOperations({
     try {
       const result = await ChangeTargetBranchDialog.show({
         branches,
-        isChangingTargetBranch: isChangingTargetBranch,
+        isChangingTargetBranch,
       });
 
-      if (result.action === 'confirmed' && result.branchName) {
+      if (result.action === "confirmed" && result.branchName) {
         await handleChangeTargetBranchClick(result.branchName);
       }
     } catch (error) {
@@ -123,17 +123,17 @@ function GitOperations({
       };
 
     const openPR = selectedRepoStatus.merges.find(
-      (m: Merge) => m.type === 'pr' && m.pr_info.status === 'open'
+      (m: Merge) => m.type === "pr" && m.pr_info.status === "open"
     );
 
     const mergedPR = selectedRepoStatus.merges.find(
-      (m: Merge) => m.type === 'pr' && m.pr_info.status === 'merged'
+      (m: Merge) => m.type === "pr" && m.pr_info.status === "merged"
     );
 
     const merges = selectedRepoStatus.merges.filter(
       (m: Merge) =>
-        m.type === 'direct' ||
-        (m.type === 'pr' && m.pr_info.status === 'merged')
+        m.type === "direct" ||
+        (m.type === "pr" && m.pr_info.status === "merged")
     );
 
     return {
@@ -147,25 +147,25 @@ function GitOperations({
   }, [getSelectedRepoStatus]);
 
   const mergeButtonLabel = useMemo(() => {
-    if (mergeSuccess) return t('git.states.merged');
-    if (merging) return t('git.states.merging');
-    return t('git.states.merge');
+    if (mergeSuccess) return t("git.states.merged");
+    if (merging) return t("git.states.merging");
+    return t("git.states.merge");
   }, [mergeSuccess, merging, t]);
 
   const rebaseButtonLabel = useMemo(() => {
-    if (rebasing) return t('git.states.rebasing');
-    return t('git.states.rebase');
+    if (rebasing) return t("git.states.rebasing");
+    return t("git.states.rebase");
   }, [rebasing, t]);
 
   const prButtonLabel = useMemo(() => {
     if (mergeInfo.hasOpenPR) {
       return pushSuccess
-        ? t('git.states.pushed')
+        ? t("git.states.pushed")
         : pushing
-          ? t('git.states.pushing')
-          : t('git.states.push');
+          ? t("git.states.pushing")
+          : t("git.states.push");
     }
-    return t('git.states.createPr');
+    return t("git.states.createPr");
   }, [mergeInfo.hasOpenPR, pushSuccess, pushing, t]);
 
   const handleMergeClick = async () => {
@@ -211,7 +211,7 @@ function GitOperations({
       if (!repoId) return;
       await git.actions.rebase({
         repoId,
-        newBaseBranch: newBaseBranch,
+        newBaseBranch,
         oldBaseBranch: selectedUpstream,
       });
     } finally {
@@ -229,7 +229,7 @@ function GitOperations({
         initialUpstreamBranch: defaultTargetBranch,
       });
       if (
-        result.action === 'confirmed' &&
+        result.action === "confirmed" &&
         result.branchName &&
         result.upstreamBranch
       ) {
@@ -258,65 +258,65 @@ function GitOperations({
     });
   };
 
-  const isVertical = layout === 'vertical';
+  const isVertical = layout === "vertical";
 
   const containerClasses = isVertical
-    ? 'grid grid-cols-1 items-start gap-3 overflow-hidden'
-    : 'flex items-center gap-2 overflow-hidden';
+    ? "grid grid-cols-1 items-start gap-3 overflow-hidden"
+    : "flex items-center gap-2 overflow-hidden";
 
   const settingsBtnClasses = isVertical
-    ? 'inline-flex h-5 w-5 p-0 hover:bg-muted'
-    : 'hidden md:inline-flex h-5 w-5 p-0 hover:bg-muted';
+    ? "inline-flex h-5 w-5 p-0 hover:bg-muted"
+    : "hidden md:inline-flex h-5 w-5 p-0 hover:bg-muted";
 
   const actionsClasses = isVertical
-    ? 'flex flex-wrap items-center gap-2'
-    : 'shrink-0 flex flex-wrap items-center gap-2 overflow-y-hidden overflow-x-visible max-h-8';
+    ? "flex flex-wrap items-center gap-2"
+    : "shrink-0 flex flex-wrap items-center gap-2 overflow-y-hidden overflow-x-visible max-h-8";
 
   const statusChips = (
-    <div className="flex items-center gap-2 text-xs min-w-0 overflow-hidden whitespace-nowrap">
+    <div className="flex min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap text-xs">
       {(() => {
         const commitsAhead = selectedRepoStatus?.commits_ahead ?? 0;
         const commitsBehind = selectedRepoStatus?.commits_behind ?? 0;
 
         if (hasConflictsCalculated) {
           return (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/60 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100/60 px-2 py-0.5 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
               <AlertTriangle className="h-3.5 w-3.5" />
-              {t('git.status.conflicts')}
+              {t("git.status.conflicts")}
             </span>
           );
         }
 
         if (selectedRepoStatus?.is_rebase_in_progress) {
           return (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/60 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100/60 px-2 py-0.5 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              {t('git.states.rebasing')}
+              {t("git.states.rebasing")}
             </span>
           );
         }
 
         if (mergeInfo.hasMergedPR) {
           return (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100/70 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/70 px-2 py-0.5 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
               <CheckCircle className="h-3.5 w-3.5" />
-              {t('git.states.merged')}
+              {t("git.states.merged")}
             </span>
           );
         }
 
-        if (mergeInfo.hasOpenPR && mergeInfo.openPR?.type === 'pr') {
+        if (mergeInfo.hasOpenPR && mergeInfo.openPR?.type === "pr") {
           const prMerge = mergeInfo.openPR;
           return (
             <button
-              onClick={() => window.open(prMerge.pr_info.url, '_blank')}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-100/60 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:underline truncate max-w-[180px] sm:max-w-none"
-              aria-label={t('git.pr.open', {
+              aria-label={t("git.pr.open", {
                 number: Number(prMerge.pr_info.number),
               })}
+              className="inline-flex max-w-[180px] items-center gap-1 truncate rounded-full bg-sky-100/60 px-2 py-0.5 text-sky-700 hover:underline sm:max-w-none dark:bg-sky-900/30 dark:text-sky-300"
+              onClick={() => window.open(prMerge.pr_info.url, "_blank")}
             >
               <GitPullRequest className="h-3.5 w-3.5" />
-              {t('git.pr.number', {
+              {t("git.pr.number", {
                 number: Number(prMerge.pr_info.number),
               })}
               <ExternalLink className="h-3.5 w-3.5" />
@@ -328,23 +328,23 @@ function GitOperations({
         if (commitsAhead > 0) {
           chips.push(
             <span
+              className="hidden items-center gap-1 rounded-full bg-emerald-100/70 px-2 py-0.5 text-emerald-700 sm:inline-flex dark:bg-emerald-900/30 dark:text-emerald-300"
               key="ahead"
-              className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100/70 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
             >
-              +{commitsAhead} {t('git.status.commits', { count: commitsAhead })}{' '}
-              {t('git.status.ahead')}
+              +{commitsAhead} {t("git.status.commits", { count: commitsAhead })}{" "}
+              {t("git.status.ahead")}
             </span>
           );
         }
         if (commitsBehind > 0) {
           chips.push(
             <span
+              className="inline-flex items-center gap-1 rounded-full bg-amber-100/60 px-2 py-0.5 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
               key="behind"
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/60 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
             >
-              {commitsBehind}{' '}
-              {t('git.status.commits', { count: commitsBehind })}{' '}
-              {t('git.status.behind')}
+              {commitsBehind}{" "}
+              {t("git.status.commits", { count: commitsBehind })}{" "}
+              {t("git.status.behind")}
             </span>
           );
         }
@@ -352,8 +352,8 @@ function GitOperations({
           return <div className="flex items-center gap-2">{chips}</div>;
 
         return (
-          <span className="text-muted-foreground hidden sm:inline">
-            {t('git.status.upToDate')}
+          <span className="hidden text-muted-foreground sm:inline">
+            {t("git.status.upToDate")}
           </span>
         );
       })()}
@@ -366,35 +366,35 @@ function GitOperations({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="hidden sm:inline-flex items-center gap-1.5 max-w-[280px] px-2 py-0.5 rounded-full bg-muted text-xs font-medium min-w-0">
-              <GitBranchIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <span className="hidden min-w-0 max-w-[280px] items-center gap-1.5 rounded-full bg-muted px-2 py-0.5 font-medium text-xs sm:inline-flex">
+              <GitBranchIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               <span className="truncate">{selectedAttempt.branch}</span>
             </span>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            {t('git.labels.taskBranch')}
+            {t("git.labels.taskBranch")}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
-      <ArrowRight className="hidden sm:inline h-4 w-4 text-muted-foreground" />
+      <ArrowRight className="hidden h-4 w-4 text-muted-foreground sm:inline" />
 
       {/* Target branch chip + change button */}
-      <div className="flex items-center gap-1 min-w-0">
+      <div className="flex min-w-0 items-center gap-1">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="inline-flex items-center gap-1.5 max-w-[280px] px-2 py-0.5 rounded-full bg-muted text-xs font-medium min-w-0">
-                <GitBranchIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="inline-flex min-w-0 max-w-[280px] items-center gap-1.5 rounded-full bg-muted px-2 py-0.5 font-medium text-xs">
+                <GitBranchIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="truncate">
                   {getSelectedRepoStatus()?.target_branch_name ||
                     selectedBranch ||
-                    t('git.branch.current')}
+                    t("git.branch.current")}
                 </span>
               </span>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('rebase.dialog.targetLabel')}
+              {t("rebase.dialog.targetLabel")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -403,18 +403,18 @@ function GitOperations({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
-                size="xs"
-                onClick={handleChangeTargetBranchDialogOpen}
-                disabled={isAttemptRunning || hasConflictsCalculated}
+                aria-label={t("branches.changeTarget.dialog.title")}
                 className={settingsBtnClasses}
-                aria-label={t('branches.changeTarget.dialog.title')}
+                disabled={isAttemptRunning || hasConflictsCalculated}
+                onClick={handleChangeTargetBranchDialogOpen}
+                size="xs"
+                variant="ghost"
               >
                 <Settings className="h-3.5 w-3.5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('branches.changeTarget.dialog.title')}
+              {t("branches.changeTarget.dialog.title")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -429,14 +429,14 @@ function GitOperations({
           <>
             {repos.length > 1 && (
               <RepoSelector
+                disabled={isAttemptRunning}
+                onRepoSelect={setSelectedRepoId}
+                placeholder={t("repos.selector.placeholder", "Select repo")}
                 repos={repos}
                 selectedRepoId={getSelectedRepoId() ?? null}
-                onRepoSelect={setSelectedRepoId}
-                disabled={isAttemptRunning}
-                placeholder={t('repos.selector.placeholder', 'Select repo')}
               />
             )}
-            <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               {branchChips}
               {statusChips}
             </div>
@@ -445,16 +445,16 @@ function GitOperations({
           <>
             {repos.length > 0 && (
               <RepoSelector
+                className="h-6 w-auto max-w-[200px] rounded-full border-0 bg-muted px-2 py-0.5 font-medium text-xs"
+                disabled={isAttemptRunning}
+                onRepoSelect={setSelectedRepoId}
+                placeholder={t("repos.selector.placeholder", "Select repo")}
                 repos={repos}
                 selectedRepoId={getSelectedRepoId() ?? null}
-                onRepoSelect={setSelectedRepoId}
-                disabled={isAttemptRunning}
-                placeholder={t('repos.selector.placeholder', 'Select repo')}
-                className="w-auto max-w-[200px] rounded-full bg-muted border-0 h-6 px-2 py-0.5 text-xs font-medium"
               />
             )}
-            <div className="flex flex-1 items-center justify-center gap-2 min-w-0 overflow-hidden">
-              <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+            <div className="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden">
+              <div className="flex min-w-0 items-center gap-2 overflow-hidden">
                 {branchChips}
               </div>
               {statusChips}
@@ -466,7 +466,8 @@ function GitOperations({
         {selectedRepoStatus && (
           <div className={actionsClasses}>
             <Button
-              onClick={handleMergeClick}
+              aria-label={mergeButtonLabel}
+              className="shrink-0 gap-1 border-success text-success hover:bg-success"
               disabled={
                 mergeInfo.hasMergedPR ||
                 mergeInfo.hasOpenPR ||
@@ -477,17 +478,17 @@ function GitOperations({
                   !pushSuccess &&
                   !mergeSuccess)
               }
-              variant="outline"
+              onClick={handleMergeClick}
               size="xs"
-              className="border-success text-success hover:bg-success gap-1 shrink-0"
-              aria-label={mergeButtonLabel}
+              variant="outline"
             >
               <GitBranchIcon className="h-3.5 w-3.5" />
-              <span className="truncate max-w-[10ch]">{mergeButtonLabel}</span>
+              <span className="max-w-[10ch] truncate">{mergeButtonLabel}</span>
             </Button>
 
             <Button
-              onClick={handlePRButtonClick}
+              aria-label={prButtonLabel}
+              className="shrink-0 gap-1 border-info text-info hover:bg-info"
               disabled={
                 mergeInfo.hasMergedPR ||
                 pushing ||
@@ -500,27 +501,26 @@ function GitOperations({
                   !pushSuccess &&
                   !mergeSuccess)
               }
-              variant="outline"
+              onClick={handlePRButtonClick}
               size="xs"
-              className="border-info text-info hover:bg-info gap-1 shrink-0"
-              aria-label={prButtonLabel}
+              variant="outline"
             >
               <GitPullRequest className="h-3.5 w-3.5" />
-              <span className="truncate max-w-[10ch]">{prButtonLabel}</span>
+              <span className="max-w-[10ch] truncate">{prButtonLabel}</span>
             </Button>
 
             <Button
-              onClick={handleRebaseDialogOpen}
-              disabled={rebasing || isAttemptRunning || hasConflictsCalculated}
-              variant="outline"
-              size="xs"
-              className="border-warning text-warning hover:bg-warning gap-1 shrink-0"
               aria-label={rebaseButtonLabel}
+              className="shrink-0 gap-1 border-warning text-warning hover:bg-warning"
+              disabled={rebasing || isAttemptRunning || hasConflictsCalculated}
+              onClick={handleRebaseDialogOpen}
+              size="xs"
+              variant="outline"
             >
               <RefreshCw
-                className={`h-3.5 w-3.5 ${rebasing ? 'animate-spin' : ''}`}
+                className={`h-3.5 w-3.5 ${rebasing ? "animate-spin" : ""}`}
               />
-              <span className="truncate max-w-[10ch]">{rebaseButtonLabel}</span>
+              <span className="max-w-[10ch] truncate">{rebaseButtonLabel}</span>
             </Button>
           </div>
         )}

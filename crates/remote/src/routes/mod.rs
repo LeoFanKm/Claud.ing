@@ -1,7 +1,8 @@
 use axum::{
     Router,
-    http::{Request, header::HeaderName},
-    middleware,
+    body::Body,
+    http::{header, header::HeaderName, HeaderValue, Method, Request, Response},
+    middleware::{self, Next},
     routing::get,
 };
 use tower_http::{
@@ -13,6 +14,35 @@ use tower_http::{
 use tracing::{Level, field};
 
 use crate::{AppState, auth::require_session};
+
+/// Security headers middleware - adds security headers to all responses
+async fn security_headers(request: Request<Body>, next: Next) -> Response<Body> {
+    let mut response = next.run(request).await;
+    let headers = response.headers_mut();
+
+    // Prevent clickjacking
+    headers.insert(
+        HeaderName::from_static("x-frame-options"),
+        HeaderValue::from_static("DENY"),
+    );
+    // Prevent MIME type sniffing
+    headers.insert(
+        HeaderName::from_static("x-content-type-options"),
+        HeaderValue::from_static("nosniff"),
+    );
+    // XSS protection for legacy browsers
+    headers.insert(
+        HeaderName::from_static("x-xss-protection"),
+        HeaderValue::from_static("1; mode=block"),
+    );
+    // Referrer policy
+    headers.insert(
+        HeaderName::from_static("referrer-policy"),
+        HeaderValue::from_static("strict-origin-when-cross-origin"),
+    );
+
+    response
+}
 
 mod electric_proxy;
 mod error;
@@ -79,11 +109,28 @@ pub fn router(state: AppState) -> Router {
         .fallback_service(spa)
         .layer(
             CorsLayer::new()
-                .allow_origin(AllowOrigin::mirror_request())
-                .allow_methods(AllowMethods::mirror_request())
-                .allow_headers(AllowHeaders::mirror_request())
+                .allow_origin(AllowOrigin::list([
+                    "https://claud.ing".parse().unwrap(),
+                    "https://www.claud.ing".parse().unwrap(),
+                    "http://localhost:5173".parse().unwrap(),
+                    "http://localhost:3000".parse().unwrap(),
+                ]))
+                .allow_methods(AllowMethods::list([
+                    Method::GET,
+                    Method::POST,
+                    Method::PUT,
+                    Method::DELETE,
+                    Method::PATCH,
+                    Method::OPTIONS,
+                ]))
+                .allow_headers(AllowHeaders::list([
+                    header::CONTENT_TYPE,
+                    header::AUTHORIZATION,
+                    HeaderName::from_static("x-request-id"),
+                ]))
                 .allow_credentials(true),
         )
+        .layer(middleware::from_fn(security_headers))
         .layer(trace_layer)
         .layer(PropagateRequestIdLayer::new(HeaderName::from_static(
             "x-request-id",

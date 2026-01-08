@@ -1,14 +1,14 @@
 import {
-  MousePointerClick,
-  Trash2,
   ArrowBigLeft,
   MoreHorizontal,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import type { ClickedEntry } from '@/contexts/ClickedElementsProvider';
-import { useState, useMemo } from 'react';
-import { Badge } from '../ui/badge';
-import { useClickedElements } from '@/contexts/ClickedElementsProvider';
+  MousePointerClick,
+  Trash2,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { ClickedEntry } from "@/contexts/ClickedElementsProvider";
+import { useClickedElements } from "@/contexts/ClickedElementsProvider";
+import { Badge } from "../ui/badge";
 
 export type Props = Readonly<{
   isEditable: boolean;
@@ -18,7 +18,7 @@ export type Props = Readonly<{
 const MAX_VISIBLE_ELEMENTS = 5;
 const MAX_BADGES = 6;
 
-type ComponentInfo = ClickedEntry['payload']['components'][number];
+type ComponentInfo = ClickedEntry["payload"]["components"][number];
 
 // Build component chain from inner-most to outer-most for banner display
 function buildChainInnerToOuterForBanner(entry: ClickedEntry) {
@@ -67,12 +67,12 @@ export function ClickedElementsBanner() {
   );
 
   return (
-    <div className="bg-bg flex flex-col gap-2 py-2">
+    <div className="flex flex-col gap-2 bg-bg py-2">
       {visibleElements.map((element) => {
         return (
           <ClickedEntryCard
-            key={element.id}
             element={element}
+            key={element.id}
             onDelete={() => removeElement(element.id)}
           />
         );
@@ -105,8 +105,8 @@ const ClickedEntryCard = ({
   };
 
   return (
-    <div className="flex gap-2 items-center min-w-0">
-      <MousePointerClick className="h-4 w-4 text-info shrink-0" aria-hidden />
+    <div className="flex min-w-0 items-center gap-2">
+      <MousePointerClick aria-hidden className="h-4 w-4 shrink-0 text-info" />
 
       <div className="flex items-center gap-1 overflow-hidden">
         {display.map((component, i) => {
@@ -117,18 +117,18 @@ const ClickedEntryCard = ({
           return (
             <div className="flex items-center" key={`${component.name}-${i}`}>
               {i > 0 && (
-                <ArrowBigLeft className="h-4 w-4 opacity-60" aria-hidden />
+                <ArrowBigLeft aria-hidden className="h-4 w-4 opacity-60" />
               )}
               <button
-                type="button"
-                onClick={() => handleSelect(i)}
+                aria-pressed={isSelected}
                 className={`inline-flex items-center rounded px-2 py-0.5 text-sm transition ${
                   isSelected
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:opacity-90'
-                } ${isDownstream ? 'opacity-50 cursor-pointer' : ''}`}
-                aria-pressed={isSelected}
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:opacity-90"
+                } ${isDownstream ? "cursor-pointer opacity-50" : ""}`}
+                onClick={() => handleSelect(i)}
                 title={component.name}
+                type="button"
               >
                 &lt;{component.name}/&gt;
               </button>
@@ -138,11 +138,11 @@ const ClickedEntryCard = ({
 
         {overflowRight > 0 && (
           <div className="flex items-center">
-            <ArrowBigLeft className="h-4 w-4 opacity-60" aria-hidden />
+            <ArrowBigLeft aria-hidden className="h-4 w-4 opacity-60" />
             <Badge
-              variant="secondary"
-              className="text-xs opacity-70 select-none"
+              className="select-none text-xs opacity-70"
               title={`${overflowRight} more outer components`}
+              variant="secondary"
             >
               <MoreHorizontal className="h-3 w-3" />
               <span className="ml-1">{overflowRight}</span>
@@ -152,11 +152,11 @@ const ClickedEntryCard = ({
       </div>
 
       <Button
+        aria-label="Delete entry"
+        className="ml-auto px-0"
+        onClick={onDelete}
         size="sm"
         variant="ghost"
-        className="px-0 ml-auto"
-        onClick={onDelete}
-        aria-label="Delete entry"
       >
         <Trash2 className="h-4 w-4" />
       </Button>

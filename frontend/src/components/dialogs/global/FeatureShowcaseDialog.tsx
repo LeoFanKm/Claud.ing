@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { ShowcaseStageMedia } from '@/components/showcase/ShowcaseStageMedia';
-import type { ShowcaseConfig } from '@/types/showcase';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ShowcaseStageMedia } from "@/components/showcase/ShowcaseStageMedia";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { defineModal } from "@/lib/modals";
+import type { ShowcaseConfig } from "@/types/showcase";
 
 interface FeatureShowcaseDialogProps {
   config: ShowcaseConfig;
@@ -35,7 +35,7 @@ const FeatureShowcaseDialogImpl = NiceModal.create<FeatureShowcaseDialogProps>(
   ({ config }: FeatureShowcaseDialogProps) => {
     const modal = useModal();
     const [currentStage, setCurrentStage] = useState(0);
-    const { t } = useTranslation('tasks');
+    const { t } = useTranslation("tasks");
 
     const stage = config.stages[currentStage];
     const totalStages = config.stages.length;
@@ -62,49 +62,49 @@ const FeatureShowcaseDialogImpl = NiceModal.create<FeatureShowcaseDialogProps>(
 
     return (
       <Dialog
-        open={modal.visible}
+        className="max-w-none overflow-hidden p-0 xl:max-w-[min(66.66vw,calc((100svh-20rem)*1.6))]"
         onOpenChange={(open) => {
           if (!open) {
             handleClose();
           }
         }}
+        open={modal.visible}
         uncloseable
-        className="max-w-none xl:max-w-[min(66.66vw,calc((100svh-20rem)*1.6))] p-0 overflow-hidden"
       >
-        <DialogContent className="p-0 gap-0">
+        <DialogContent className="gap-0 p-0">
           <AnimatePresence mode="wait">
             <motion.div
-              key={currentStage}
-              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: 20 }}
+              key={currentStage}
               transition={{ duration: 0.2 }}
             >
               <ShowcaseStageMedia media={stage.media} />
 
-              <div className="p-6 space-y-4">
+              <div className="space-y-4 p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-foreground">
+                    <h3 className="font-semibold text-foreground text-lg">
                       {t(stage.titleKey)}
                     </h3>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                  <div className="flex items-center gap-2 font-medium text-muted-foreground text-xs">
                     {currentStage + 1} / {totalStages}
                   </div>
                 </div>
 
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {t(stage.descriptionKey)}
                 </p>
 
                 <div className="flex items-center gap-2">
                   {Array.from({ length: totalStages }).map((_, index) => (
                     <div
-                      key={index}
                       className={`h-1 flex-1 rounded-full transition-colors ${
-                        index === currentStage ? 'bg-primary' : 'bg-muted'
+                        index === currentStage ? "bg-primary" : "bg-muted"
                       }`}
+                      key={index}
                     />
                   ))}
                 </div>
@@ -113,20 +113,20 @@ const FeatureShowcaseDialogImpl = NiceModal.create<FeatureShowcaseDialogProps>(
                   <div className="flex justify-end gap-2 pt-2">
                     {currentStage > 0 && (
                       <button
+                        className="inline-flex h-10 items-center justify-center gap-2 border border-input px-4 py-2 font-medium text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                         onClick={handlePrevious}
-                        className="h-10 px-4 py-2 inline-flex items-center justify-center gap-2 text-sm font-medium border border-input hover:bg-accent hover:text-accent-foreground transition-colors"
                       >
                         <ChevronLeft className="h-4 w-4" />
-                        {t('showcases.buttons.previous')}
+                        {t("showcases.buttons.previous")}
                       </button>
                     )}
                     <button
+                      className="inline-flex h-10 items-center justify-center gap-2 border border-foreground px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
                       onClick={handleNext}
-                      className="h-10 px-4 py-2 inline-flex items-center justify-center gap-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 border border-foreground transition-colors"
                     >
                       {currentStage === totalStages - 1
-                        ? t('showcases.buttons.finish')
-                        : t('showcases.buttons.next')}
+                        ? t("showcases.buttons.finish")
+                        : t("showcases.buttons.next")}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>

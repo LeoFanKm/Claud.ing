@@ -1,0 +1,67 @@
+name = "clauding-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Production routes
+[[routes]]
+pattern = "claud.ing/api/*"
+zone_name = "claud.ing"
+
+# Development settings
+[dev]
+port = 8787
+local_protocol = "http"
+
+[[hyperdrive]]
+binding = "DB"
+id = "775ff80bd7424a54b5fd6a1c1f1bc015"
+localConnectionString = "postgresql://neondb_owner:npg_JzCFs76BMaRK@ep-fragrant-star-a1pqfvk8-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "clauding-storage"
+
+[[durable_objects.bindings]]
+name = "TASK_SESSION"
+class_name = "TaskSession"
+
+[[durable_objects.bindings]]
+name = "COLLABORATION_SESSION"
+class_name = "CollaborationSession"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["TaskSession"]
+
+[[migrations]]
+tag = "v2"
+new_classes = ["CollaborationSession"]
+
+# Clerk Authentication Secrets
+# Set these using wrangler secret put:
+#   wrangler secret put CLERK_SECRET_KEY
+#   wrangler secret put CLERK_PUBLISHABLE_KEY
+#
+# Get your keys from: https://dashboard.clerk.com
+# For local development, add to .dev.vars:
+#   CLERK_SECRET_KEY=sk_test_xxx
+#   CLERK_PUBLISHABLE_KEY=pk_test_xxx
+
+# Stripe Billing Secrets
+# Set using wrangler secret put:
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+#
+# Get your keys from: https://dashboard.stripe.com/apikeys
+# Get webhook secret from: https://dashboard.stripe.com/webhooks
+#   - Create webhook endpoint: https://claud.ing/api/billing/webhook
+#   - Events: checkout.session.completed, customer.subscription.updated,
+#             customer.subscription.deleted, invoice.payment_failed
+#
+# For local development, add to .dev.vars:
+#   STRIPE_SECRET_KEY=sk_test_xxx
+#   STRIPE_WEBHOOK_SECRET=whsec_xxx
+#
+# Local webhook testing with Stripe CLI:
+#   stripe listen --forward-to localhost:8787/api/billing/webhook

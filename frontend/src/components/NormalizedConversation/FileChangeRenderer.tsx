@@ -1,42 +1,42 @@
-import { type FileChange } from 'shared/types';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { Trash2, FilePlus2, ArrowRight, FileX, FileClock } from 'lucide-react';
-import { getHighLightLanguageFromPath } from '@/utils/extToLanguage';
-import { getActualTheme } from '@/utils/theme';
-import EditDiffRenderer from './EditDiffRenderer';
-import FileContentView from './FileContentView';
-import '@/styles/diff-style-overrides.css';
-import { useExpandable } from '@/stores/useExpandableStore';
-import { cn } from '@/lib/utils';
+import { ArrowRight, FileClock, FilePlus2, FileX, Trash2 } from "lucide-react";
+import type { FileChange } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { getHighLightLanguageFromPath } from "@/utils/extToLanguage";
+import { getActualTheme } from "@/utils/theme";
+import EditDiffRenderer from "./EditDiffRenderer";
+import FileContentView from "./FileContentView";
+import "@/styles/diff-style-overrides.css";
+import { cn } from "@/lib/utils";
+import { useExpandable } from "@/stores/useExpandableStore";
 
 type Props = {
   path: string;
   change: FileChange;
   expansionKey: string;
   defaultExpanded?: boolean;
-  statusAppearance?: 'default' | 'denied' | 'timed_out';
+  statusAppearance?: "default" | "denied" | "timed_out";
   forceExpanded?: boolean;
 };
 
 function isWrite(
   change: FileChange
-): change is Extract<FileChange, { action: 'write'; content: string }> {
-  return change?.action === 'write';
+): change is Extract<FileChange, { action: "write"; content: string }> {
+  return change?.action === "write";
 }
 function isDelete(
   change: FileChange
-): change is Extract<FileChange, { action: 'delete' }> {
-  return change?.action === 'delete';
+): change is Extract<FileChange, { action: "delete" }> {
+  return change?.action === "delete";
 }
 function isRename(
   change: FileChange
-): change is Extract<FileChange, { action: 'rename'; new_path: string }> {
-  return change?.action === 'rename';
+): change is Extract<FileChange, { action: "rename"; new_path: string }> {
+  return change?.action === "rename";
 }
 function isEdit(
   change: FileChange
-): change is Extract<FileChange, { action: 'edit' }> {
-  return change?.action === 'edit';
+): change is Extract<FileChange, { action: "edit" }> {
+  return change?.action === "edit";
 }
 
 const FileChangeRenderer = ({
@@ -44,7 +44,7 @@ const FileChangeRenderer = ({
   change,
   expansionKey,
   defaultExpanded = false,
-  statusAppearance = 'default',
+  statusAppearance = "default",
   forceExpanded = false,
 }: Props) => {
   const { config } = useUserSystem();
@@ -52,12 +52,12 @@ const FileChangeRenderer = ({
   const effectiveExpanded = forceExpanded || expanded;
 
   const theme = getActualTheme(config?.theme);
-  const headerClass = cn('flex items-center gap-1.5 text-secondary-foreground');
+  const headerClass = cn("flex items-center gap-1.5 text-secondary-foreground");
 
   const statusIcon =
-    statusAppearance === 'denied' ? (
+    statusAppearance === "denied" ? (
       <FileX className="h-3 w-3" />
-    ) : statusAppearance === 'timed_out' ? (
+    ) : statusAppearance === "timed_out" ? (
       <FileClock className="h-3 w-3" />
     ) : null;
 
@@ -66,7 +66,7 @@ const FileChangeRenderer = ({
       <div>
         <div className={headerClass}>
           {statusIcon}
-          <p className="text-sm font-light overflow-x-auto flex-1">{path}</p>
+          <p className="flex-1 overflow-x-auto font-light text-sm">{path}</p>
         </div>
       </div>
     );
@@ -76,13 +76,13 @@ const FileChangeRenderer = ({
   if (isEdit(change)) {
     return (
       <EditDiffRenderer
-        path={path}
-        unifiedDiff={change.unified_diff}
-        hasLineNumbers={change.has_line_numbers}
-        expansionKey={expansionKey}
         defaultExpanded={defaultExpanded}
-        statusAppearance={statusAppearance}
+        expansionKey={expansionKey}
         forceExpanded={forceExpanded}
+        hasLineNumbers={change.has_line_numbers}
+        path={path}
+        statusAppearance={statusAppearance}
+        unifiedDiff={change.unified_diff}
       />
     );
   }
@@ -135,8 +135,8 @@ const FileChangeRenderer = ({
       <div className={headerClass}>
         {icon}
         <p
+          className="flex-1 cursor-pointer overflow-x-auto font-mono text-sm"
           onClick={() => expandable && setExpanded()}
-          className="text-sm font-mono overflow-x-auto flex-1 cursor-pointer"
         >
           {titleNode}
         </p>

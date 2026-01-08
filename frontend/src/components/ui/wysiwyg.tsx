@@ -1,44 +1,44 @@
-import { useMemo, useState, useCallback, memo } from 'react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import { TRANSFORMERS, type Transformer } from '@lexical/markdown';
-import { ImageNode, IMAGE_TRANSFORMER } from './wysiwyg/nodes/image-node';
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { LinkNode } from "@lexical/link";
+import { ListItemNode, ListNode } from "@lexical/list";
+import { TRANSFORMERS, type Transformer } from "@lexical/markdown";
+import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import type { EditorState } from "lexical";
+import { Check, Clipboard, Pencil, Trash2 } from "lucide-react";
+import { memo, useCallback, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { writeClipboardViaBridge } from "@/vscode/bridge";
 import {
-  GitHubCommentNode,
-  GITHUB_COMMENT_TRANSFORMER,
-  GITHUB_COMMENT_EXPORT_TRANSFORMER,
-} from './wysiwyg/nodes/github-comment-node';
-import { CODE_BLOCK_TRANSFORMER } from './wysiwyg/transformers/code-block-transformer';
-import {
+  type LocalImageMetadata,
+  LocalImagesContext,
   TaskAttemptContext,
   TaskContext,
-  LocalImagesContext,
-  type LocalImageMetadata,
-} from './wysiwyg/context/task-attempt-context';
-import { FileTagTypeaheadPlugin } from './wysiwyg/plugins/file-tag-typeahead-plugin';
-import { KeyboardCommandsPlugin } from './wysiwyg/plugins/keyboard-commands-plugin';
-import { ImageKeyboardPlugin } from './wysiwyg/plugins/image-keyboard-plugin';
-import { ReadOnlyLinkPlugin } from './wysiwyg/plugins/read-only-link-plugin';
-import { ToolbarPlugin } from './wysiwyg/plugins/toolbar-plugin';
-import { CodeBlockShortcutPlugin } from './wysiwyg/plugins/code-block-shortcut-plugin';
-import { MarkdownSyncPlugin } from './wysiwyg/plugins/markdown-sync-plugin';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { HeadingNode, QuoteNode } from '@lexical/rich-text';
-import { ListNode, ListItemNode } from '@lexical/list';
-import { ListPlugin } from '@lexical/react/LexicalListPlugin';
-import { CodeNode, CodeHighlightNode } from '@lexical/code';
-import { CodeHighlightPlugin } from './wysiwyg/plugins/code-highlight-plugin';
-import { CODE_HIGHLIGHT_CLASSES } from './wysiwyg/lib/code-highlight-theme';
-import { LinkNode } from '@lexical/link';
-import { EditorState } from 'lexical';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Check, Clipboard, Pencil, Trash2 } from 'lucide-react';
-import { writeClipboardViaBridge } from '@/vscode/bridge';
+} from "./wysiwyg/context/task-attempt-context";
+import { CODE_HIGHLIGHT_CLASSES } from "./wysiwyg/lib/code-highlight-theme";
+import {
+  GITHUB_COMMENT_EXPORT_TRANSFORMER,
+  GITHUB_COMMENT_TRANSFORMER,
+  GitHubCommentNode,
+} from "./wysiwyg/nodes/github-comment-node";
+import { IMAGE_TRANSFORMER, ImageNode } from "./wysiwyg/nodes/image-node";
+import { CodeBlockShortcutPlugin } from "./wysiwyg/plugins/code-block-shortcut-plugin";
+import { CodeHighlightPlugin } from "./wysiwyg/plugins/code-highlight-plugin";
+import { FileTagTypeaheadPlugin } from "./wysiwyg/plugins/file-tag-typeahead-plugin";
+import { ImageKeyboardPlugin } from "./wysiwyg/plugins/image-keyboard-plugin";
+import { KeyboardCommandsPlugin } from "./wysiwyg/plugins/keyboard-commands-plugin";
+import { MarkdownSyncPlugin } from "./wysiwyg/plugins/markdown-sync-plugin";
+import { ReadOnlyLinkPlugin } from "./wysiwyg/plugins/read-only-link-plugin";
+import { ToolbarPlugin } from "./wysiwyg/plugins/toolbar-plugin";
+import { CODE_BLOCK_TRANSFORMER } from "./wysiwyg/transformers/code-block-transformer";
 
 /** Markdown string representing the editor content */
 export type SerializedEditorState = string;
@@ -70,7 +70,7 @@ type WysiwygProps = {
 };
 
 function WYSIWYGEditor({
-  placeholder = '',
+  placeholder = "",
   value,
   onChange,
   onEditorStateChange,
@@ -102,37 +102,37 @@ function WYSIWYGEditor({
 
   const initialConfig = useMemo(
     () => ({
-      namespace: 'md-wysiwyg',
+      namespace: "md-wysiwyg",
       onError: console.error,
       theme: {
-        paragraph: 'mb-2 last:mb-0',
+        paragraph: "mb-2 last:mb-0",
         heading: {
-          h1: 'mt-4 mb-2 text-2xl font-semibold',
-          h2: 'mt-3 mb-2 text-xl font-semibold',
-          h3: 'mt-3 mb-2 text-lg font-semibold',
-          h4: 'mt-2 mb-1 text-base font-medium',
-          h5: 'mt-2 mb-1 text-sm font-medium',
-          h6: 'mt-2 mb-1 text-xs font-medium uppercase tracking-wide',
+          h1: "mt-4 mb-2 text-2xl font-semibold",
+          h2: "mt-3 mb-2 text-xl font-semibold",
+          h3: "mt-3 mb-2 text-lg font-semibold",
+          h4: "mt-2 mb-1 text-base font-medium",
+          h5: "mt-2 mb-1 text-sm font-medium",
+          h6: "mt-2 mb-1 text-xs font-medium uppercase tracking-wide",
         },
         quote:
-          'my-3 border-l-4 border-primary-foreground pl-4 text-muted-foreground',
+          "my-3 border-l-4 border-primary-foreground pl-4 text-muted-foreground",
         list: {
-          ul: 'my-1 list-disc list-inside',
-          ol: 'my-1 list-decimal list-inside',
-          listitem: '',
+          ul: "my-1 list-disc list-inside",
+          ol: "my-1 list-decimal list-inside",
+          listitem: "",
           nested: {
-            listitem: 'pl-4',
+            listitem: "pl-4",
           },
         },
-        link: 'text-blue-600 dark:text-blue-400 underline underline-offset-2 cursor-pointer hover:text-blue-800 dark:hover:text-blue-300',
+        link: "text-blue-600 dark:text-blue-400 underline underline-offset-2 cursor-pointer hover:text-blue-800 dark:hover:text-blue-300",
         text: {
-          bold: 'font-semibold',
-          italic: 'italic',
-          underline: 'underline underline-offset-2',
-          strikethrough: 'line-through',
-          code: 'font-mono bg-muted px-1 py-0.5 rounded',
+          bold: "font-semibold",
+          italic: "italic",
+          underline: "underline underline-offset-2",
+          strikethrough: "line-through",
+          code: "font-mono bg-muted px-1 py-0.5 rounded",
         },
-        code: 'block font-mono bg-secondary rounded-md px-3 py-2 my-2 whitespace-pre overflow-x-auto',
+        code: "block font-mono bg-secondary rounded-md px-3 py-2 my-2 whitespace-pre overflow-x-auto",
         codeHighlight: CODE_HIGHLIGHT_CLASSES,
       },
       nodes: [
@@ -171,7 +171,7 @@ function WYSIWYGEditor({
       if (!dt) return;
 
       const files: File[] = Array.from(dt.files || []).filter((f) =>
-        f.type.startsWith('image/')
+        f.type.startsWith("image/")
       );
 
       if (files.length > 0) {
@@ -184,11 +184,11 @@ function WYSIWYGEditor({
   // Memoized placeholder element
   const placeholderElement = useMemo(
     () =>
-      !disabled ? (
-        <div className="absolute top-0 left-0 text-sm text-secondary-foreground pointer-events-none">
+      disabled ? null : (
+        <div className="pointer-events-none absolute top-0 left-0 text-secondary-foreground text-sm">
           {placeholder}
         </div>
-      ) : null,
+      ),
     [disabled, placeholder]
   );
 
@@ -199,30 +199,30 @@ function WYSIWYGEditor({
           <LocalImagesContext.Provider value={localImages ?? []}>
             <LexicalComposer initialConfig={initialConfig}>
               <MarkdownSyncPlugin
-                value={value}
+                editable={!disabled}
                 onChange={onChange}
                 onEditorStateChange={onEditorStateChange}
-                editable={!disabled}
                 transformers={extendedTransformers}
+                value={value}
               />
               {!disabled && <ToolbarPlugin />}
               <div className="relative">
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable
+                      aria-label={
+                        disabled ? "Markdown content" : "Markdown editor"
+                      }
                       className={cn(
-                        'outline-none',
-                        !disabled && 'min-h-[200px]',
+                        "outline-none",
+                        !disabled && "min-h-[200px]",
                         className
                       )}
-                      aria-label={
-                        disabled ? 'Markdown content' : 'Markdown editor'
-                      }
                       onPaste={handlePaste}
                     />
                   }
-                  placeholder={placeholderElement}
                   ErrorBoundary={LexicalErrorBoundary}
+                  placeholder={placeholderElement}
                 />
               </div>
 
@@ -255,51 +255,51 @@ function WYSIWYGEditor({
   // Wrap with action buttons in read-only mode
   if (disabled) {
     return (
-      <div className="relative group">
-        <div className="sticky top-0 right-2 z-10 pointer-events-none h-0">
-          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      <div className="group relative">
+        <div className="pointer-events-none sticky top-0 right-2 z-10 h-0">
+          <div className="flex justify-end gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
             {/* Copy button */}
             <Button
-              type="button"
-              aria-label={copied ? 'Copied!' : 'Copy as Markdown'}
-              title={copied ? 'Copied!' : 'Copy as Markdown'}
-              variant="icon"
-              size="icon"
+              aria-label={copied ? "Copied!" : "Copy as Markdown"}
+              className="pointer-events-auto h-8 w-8 bg-muted p-2"
               onClick={handleCopy}
-              className="pointer-events-auto p-2 bg-muted h-8 w-8"
+              size="icon"
+              title={copied ? "Copied!" : "Copy as Markdown"}
+              type="button"
+              variant="icon"
             >
               {copied ? (
-                <Check className="w-4 h-4 text-success" />
+                <Check className="h-4 w-4 text-success" />
               ) : (
-                <Clipboard className="w-4 h-4 text-muted-foreground" />
+                <Clipboard className="h-4 w-4 text-muted-foreground" />
               )}
             </Button>
             {/* Edit button - only if onEdit provided */}
             {onEdit && (
               <Button
-                type="button"
                 aria-label="Edit"
-                title="Edit"
-                variant="icon"
-                size="icon"
+                className="pointer-events-auto h-8 w-8 bg-muted p-2"
                 onClick={onEdit}
-                className="pointer-events-auto p-2 bg-muted h-8 w-8"
+                size="icon"
+                title="Edit"
+                type="button"
+                variant="icon"
               >
-                <Pencil className="w-4 h-4 text-muted-foreground" />
+                <Pencil className="h-4 w-4 text-muted-foreground" />
               </Button>
             )}
             {/* Delete button - only if onDelete provided */}
             {onDelete && (
               <Button
-                type="button"
                 aria-label="Delete"
-                title="Delete"
-                variant="icon"
-                size="icon"
+                className="pointer-events-auto h-8 w-8 bg-muted p-2"
                 onClick={onDelete}
-                className="pointer-events-auto p-2 bg-muted h-8 w-8"
+                size="icon"
+                title="Delete"
+                type="button"
+                variant="icon"
               >
-                <Trash2 className="w-4 h-4 text-muted-foreground" />
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
               </Button>
             )}
           </div>

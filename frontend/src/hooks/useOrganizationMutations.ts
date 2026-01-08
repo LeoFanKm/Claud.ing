@@ -1,14 +1,14 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { organizationsApi } from '@/lib/api';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
-  MemberRole,
-  UpdateMemberRoleResponse,
-  CreateOrganizationRequest,
-  CreateOrganizationResponse,
   CreateInvitationRequest,
   CreateInvitationResponse,
+  CreateOrganizationRequest,
+  CreateOrganizationResponse,
   ListOrganizationsResponse,
-} from 'shared/types';
+  MemberRole,
+  UpdateMemberRoleResponse,
+} from "shared/types";
+import { organizationsApi } from "@/lib/api";
 
 interface UseOrganizationMutationsOptions {
   onCreateSuccess?: (result: CreateOrganizationResponse) => void;
@@ -31,13 +31,13 @@ export function useOrganizationMutations(
   const queryClient = useQueryClient();
 
   const createOrganization = useMutation({
-    mutationKey: ['createOrganization'],
+    mutationKey: ["createOrganization"],
     mutationFn: (data: CreateOrganizationRequest) =>
       organizationsApi.createOrganization(data),
     onSuccess: (result: CreateOrganizationResponse) => {
       // Immediately add new org to cache to prevent race condition with selection
       queryClient.setQueryData<ListOrganizationsResponse>(
-        ['user', 'organizations'],
+        ["user", "organizations"],
         (old) => {
           if (!old) return { organizations: [result.organization] };
           return {
@@ -47,17 +47,17 @@ export function useOrganizationMutations(
       );
 
       // Then invalidate to ensure server data stays fresh
-      queryClient.invalidateQueries({ queryKey: ['user', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: ["user", "organizations"] });
       options?.onCreateSuccess?.(result);
     },
     onError: (err) => {
-      console.error('Failed to create organization:', err);
+      console.error("Failed to create organization:", err);
       options?.onCreateError?.(err);
     },
   });
 
   const createInvitation = useMutation({
-    mutationKey: ['createInvitation'],
+    mutationKey: ["createInvitation"],
     mutationFn: ({
       orgId,
       data,
@@ -67,15 +67,15 @@ export function useOrganizationMutations(
     }) => organizationsApi.createInvitation(orgId, data),
     onSuccess: (result: CreateInvitationResponse, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['organization', 'members', variables.orgId],
+        queryKey: ["organization", "members", variables.orgId],
       });
       queryClient.invalidateQueries({
-        queryKey: ['organization', 'invitations', variables.orgId],
+        queryKey: ["organization", "invitations", variables.orgId],
       });
       options?.onInviteSuccess?.(result);
     },
     onError: (err) => {
-      console.error('Failed to create invitation:', err);
+      console.error("Failed to create invitation:", err);
       options?.onInviteError?.(err);
     },
   });
@@ -90,15 +90,15 @@ export function useOrganizationMutations(
     }) => organizationsApi.revokeInvitation(orgId, invitationId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['organization', 'members', variables.orgId],
+        queryKey: ["organization", "members", variables.orgId],
       });
       queryClient.invalidateQueries({
-        queryKey: ['organization', 'invitations', variables.orgId],
+        queryKey: ["organization", "invitations", variables.orgId],
       });
       options?.onRevokeSuccess?.();
     },
     onError: (err) => {
-      console.error('Failed to revoke invitation:', err);
+      console.error("Failed to revoke invitation:", err);
       options?.onRevokeError?.(err);
     },
   });
@@ -108,14 +108,14 @@ export function useOrganizationMutations(
       organizationsApi.removeMember(orgId, userId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['organization', 'members', variables.orgId],
+        queryKey: ["organization", "members", variables.orgId],
       });
       // Invalidate user's organizations in case we removed ourselves
-      queryClient.invalidateQueries({ queryKey: ['user', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: ["user", "organizations"] });
       options?.onRemoveSuccess?.();
     },
     onError: (err) => {
-      console.error('Failed to remove member:', err);
+      console.error("Failed to remove member:", err);
       options?.onRemoveError?.(err);
     },
   });
@@ -129,38 +129,38 @@ export function useOrganizationMutations(
       organizationsApi.updateMemberRole(orgId, userId, { role }),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['organization', 'members', variables.orgId],
+        queryKey: ["organization", "members", variables.orgId],
       });
       // Invalidate user's organizations in case we changed our own role
-      queryClient.invalidateQueries({ queryKey: ['user', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: ["user", "organizations"] });
       options?.onRoleChangeSuccess?.();
     },
     onError: (err) => {
-      console.error('Failed to update member role:', err);
+      console.error("Failed to update member role:", err);
       options?.onRoleChangeError?.(err);
     },
   });
 
   const refetchMembers = async (orgId: string) => {
     await queryClient.invalidateQueries({
-      queryKey: ['organization', 'members', orgId],
+      queryKey: ["organization", "members", orgId],
     });
   };
 
   const refetchInvitations = async (orgId: string) => {
     await queryClient.invalidateQueries({
-      queryKey: ['organization', 'invitations', orgId],
+      queryKey: ["organization", "invitations", orgId],
     });
   };
 
   const deleteOrganization = useMutation({
     mutationFn: (orgId: string) => organizationsApi.deleteOrganization(orgId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: ["user", "organizations"] });
       options?.onDeleteSuccess?.();
     },
     onError: (err) => {
-      console.error('Failed to delete organization:', err);
+      console.error("Failed to delete organization:", err);
       options?.onDeleteError?.(err);
     },
   });

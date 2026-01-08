@@ -1,5 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
-import { oauthApi } from '@/lib/api';
+import { useMutation } from "@tanstack/react-query";
+import { oauthApi } from "@/lib/api";
 
 interface UseAuthMutationsOptions {
   onInitSuccess?: (data: { handoff_id: string; authorize_url: string }) => void;
@@ -8,7 +8,7 @@ interface UseAuthMutationsOptions {
 
 export function useAuthMutations(options?: UseAuthMutationsOptions) {
   const initHandoff = useMutation({
-    mutationKey: ['auth', 'init'],
+    mutationKey: ["auth", "init"],
     mutationFn: ({
       provider,
       returnTo,
@@ -20,7 +20,7 @@ export function useAuthMutations(options?: UseAuthMutationsOptions) {
       options?.onInitSuccess?.(data);
     },
     onError: (err) => {
-      console.error('Failed to initialize OAuth handoff:', err);
+      console.error("Failed to initialize OAuth handoff:", err);
       options?.onInitError?.(err);
     },
   });

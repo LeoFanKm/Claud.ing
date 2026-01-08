@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { getSharedTaskAssignees } from '@/lib/remoteApi';
-import type { SharedTask, UserData } from 'shared/types';
-import { useEffect, useMemo } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+import type { SharedTask, UserData } from "shared/types";
+import { getSharedTaskAssignees } from "@/lib/remoteApi";
 
 interface UseAssigneeUserNamesOptions {
   projectId: string | undefined;
@@ -12,7 +12,7 @@ export function useAssigneeUserNames(options: UseAssigneeUserNamesOptions) {
   const { projectId, sharedTasks } = options;
 
   const { data: assignees, refetch } = useQuery<UserData[], Error>({
-    queryKey: ['project', 'assignees', projectId],
+    queryKey: ["project", "assignees", projectId],
     queryFn: () => getSharedTaskAssignees(projectId!),
     enabled: Boolean(projectId),
     staleTime: 5 * 60 * 1000, // 5 minutes

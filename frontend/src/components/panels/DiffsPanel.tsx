@@ -1,24 +1,23 @@
-import { useDiffStream } from '@/hooks/useDiffStream';
-import { useMemo, useCallback, useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Loader } from '@/components/ui/loader';
-import { Button } from '@/components/ui/button';
-import DiffViewSwitch from '@/components/DiffViewSwitch';
-import DiffCard from '@/components/DiffCard';
-import { useDiffSummary } from '@/hooks/useDiffSummary';
-import { NewCardHeader } from '@/components/ui/new-card';
-import { ChevronsUp, ChevronsDown } from 'lucide-react';
+import { ChevronsDown, ChevronsUp } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { Diff, DiffChangeKind, Workspace } from "shared/types";
+import DiffCard from "@/components/DiffCard";
+import DiffViewSwitch from "@/components/DiffViewSwitch";
+import GitOperations, {
+  type GitOperationsInputs,
+} from "@/components/tasks/Toolbar/GitOperations.tsx";
+import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
+import { NewCardHeader } from "@/components/ui/new-card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import type { Diff, DiffChangeKind } from 'shared/types';
-import type { Workspace } from 'shared/types';
-import GitOperations, {
-  type GitOperationsInputs,
-} from '@/components/tasks/Toolbar/GitOperations.tsx';
+} from "@/components/ui/tooltip";
+import { useDiffStream } from "@/hooks/useDiffStream";
+import { useDiffSummary } from "@/hooks/useDiffSummary";
 
 interface DiffsPanelProps {
   selectedAttempt: Workspace | null;
@@ -49,10 +48,10 @@ const getDiffId = ({ diff, index }: { diff: Diff; index: number }) =>
   `${diff.newPath || diff.oldPath || index}`;
 
 export function DiffsPanel({ selectedAttempt, gitOps }: DiffsPanelProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const [loadingState, setLoadingState] = useState<
-    'loading' | 'loaded' | 'timed-out'
-  >('loading');
+    "loading" | "loaded" | "timed-out"
+  >("loading");
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
   const { diffs, error } = useDiffStream(selectedAttempt?.id ?? null, true);
@@ -62,13 +61,13 @@ export function DiffsPanel({ selectedAttempt, gitOps }: DiffsPanelProps) {
 
   // If no diffs arrive within 3 seconds, stop showing the spinner
   useEffect(() => {
-    if (loadingState !== 'loading') return;
-    const timer = setTimeout(() => setLoadingState('timed-out'), 3000);
+    if (loadingState !== "loading") return;
+    const timer = setTimeout(() => setLoadingState("timed-out"), 3000);
     return () => clearTimeout(timer);
   }, [loadingState]);
 
-  if (diffs.length > 0 && loadingState === 'loading') {
-    setLoadingState('loaded');
+  if (diffs.length > 0 && loadingState === "loading") {
+    setLoadingState("loaded");
   }
 
   if (diffs.length > 0) {
@@ -96,7 +95,7 @@ export function DiffsPanel({ selectedAttempt, gitOps }: DiffsPanelProps) {
     }
   }
 
-  const loading = loadingState === 'loading';
+  const loading = loadingState === "loading";
 
   const ids = useMemo(() => {
     return diffs.map((d, i) => getDiffId({ diff: d, index: i }));
@@ -117,9 +116,9 @@ export function DiffsPanel({ selectedAttempt, gitOps }: DiffsPanelProps) {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+      <div className="m-4 rounded-lg border border-red-200 bg-red-50 p-4">
         <div className="text-red-800 text-sm">
-          {t('diff.errorLoadingDiff', { error })}
+          {t("diff.errorLoadingDiff", { error })}
         </div>
       </div>
     );
@@ -127,18 +126,18 @@ export function DiffsPanel({ selectedAttempt, gitOps }: DiffsPanelProps) {
 
   return (
     <DiffsPanelContent
+      added={added}
+      allCollapsed={allCollapsed}
+      collapsedIds={collapsedIds}
+      deleted={deleted}
       diffs={diffs}
       fileCount={fileCount}
-      added={added}
-      deleted={deleted}
-      collapsedIds={collapsedIds}
-      allCollapsed={allCollapsed}
-      handleCollapseAll={handleCollapseAll}
-      toggle={toggle}
-      selectedAttempt={selectedAttempt}
       gitOps={gitOps}
+      handleCollapseAll={handleCollapseAll}
       loading={loading}
+      selectedAttempt={selectedAttempt}
       t={t}
+      toggle={toggle}
     />
   );
 }
@@ -173,10 +172,9 @@ function DiffsPanelContent({
   t,
 }: DiffsPanelContentProps) {
   return (
-    <div className="h-full flex flex-col relative">
+    <div className="relative flex h-full flex-col">
       {diffs.length > 0 && (
         <NewCardHeader
-          className="sticky top-0 z-10"
           actions={
             <>
               <DiffViewSwitch />
@@ -185,14 +183,14 @@ function DiffsPanelContent({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="icon"
-                      onClick={handleCollapseAll}
-                      aria-pressed={allCollapsed}
                       aria-label={
                         allCollapsed
-                          ? t('diff.expandAll')
-                          : t('diff.collapseAll')
+                          ? t("diff.expandAll")
+                          : t("diff.collapseAll")
                       }
+                      aria-pressed={allCollapsed}
+                      onClick={handleCollapseAll}
+                      variant="icon"
                     >
                       {allCollapsed ? (
                         <ChevronsDown className="h-4 w-4" />
@@ -202,22 +200,23 @@ function DiffsPanelContent({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
-                    {allCollapsed ? t('diff.expandAll') : t('diff.collapseAll')}
+                    {allCollapsed ? t("diff.expandAll") : t("diff.collapseAll")}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </>
           }
+          className="sticky top-0 z-10"
         >
           <div className="flex items-center">
             <span
-              className="text-sm text-muted-foreground whitespace-nowrap"
               aria-live="polite"
+              className="whitespace-nowrap text-muted-foreground text-sm"
             >
-              {t('diff.filesChanged', { count: fileCount })}{' '}
+              {t("diff.filesChanged", { count: fileCount })}{" "}
               <span className="text-green-600 dark:text-green-500">
                 +{added}
-              </span>{' '}
+              </span>{" "}
               <span className="text-red-600 dark:text-red-500">-{deleted}</span>
             </span>
           </div>
@@ -230,21 +229,21 @@ function DiffsPanelContent({
       )}
       <div className="flex-1 overflow-y-auto px-3">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex h-full items-center justify-center">
             <Loader />
           </div>
         ) : diffs.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-            {t('diff.noChanges')}
+          <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+            {t("diff.noChanges")}
           </div>
         ) : (
           diffs.map((diff, idx) => {
             const id = diff.newPath || diff.oldPath || String(idx);
             return (
               <DiffCard
-                key={id}
                 diff={diff}
                 expanded={!collapsedIds.has(id)}
+                key={id}
                 onToggle={() => toggle(id)}
                 selectedAttempt={selectedAttempt}
               />

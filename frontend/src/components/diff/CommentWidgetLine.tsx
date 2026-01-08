@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import WYSIWYGEditor from '@/components/ui/wysiwyg';
-import { useReview, type ReviewDraft } from '@/contexts/ReviewProvider';
-import { Scope, useKeyExit, useKeySubmitComment } from '@/keyboard';
-import { useHotkeysContext } from 'react-hotkeys-hook';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useHotkeysContext } from "react-hotkeys-hook";
+import { Button } from "@/components/ui/button";
+import WYSIWYGEditor from "@/components/ui/wysiwyg";
+import { type ReviewDraft, useReview } from "@/contexts/ReviewProvider";
+import { Scope, useKeyExit, useKeySubmitComment } from "@/keyboard";
 
 interface CommentWidgetLineProps {
   draft: ReviewDraft;
@@ -69,31 +69,31 @@ export function CommentWidgetLine({
 
   useKeySubmitComment(handleSubmitShortcut, {
     scope: Scope.EDIT_COMMENT,
-    enableOnFormTags: ['textarea', 'TEXTAREA'],
-    when: value.trim() !== '',
+    enableOnFormTags: ["textarea", "TEXTAREA"],
+    when: value.trim() !== "",
     preventDefault: true,
   });
 
   return (
-    <div className="p-4 border-y bg-primary">
+    <div className="border-y bg-primary p-4">
       <WYSIWYGEditor
-        value={value}
-        onChange={setValue}
-        placeholder="Add a comment... (type @ to search files)"
-        className="w-full bg-primary text-primary-foreground text-sm font-mono min-h-[60px]"
-        projectId={projectId}
-        onCmdEnter={handleSave}
         autoFocus
+        className="min-h-[60px] w-full bg-primary font-mono text-primary-foreground text-sm"
+        onChange={setValue}
+        onCmdEnter={handleSave}
+        placeholder="Add a comment... (type @ to search files)"
+        projectId={projectId}
+        value={value}
       />
       <div className="mt-2 flex gap-2">
-        <Button size="xs" onClick={handleSave} disabled={!value.trim()}>
+        <Button disabled={!value.trim()} onClick={handleSave} size="xs">
           Add review comment
         </Button>
         <Button
+          className="text-secondary-foreground"
+          onClick={handleCancel}
           size="xs"
           variant="ghost"
-          onClick={handleCancel}
-          className="text-secondary-foreground"
         >
           Cancel
         </Button>

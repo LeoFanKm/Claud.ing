@@ -1,37 +1,37 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
-import { isEqual } from 'lodash';
+import { useQueryClient } from "@tanstack/react-query";
+import { isEqual } from "lodash";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
+import type { Project, ProjectRepo, Repo, UpdateProject } from "shared/types";
+import { RepoPickerDialog } from "@/components/dialogs/shared/RepoPickerDialog";
+import { CopyFilesField } from "@/components/projects/CopyFilesField";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
-import { useProjects } from '@/hooks/useProjects';
-import { useProjectMutations } from '@/hooks/useProjectMutations';
-import { useScriptPlaceholders } from '@/hooks/useScriptPlaceholders';
-import { CopyFilesField } from '@/components/projects/CopyFilesField';
-import { AutoExpandingTextarea } from '@/components/ui/auto-expanding-textarea';
-import { RepoPickerDialog } from '@/components/dialogs/shared/RepoPickerDialog';
-import { projectsApi } from '@/lib/api';
-import { repoBranchKeys } from '@/hooks/useRepoBranches';
-import type { Project, ProjectRepo, Repo, UpdateProject } from 'shared/types';
+} from "@/components/ui/select";
+import { useProjectMutations } from "@/hooks/useProjectMutations";
+import { useProjects } from "@/hooks/useProjects";
+import { repoBranchKeys } from "@/hooks/useRepoBranches";
+import { useScriptPlaceholders } from "@/hooks/useScriptPlaceholders";
+import { projectsApi } from "@/lib/api";
 
 interface ProjectFormState {
   name: string;
@@ -50,9 +50,9 @@ interface RepoScriptsFormState {
 function projectToFormState(project: Project): ProjectFormState {
   return {
     name: project.name,
-    dev_script: project.dev_script ?? '',
-    dev_script_working_dir: project.dev_script_working_dir ?? '',
-    default_agent_working_dir: project.default_agent_working_dir ?? '',
+    dev_script: project.dev_script ?? "",
+    dev_script_working_dir: project.dev_script_working_dir ?? "",
+    default_agent_working_dir: project.default_agent_working_dir ?? "",
   };
 }
 
@@ -60,17 +60,17 @@ function projectRepoToScriptsFormState(
   projectRepo: ProjectRepo | null
 ): RepoScriptsFormState {
   return {
-    setup_script: projectRepo?.setup_script ?? '',
+    setup_script: projectRepo?.setup_script ?? "",
     parallel_setup_script: projectRepo?.parallel_setup_script ?? false,
-    cleanup_script: projectRepo?.cleanup_script ?? '',
-    copy_files: projectRepo?.copy_files ?? '',
+    cleanup_script: projectRepo?.cleanup_script ?? "",
+    copy_files: projectRepo?.copy_files ?? "",
   };
 }
 
 export function ProjectSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const projectIdParam = searchParams.get('projectId') ?? '';
-  const { t } = useTranslation('settings');
+  const projectIdParam = searchParams.get("projectId") ?? "";
+  const { t } = useTranslation("settings");
   const queryClient = useQueryClient();
 
   // Fetch all projects
@@ -82,7 +82,7 @@ export function ProjectSettings() {
 
   // Selected project state
   const [selectedProjectId, setSelectedProjectId] = useState<string>(
-    searchParams.get('projectId') || ''
+    searchParams.get("projectId") || ""
   );
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -118,13 +118,13 @@ export function ProjectSettings() {
 
   // Check for unsaved changes (project name)
   const hasUnsavedProjectChanges = useMemo(() => {
-    if (!draft || !selectedProject) return false;
+    if (!(draft && selectedProject)) return false;
     return !isEqual(draft, projectToFormState(selectedProject));
   }, [draft, selectedProject]);
 
   // Check for unsaved script changes
   const hasUnsavedScriptsChanges = useMemo(() => {
-    if (!scriptsDraft || !selectedProjectRepo) return false;
+    if (!(scriptsDraft && selectedProjectRepo)) return false;
     return !isEqual(
       scriptsDraft,
       projectRepoToScriptsFormState(selectedProjectRepo)
@@ -144,7 +144,7 @@ export function ProjectSettings() {
       // Confirm if there are unsaved changes
       if (hasUnsavedChanges) {
         const confirmed = window.confirm(
-          t('settings.projects.save.confirmSwitch')
+          t("settings.projects.save.confirmSwitch")
         );
         if (!confirmed) return;
 
@@ -173,7 +173,7 @@ export function ProjectSettings() {
     // Confirm if there are unsaved changes
     if (hasUnsavedChanges) {
       const confirmed = window.confirm(
-        t('settings.projects.save.confirmSwitch')
+        t("settings.projects.save.confirmSwitch")
       );
       if (!confirmed) {
         // Revert URL to previous value
@@ -228,11 +228,11 @@ export function ProjectSettings() {
     const handler = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
   }, [hasUnsavedChanges]);
 
   // Fetch repositories when project changes
@@ -249,7 +249,7 @@ export function ProjectSettings() {
       .then(setRepositories)
       .catch((err) => {
         setRepoError(
-          err instanceof Error ? err.message : 'Failed to load repositories'
+          err instanceof Error ? err.message : "Failed to load repositories"
         );
         setRepositories([]);
       })
@@ -280,7 +280,7 @@ export function ProjectSettings() {
 
   // Fetch ProjectRepo scripts when selected scripts repo changes
   useEffect(() => {
-    if (!selectedProjectId || !selectedScriptsRepoId) {
+    if (!(selectedProjectId && selectedScriptsRepoId)) {
       setSelectedProjectRepo(null);
       setScriptsDraft(null);
       return;
@@ -298,7 +298,7 @@ export function ProjectSettings() {
         setScriptsError(
           err instanceof Error
             ? err.message
-            : 'Failed to load repository scripts'
+            : "Failed to load repository scripts"
         );
         setSelectedProjectRepo(null);
         setScriptsDraft(null);
@@ -310,8 +310,8 @@ export function ProjectSettings() {
     if (!selectedProjectId) return;
 
     const repo = await RepoPickerDialog.show({
-      title: 'Select Git Repository',
-      description: 'Choose a git repository to add to this project',
+      title: "Select Git Repository",
+      description: "Choose a git repository to add to this project",
     });
 
     if (!repo) return;
@@ -329,14 +329,14 @@ export function ProjectSettings() {
       });
       setRepositories((prev) => [...prev, newRepo]);
       queryClient.invalidateQueries({
-        queryKey: ['projectRepositories', selectedProjectId],
+        queryKey: ["projectRepositories", selectedProjectId],
       });
       queryClient.invalidateQueries({
         queryKey: repoBranchKeys.byRepo(newRepo.id),
       });
     } catch (err) {
       setRepoError(
-        err instanceof Error ? err.message : 'Failed to add repository'
+        err instanceof Error ? err.message : "Failed to add repository"
       );
     } finally {
       setAddingRepo(false);
@@ -352,14 +352,14 @@ export function ProjectSettings() {
       await projectsApi.deleteRepository(selectedProjectId, repoId);
       setRepositories((prev) => prev.filter((r) => r.id !== repoId));
       queryClient.invalidateQueries({
-        queryKey: ['projectRepositories', selectedProjectId],
+        queryKey: ["projectRepositories", selectedProjectId],
       });
       queryClient.invalidateQueries({
         queryKey: repoBranchKeys.byRepo(repoId),
       });
     } catch (err) {
       setRepoError(
-        err instanceof Error ? err.message : 'Failed to delete repository'
+        err instanceof Error ? err.message : "Failed to delete repository"
       );
     } finally {
       setDeletingRepoId(null);
@@ -377,14 +377,14 @@ export function ProjectSettings() {
     },
     onUpdateError: (err) => {
       setError(
-        err instanceof Error ? err.message : 'Failed to save project settings'
+        err instanceof Error ? err.message : "Failed to save project settings"
       );
       setSaving(false);
     },
   });
 
   const handleSave = async () => {
-    if (!draft || !selectedProject) return;
+    if (!(draft && selectedProject)) return;
 
     setSaving(true);
     setError(null);
@@ -404,14 +404,14 @@ export function ProjectSettings() {
         data: updateData,
       });
     } catch (err) {
-      setError(t('settings.projects.save.error'));
-      console.error('Error saving project settings:', err);
+      setError(t("settings.projects.save.error"));
+      console.error("Error saving project settings:", err);
       setSaving(false);
     }
   };
 
   const handleSaveScripts = async () => {
-    if (!scriptsDraft || !selectedProjectId || !selectedScriptsRepoId) return;
+    if (!(scriptsDraft && selectedProjectId && selectedScriptsRepoId)) return;
 
     setSavingScripts(true);
     setScriptsError(null);
@@ -434,7 +434,7 @@ export function ProjectSettings() {
       setTimeout(() => setScriptsSuccess(false), 3000);
     } catch (err) {
       setScriptsError(
-        err instanceof Error ? err.message : 'Failed to save scripts'
+        err instanceof Error ? err.message : "Failed to save scripts"
       );
     } finally {
       setSavingScripts(false);
@@ -469,7 +469,7 @@ export function ProjectSettings() {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">{t('settings.projects.loading')}</span>
+        <span className="ml-2">{t("settings.projects.loading")}</span>
       </div>
     );
   }
@@ -481,7 +481,7 @@ export function ProjectSettings() {
           <AlertDescription>
             {projectsError instanceof Error
               ? projectsError.message
-              : t('settings.projects.loadError')}
+              : t("settings.projects.loadError")}
           </AlertDescription>
         </Alert>
       </div>
@@ -499,30 +499,30 @@ export function ProjectSettings() {
       {success && (
         <Alert variant="success">
           <AlertDescription className="font-medium">
-            {t('settings.projects.save.success')}
+            {t("settings.projects.save.success")}
           </AlertDescription>
         </Alert>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.projects.title')}</CardTitle>
+          <CardTitle>{t("settings.projects.title")}</CardTitle>
           <CardDescription>
-            {t('settings.projects.description')}
+            {t("settings.projects.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="project-selector">
-              {t('settings.projects.selector.label')}
+              {t("settings.projects.selector.label")}
             </Label>
             <Select
-              value={selectedProjectId}
               onValueChange={handleProjectSelect}
+              value={selectedProjectId}
             >
               <SelectTrigger id="project-selector">
                 <SelectValue
-                  placeholder={t('settings.projects.selector.placeholder')}
+                  placeholder={t("settings.projects.selector.placeholder")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -533,14 +533,14 @@ export function ProjectSettings() {
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="no-projects" disabled>
-                    {t('settings.projects.selector.noProjects')}
+                  <SelectItem disabled value="no-projects">
+                    {t("settings.projects.selector.noProjects")}
                   </SelectItem>
                 )}
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground">
-              {t('settings.projects.selector.helper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.projects.selector.helper")}
             </p>
           </div>
         </CardContent>
@@ -550,114 +550,114 @@ export function ProjectSettings() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>{t('settings.projects.general.title')}</CardTitle>
+              <CardTitle>{t("settings.projects.general.title")}</CardTitle>
               <CardDescription>
-                {t('settings.projects.general.description')}
+                {t("settings.projects.general.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="project-name">
-                  {t('settings.projects.general.name.label')}
+                  {t("settings.projects.general.name.label")}
                 </Label>
                 <Input
                   id="project-name"
+                  onChange={(e) => updateDraft({ name: e.target.value })}
+                  placeholder={t("settings.projects.general.name.placeholder")}
+                  required
                   type="text"
                   value={draft.name}
-                  onChange={(e) => updateDraft({ name: e.target.value })}
-                  placeholder={t('settings.projects.general.name.placeholder')}
-                  required
                 />
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.projects.general.name.helper')}
+                <p className="text-muted-foreground text-sm">
+                  {t("settings.projects.general.name.helper")}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="dev-script">
-                  {t('settings.projects.scripts.dev.label')}
+                  {t("settings.projects.scripts.dev.label")}
                 </Label>
                 <AutoExpandingTextarea
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   id="dev-script"
-                  value={draft.dev_script}
+                  maxRows={12}
                   onChange={(e) => updateDraft({ dev_script: e.target.value })}
                   placeholder={placeholders.dev}
-                  maxRows={12}
-                  className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring font-mono"
+                  value={draft.dev_script}
                 />
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.projects.scripts.dev.helper')}
+                <p className="text-muted-foreground text-sm">
+                  {t("settings.projects.scripts.dev.helper")}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="dev-script-working-dir">
-                  {t('settings.projects.scripts.devWorkingDir.label')}
+                  {t("settings.projects.scripts.devWorkingDir.label")}
                 </Label>
                 <Input
+                  className="font-mono"
                   id="dev-script-working-dir"
-                  value={draft.dev_script_working_dir}
                   onChange={(e) =>
                     updateDraft({ dev_script_working_dir: e.target.value })
                   }
                   placeholder={t(
-                    'settings.projects.scripts.devWorkingDir.placeholder'
+                    "settings.projects.scripts.devWorkingDir.placeholder"
                   )}
-                  className="font-mono"
+                  value={draft.dev_script_working_dir}
                 />
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.projects.scripts.devWorkingDir.helper')}
+                <p className="text-muted-foreground text-sm">
+                  {t("settings.projects.scripts.devWorkingDir.helper")}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="agent-working-dir">
-                  {t('settings.projects.scripts.agentWorkingDir.label')}
+                  {t("settings.projects.scripts.agentWorkingDir.label")}
                 </Label>
                 <Input
+                  className="font-mono"
                   id="agent-working-dir"
-                  value={draft.default_agent_working_dir}
                   onChange={(e) =>
                     updateDraft({ default_agent_working_dir: e.target.value })
                   }
                   placeholder={t(
-                    'settings.projects.scripts.agentWorkingDir.placeholder'
+                    "settings.projects.scripts.agentWorkingDir.placeholder"
                   )}
-                  className="font-mono"
+                  value={draft.default_agent_working_dir}
                 />
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.projects.scripts.agentWorkingDir.helper')}
+                <p className="text-muted-foreground text-sm">
+                  {t("settings.projects.scripts.agentWorkingDir.helper")}
                 </p>
               </div>
 
               {/* Save Button */}
-              <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center justify-between border-t pt-4">
                 {hasUnsavedProjectChanges ? (
-                  <span className="text-sm text-muted-foreground">
-                    {t('settings.projects.save.unsavedChanges')}
+                  <span className="text-muted-foreground text-sm">
+                    {t("settings.projects.save.unsavedChanges")}
                   </span>
                 ) : (
                   <span />
                 )}
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    onClick={handleDiscard}
                     disabled={saving || !hasUnsavedProjectChanges}
+                    onClick={handleDiscard}
+                    variant="outline"
                   >
-                    {t('settings.projects.save.discard')}
+                    {t("settings.projects.save.discard")}
                   </Button>
                   <Button
-                    onClick={handleSave}
                     disabled={saving || !hasUnsavedProjectChanges}
+                    onClick={handleSave}
                   >
                     {saving ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {t('settings.projects.save.saving')}
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t("settings.projects.save.saving")}
                       </>
                     ) : (
-                      t('settings.projects.save.button')
+                      t("settings.projects.save.button")
                     )}
                   </Button>
                 </div>
@@ -670,7 +670,7 @@ export function ProjectSettings() {
               {success && (
                 <Alert>
                   <AlertDescription>
-                    {t('settings.projects.save.success')}
+                    {t("settings.projects.save.success")}
                   </AlertDescription>
                 </Alert>
               )}
@@ -695,7 +695,7 @@ export function ProjectSettings() {
               {loadingRepos ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="ml-2 text-sm text-muted-foreground">
+                  <span className="ml-2 text-muted-foreground text-sm">
                     Loading repositories...
                   </span>
                 </div>
@@ -703,21 +703,21 @@ export function ProjectSettings() {
                 <div className="space-y-2">
                   {repositories.map((repo) => (
                     <div
+                      className="flex items-center justify-between rounded-md border p-3"
                       key={repo.id}
-                      className="flex items-center justify-between p-3 border rounded-md"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="font-medium">{repo.display_name}</div>
-                        <div className="text-sm text-muted-foreground truncate">
+                        <div className="truncate text-muted-foreground text-sm">
                           {repo.path}
                         </div>
                       </div>
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteRepository(repo.id)}
                         disabled={deletingRepoId === repo.id}
+                        onClick={() => handleDeleteRepository(repo.id)}
+                        size="sm"
                         title="Delete repository"
+                        variant="ghost"
                       >
                         {deletingRepoId === repo.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -729,22 +729,22 @@ export function ProjectSettings() {
                   ))}
 
                   {repositories.length === 0 && !loadingRepos && (
-                    <div className="text-center py-4 text-sm text-muted-foreground">
+                    <div className="py-4 text-center text-muted-foreground text-sm">
                       No repositories configured
                     </div>
                   )}
 
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddRepository}
-                    disabled={addingRepo}
                     className="w-full"
+                    disabled={addingRepo}
+                    onClick={handleAddRepository}
+                    size="sm"
+                    variant="outline"
                   >
                     {addingRepo ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                     )}
                     Add Repository
                   </Button>
@@ -755,9 +755,9 @@ export function ProjectSettings() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{t('settings.projects.scripts.title')}</CardTitle>
+              <CardTitle>{t("settings.projects.scripts.title")}</CardTitle>
               <CardDescription>
-                {t('settings.projects.scripts.description')}
+                {t("settings.projects.scripts.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -776,7 +776,7 @@ export function ProjectSettings() {
               )}
 
               {repositories.length === 0 ? (
-                <div className="text-center py-4 text-sm text-muted-foreground">
+                <div className="py-4 text-center text-muted-foreground text-sm">
                   Add a repository above to configure scripts
                 </div>
               ) : (
@@ -785,8 +785,8 @@ export function ProjectSettings() {
                   <div className="space-y-2">
                     <Label htmlFor="scripts-repo-selector">Repository</Label>
                     <Select
-                      value={selectedScriptsRepoId ?? ''}
                       onValueChange={setSelectedScriptsRepoId}
+                      value={selectedScriptsRepoId ?? ""}
                     >
                       <SelectTrigger id="scripts-repo-selector">
                         <SelectValue placeholder="Select a repository" />
@@ -799,7 +799,7 @@ export function ProjectSettings() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Configure scripts for each repository separately
                     </p>
                   </div>
@@ -807,7 +807,7 @@ export function ProjectSettings() {
                   {loadingProjectRepo ? (
                     <div className="flex items-center justify-center py-4">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      <span className="ml-2 text-sm text-muted-foreground">
+                      <span className="ml-2 text-muted-foreground text-sm">
                         Loading scripts...
                       </span>
                     </div>
@@ -815,106 +815,106 @@ export function ProjectSettings() {
                     <>
                       <div className="space-y-2">
                         <Label htmlFor="setup-script">
-                          {t('settings.projects.scripts.setup.label')}
+                          {t("settings.projects.scripts.setup.label")}
                         </Label>
                         <AutoExpandingTextarea
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           id="setup-script"
-                          value={scriptsDraft.setup_script}
+                          maxRows={12}
                           onChange={(e) =>
                             updateScriptsDraft({ setup_script: e.target.value })
                           }
                           placeholder={placeholders.setup}
-                          maxRows={12}
-                          className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring font-mono"
+                          value={scriptsDraft.setup_script}
                         />
-                        <p className="text-sm text-muted-foreground">
-                          {t('settings.projects.scripts.setup.helper')}
+                        <p className="text-muted-foreground text-sm">
+                          {t("settings.projects.scripts.setup.helper")}
                         </p>
 
                         <div className="flex items-center space-x-2 pt-2">
                           <Checkbox
-                            id="parallel-setup-script"
                             checked={scriptsDraft.parallel_setup_script}
+                            disabled={!scriptsDraft.setup_script.trim()}
+                            id="parallel-setup-script"
                             onCheckedChange={(checked) =>
                               updateScriptsDraft({
                                 parallel_setup_script: checked === true,
                               })
                             }
-                            disabled={!scriptsDraft.setup_script.trim()}
                           />
                           <Label
+                            className="cursor-pointer font-normal text-sm"
                             htmlFor="parallel-setup-script"
-                            className="text-sm font-normal cursor-pointer"
                           >
-                            {t('settings.projects.scripts.setup.parallelLabel')}
+                            {t("settings.projects.scripts.setup.parallelLabel")}
                           </Label>
                         </div>
-                        <p className="text-sm text-muted-foreground pl-6">
-                          {t('settings.projects.scripts.setup.parallelHelper')}
+                        <p className="pl-6 text-muted-foreground text-sm">
+                          {t("settings.projects.scripts.setup.parallelHelper")}
                         </p>
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="cleanup-script">
-                          {t('settings.projects.scripts.cleanup.label')}
+                          {t("settings.projects.scripts.cleanup.label")}
                         </Label>
                         <AutoExpandingTextarea
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           id="cleanup-script"
-                          value={scriptsDraft.cleanup_script}
+                          maxRows={12}
                           onChange={(e) =>
                             updateScriptsDraft({
                               cleanup_script: e.target.value,
                             })
                           }
                           placeholder={placeholders.cleanup}
-                          maxRows={12}
-                          className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring font-mono"
+                          value={scriptsDraft.cleanup_script}
                         />
-                        <p className="text-sm text-muted-foreground">
-                          {t('settings.projects.scripts.cleanup.helper')}
+                        <p className="text-muted-foreground text-sm">
+                          {t("settings.projects.scripts.cleanup.helper")}
                         </p>
                       </div>
 
                       <div className="space-y-2">
                         <Label>
-                          {t('settings.projects.scripts.copyFiles.label')}
+                          {t("settings.projects.scripts.copyFiles.label")}
                         </Label>
                         <CopyFilesField
-                          value={scriptsDraft.copy_files}
                           onChange={(value) =>
                             updateScriptsDraft({ copy_files: value })
                           }
                           projectId={selectedProject.id}
+                          value={scriptsDraft.copy_files}
                         />
-                        <p className="text-sm text-muted-foreground">
-                          {t('settings.projects.scripts.copyFiles.helper')}
+                        <p className="text-muted-foreground text-sm">
+                          {t("settings.projects.scripts.copyFiles.helper")}
                         </p>
                       </div>
 
                       {/* Scripts Save Buttons */}
-                      <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="flex items-center justify-between border-t pt-4">
                         {hasUnsavedScriptsChanges ? (
-                          <span className="text-sm text-muted-foreground">
-                            {t('settings.projects.save.unsavedChanges')}
+                          <span className="text-muted-foreground text-sm">
+                            {t("settings.projects.save.unsavedChanges")}
                           </span>
                         ) : (
                           <span />
                         )}
                         <div className="flex gap-2">
                           <Button
-                            variant="outline"
-                            onClick={handleDiscardScripts}
                             disabled={
                               !hasUnsavedScriptsChanges || savingScripts
                             }
+                            onClick={handleDiscardScripts}
+                            variant="outline"
                           >
-                            {t('settings.projects.save.discard')}
+                            {t("settings.projects.save.discard")}
                           </Button>
                           <Button
-                            onClick={handleSaveScripts}
                             disabled={
                               !hasUnsavedScriptsChanges || savingScripts
                             }
+                            onClick={handleSaveScripts}
                           >
                             {savingScripts && (
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -932,24 +932,24 @@ export function ProjectSettings() {
 
           {/* Sticky Save Button for Project Name */}
           {hasUnsavedProjectChanges && (
-            <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t py-4">
+            <div className="sticky bottom-0 z-10 border-t bg-background/80 py-4 backdrop-blur-sm">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  {t('settings.projects.save.unsavedChanges')}
+                <span className="text-muted-foreground text-sm">
+                  {t("settings.projects.save.unsavedChanges")}
                 </span>
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    onClick={handleDiscard}
                     disabled={saving}
+                    onClick={handleDiscard}
+                    variant="outline"
                   >
-                    {t('settings.projects.save.discard')}
+                    {t("settings.projects.save.discard")}
                   </Button>
-                  <Button onClick={handleSave} disabled={saving}>
+                  <Button disabled={saving} onClick={handleSave}>
                     {saving && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    {t('settings.projects.save.button')}
+                    {t("settings.projects.save.button")}
                   </Button>
                 </div>
               </div>

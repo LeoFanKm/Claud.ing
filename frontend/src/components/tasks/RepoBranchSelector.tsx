@@ -1,7 +1,7 @@
-import { useTranslation } from 'react-i18next';
-import { Label } from '@/components/ui/label';
-import BranchSelector from './BranchSelector';
-import type { RepoBranchConfig } from '@/hooks';
+import { useTranslation } from "react-i18next";
+import { Label } from "@/components/ui/label";
+import type { RepoBranchConfig } from "@/hooks";
+import BranchSelector from "./BranchSelector";
 
 type Props = {
   configs: RepoBranchConfig[];
@@ -18,7 +18,7 @@ export function RepoBranchSelector({
   showLabel = true,
   className,
 }: Props) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
 
   if (configs.length === 0) {
     return null;
@@ -29,20 +29,20 @@ export function RepoBranchSelector({
     return (
       <div className={className}>
         {showLabel && (
-          <Label className="text-sm font-medium">
-            {t('repoBranchSelector.label')}{' '}
+          <Label className="font-medium text-sm">
+            {t("repoBranchSelector.label")}{" "}
             <span className="text-destructive">*</span>
           </Label>
         )}
         <BranchSelector
           branches={config.branches}
-          selectedBranch={config.targetBranch}
           onBranchSelect={(branch) => onBranchChange(config.repoId, branch)}
           placeholder={
             isLoading
-              ? t('createAttemptDialog.loadingBranches')
-              : t('createAttemptDialog.selectBranch')
+              ? t("createAttemptDialog.loadingBranches")
+              : t("createAttemptDialog.selectBranch")
           }
+          selectedBranch={config.targetBranch}
         />
       </div>
     );
@@ -52,20 +52,20 @@ export function RepoBranchSelector({
     <div className={className}>
       <div className="space-y-3">
         {configs.map((config) => (
-          <div key={config.repoId} className="space-y-1">
-            <Label className="text-sm font-medium">
-              {config.repoDisplayName}{' '}
+          <div className="space-y-1" key={config.repoId}>
+            <Label className="font-medium text-sm">
+              {config.repoDisplayName}{" "}
               <span className="text-destructive">*</span>
             </Label>
             <BranchSelector
               branches={config.branches}
-              selectedBranch={config.targetBranch}
               onBranchSelect={(branch) => onBranchChange(config.repoId, branch)}
               placeholder={
                 isLoading
-                  ? t('createAttemptDialog.loadingBranches')
-                  : t('createAttemptDialog.selectBranch')
+                  ? t("createAttemptDialog.loadingBranches")
+                  : t("createAttemptDialog.selectBranch")
               }
+              selectedBranch={config.targetBranch}
             />
           </div>
         ))}

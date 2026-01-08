@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,12 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal, getErrorMessage } from '@/lib/modals';
-import { useRenameBranch } from '@/hooks/useRenameBranch';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useRenameBranch } from "@/hooks/useRenameBranch";
+import { defineModal, getErrorMessage } from "@/lib/modals";
 
 export interface EditBranchNameDialogProps {
   attemptId: string;
@@ -20,14 +20,14 @@ export interface EditBranchNameDialogProps {
 }
 
 export type EditBranchNameDialogResult = {
-  action: 'confirmed' | 'canceled';
+  action: "confirmed" | "canceled";
   branchName?: string;
 };
 
 const EditBranchNameDialogImpl = NiceModal.create<EditBranchNameDialogProps>(
   ({ attemptId, currentBranchName }) => {
     const modal = useModal();
-    const { t } = useTranslation(['tasks', 'common']);
+    const { t } = useTranslation(["tasks", "common"]);
     const [branchName, setBranchName] = useState<string>(currentBranchName);
     const [error, setError] = useState<string | null>(null);
 
@@ -40,13 +40,13 @@ const EditBranchNameDialogImpl = NiceModal.create<EditBranchNameDialogProps>(
       attemptId,
       (newBranch) => {
         modal.resolve({
-          action: 'confirmed',
+          action: "confirmed",
           branchName: newBranch,
         } as EditBranchNameDialogResult);
         modal.hide();
       },
       (err: unknown) => {
-        setError(getErrorMessage(err) || 'Failed to rename branch');
+        setError(getErrorMessage(err) || "Failed to rename branch");
       }
     );
 
@@ -54,18 +54,18 @@ const EditBranchNameDialogImpl = NiceModal.create<EditBranchNameDialogProps>(
       const trimmedName = branchName.trim();
 
       if (!trimmedName) {
-        setError('Branch name cannot be empty');
+        setError("Branch name cannot be empty");
         return;
       }
 
       if (trimmedName === currentBranchName) {
-        modal.resolve({ action: 'canceled' } as EditBranchNameDialogResult);
+        modal.resolve({ action: "canceled" } as EditBranchNameDialogResult);
         modal.hide();
         return;
       }
 
-      if (trimmedName.includes(' ')) {
-        setError('Branch name cannot contain spaces');
+      if (trimmedName.includes(" ")) {
+        setError("Branch name cannot contain spaces");
         return;
       }
 
@@ -74,7 +74,7 @@ const EditBranchNameDialogImpl = NiceModal.create<EditBranchNameDialogProps>(
     };
 
     const handleCancel = () => {
-      modal.resolve({ action: 'canceled' } as EditBranchNameDialogResult);
+      modal.resolve({ action: "canceled" } as EditBranchNameDialogResult);
       modal.hide();
     };
 
@@ -85,56 +85,56 @@ const EditBranchNameDialogImpl = NiceModal.create<EditBranchNameDialogProps>(
     };
 
     return (
-      <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
+      <Dialog onOpenChange={handleOpenChange} open={modal.visible}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('editBranchName.dialog.title')}</DialogTitle>
+            <DialogTitle>{t("editBranchName.dialog.title")}</DialogTitle>
             <DialogDescription>
-              {t('editBranchName.dialog.description')}
+              {t("editBranchName.dialog.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="branch-name" className="text-sm font-medium">
-                {t('editBranchName.dialog.branchNameLabel')}
+              <label className="font-medium text-sm" htmlFor="branch-name">
+                {t("editBranchName.dialog.branchNameLabel")}
               </label>
               <Input
+                autoFocus
+                disabled={renameMutation.isPending}
                 id="branch-name"
-                type="text"
-                value={branchName}
                 onChange={(e) => {
                   setBranchName(e.target.value);
                   setError(null);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !renameMutation.isPending) {
+                  if (e.key === "Enter" && !renameMutation.isPending) {
                     handleConfirm();
                   }
                 }}
-                placeholder={t('editBranchName.dialog.placeholder')}
-                disabled={renameMutation.isPending}
-                autoFocus
+                placeholder={t("editBranchName.dialog.placeholder")}
+                type="text"
+                value={branchName}
               />
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <p className="text-destructive text-sm">{error}</p>}
             </div>
           </div>
 
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={handleCancel}
               disabled={renameMutation.isPending}
+              onClick={handleCancel}
+              variant="outline"
             >
-              {t('common:buttons.cancel')}
+              {t("common:buttons.cancel")}
             </Button>
             <Button
-              onClick={handleConfirm}
               disabled={renameMutation.isPending || !branchName.trim()}
+              onClick={handleConfirm}
             >
               {renameMutation.isPending
-                ? t('editBranchName.dialog.renaming')
-                : t('editBranchName.dialog.action')}
+                ? t("editBranchName.dialog.renaming")
+                : t("editBranchName.dialog.action")}
             </Button>
           </DialogFooter>
         </DialogContent>

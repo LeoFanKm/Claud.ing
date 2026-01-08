@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { IdeIcon, getIdeName } from './IdeIcon';
+import { useMemo } from "react";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { Button } from "@/components/ui/button";
+import { getIdeName, IdeIcon } from "./IdeIcon";
 
 type OpenInIdeButtonProps = {
   onClick: () => void;
@@ -24,15 +24,15 @@ export function OpenInIdeButton({
 
   return (
     <Button
-      variant="ghost"
-      size="sm"
-      className={`h-10 w-10 p-0 hover:opacity-70 transition-opacity ${className ?? ''}`}
-      onClick={onClick}
-      disabled={disabled}
       aria-label={label}
+      className={`h-10 w-10 p-0 transition-opacity hover:opacity-70 ${className ?? ""}`}
+      disabled={disabled}
+      onClick={onClick}
+      size="sm"
       title={label}
+      variant="ghost"
     >
-      <IdeIcon editorType={editorType} className="h-4 w-4" />
+      <IdeIcon className="h-4 w-4" editorType={editorType} />
       <span className="sr-only">{label}</span>
     </Button>
   );

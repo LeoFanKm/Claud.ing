@@ -1,14 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { attemptsApi, sessionsApi } from '@/lib/api';
-import type { Workspace } from 'shared/types';
-import type { WorkspaceWithSession } from '@/types/attempt';
-import { createWorkspaceWithSession } from '@/types/attempt';
+import { useQuery } from "@tanstack/react-query";
+import type { Workspace } from "shared/types";
+import { attemptsApi, sessionsApi } from "@/lib/api";
+import type { WorkspaceWithSession } from "@/types/attempt";
+import { createWorkspaceWithSession } from "@/types/attempt";
 
 export const taskAttemptKeys = {
-  all: ['taskAttempts'] as const,
-  byTask: (taskId: string | undefined) => ['taskAttempts', taskId] as const,
+  all: ["taskAttempts"] as const,
+  byTask: (taskId: string | undefined) => ["taskAttempts", taskId] as const,
   byTaskWithSessions: (taskId: string | undefined) =>
-    ['taskAttemptsWithSessions', taskId] as const,
+    ["taskAttemptsWithSessions", taskId] as const,
 };
 
 type Options = {

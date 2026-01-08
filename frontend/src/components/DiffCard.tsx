@@ -1,40 +1,40 @@
-import { Diff } from 'shared/types';
-import { DiffModeEnum, DiffView, SplitSide } from '@git-diff-view/react';
-import { generateDiffFile, type DiffFile } from '@git-diff-view/file';
-import { useMemo } from 'react';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { getHighLightLanguageFromPath } from '@/utils/extToLanguage';
-import { getActualTheme } from '@/utils/theme';
-import { stripLineEnding } from '@/utils/string';
-import { Button } from '@/components/ui/button';
+import { type DiffFile, generateDiffFile } from "@git-diff-view/file";
+import { DiffModeEnum, DiffView, SplitSide } from "@git-diff-view/react";
 import {
+  ArrowLeftRight,
   ChevronRight,
   ChevronUp,
-  Trash2,
-  ArrowLeftRight,
-  FilePlus2,
-  PencilLine,
   Copy,
-  Key,
   ExternalLink,
+  FilePlus2,
+  Key,
   MessageSquare,
-} from 'lucide-react';
-import '@/styles/diff-style-overrides.css';
-import { attemptsApi } from '@/lib/api';
-import type { Workspace } from 'shared/types';
+  PencilLine,
+  Trash2,
+} from "lucide-react";
+import { useMemo } from "react";
+import type { Diff } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { Button } from "@/components/ui/button";
+import { getHighLightLanguageFromPath } from "@/utils/extToLanguage";
+import { stripLineEnding } from "@/utils/string";
+import { getActualTheme } from "@/utils/theme";
+import "@/styles/diff-style-overrides.css";
+import type { Workspace } from "shared/types";
+import { CommentWidgetLine } from "@/components/diff/CommentWidgetLine";
+import { ReviewCommentRenderer } from "@/components/diff/ReviewCommentRenderer";
+import { useProject } from "@/contexts/ProjectContext";
 import {
-  useReview,
-  type ReviewDraft,
   type ReviewComment,
-} from '@/contexts/ReviewProvider';
-import { CommentWidgetLine } from '@/components/diff/CommentWidgetLine';
-import { ReviewCommentRenderer } from '@/components/diff/ReviewCommentRenderer';
+  type ReviewDraft,
+  useReview,
+} from "@/contexts/ReviewProvider";
+import { attemptsApi } from "@/lib/api";
 import {
   useDiffViewMode,
   useIgnoreWhitespaceDiff,
   useWrapTextDiff,
-} from '@/stores/useDiffViewStore';
-import { useProject } from '@/contexts/ProjectContext';
+} from "@/stores/useDiffViewStore";
 
 type Props = {
   diff: Diff;
@@ -45,13 +45,13 @@ type Props = {
 
 function labelAndIcon(diff: Diff) {
   const c = diff.change;
-  if (c === 'deleted') return { label: 'Deleted', Icon: Trash2 };
-  if (c === 'renamed') return { label: 'Renamed', Icon: ArrowLeftRight };
-  if (c === 'added')
+  if (c === "deleted") return { label: "Deleted", Icon: Trash2 };
+  if (c === "renamed") return { label: "Renamed", Icon: ArrowLeftRight };
+  if (c === "added")
     return { label: undefined as string | undefined, Icon: FilePlus2 };
-  if (c === 'copied') return { label: 'Copied', Icon: Copy };
-  if (c === 'permissionChange')
-    return { label: 'Permission Changed', Icon: Key };
+  if (c === "copied") return { label: "Copied", Icon: Copy };
+  if (c === "permissionChange")
+    return { label: "Permission Changed", Icon: Key };
   return { label: undefined as string | undefined, Icon: PencilLine };
 }
 
@@ -69,7 +69,7 @@ function readPlainLine(
     if (rawLine?.value === undefined) return undefined;
     return stripLineEnding(rawLine.value);
   } catch (error) {
-    console.error('Failed to read line content for review comment', error);
+    console.error("Failed to read line content for review comment", error);
     return undefined;
   }
 }
@@ -89,17 +89,17 @@ export default function DiffCard({
   const { projectId } = useProject();
 
   const oldName = diff.oldPath || undefined;
-  const newName = diff.newPath || oldName || 'unknown';
+  const newName = diff.newPath || oldName || "unknown";
   const oldLang =
-    getHighLightLanguageFromPath(oldName || newName || '') || 'plaintext';
+    getHighLightLanguageFromPath(oldName || newName || "") || "plaintext";
   const newLang =
-    getHighLightLanguageFromPath(newName || oldName || '') || 'plaintext';
+    getHighLightLanguageFromPath(newName || oldName || "") || "plaintext";
   const { label, Icon } = labelAndIcon(diff);
   const isOmitted = !!diff.contentOmitted;
 
   // Build a diff from raw contents so the viewer can expand beyond hunks
-  const oldContentSafe = diff.oldContent || '';
-  const newContentSafe = diff.newContent || '';
+  const oldContentSafe = diff.oldContent || "";
+  const newContentSafe = diff.newContent || "";
   const isContentEqual = oldContentSafe === newContentSafe;
 
   const diffOptions = useMemo(
@@ -110,8 +110,8 @@ export default function DiffCard({
   const diffFile = useMemo(() => {
     if (isContentEqual || isOmitted) return null;
     try {
-      const oldFileName = oldName || newName || 'unknown';
-      const newFileName = newName || oldName || 'unknown';
+      const oldFileName = oldName || newName || "unknown";
+      const newFileName = newName || oldName || "unknown";
       const file = generateDiffFile(
         oldFileName,
         oldContentSafe,
@@ -124,7 +124,7 @@ export default function DiffCard({
       file.initRaw();
       return file;
     } catch (e) {
-      console.error('Failed to build diff for view', e);
+      console.error("Failed to build diff for view", e);
       return null;
     }
   }, [
@@ -147,7 +147,7 @@ export default function DiffCard({
     : (diffFile?.deletionLength ?? 0);
 
   // Review functionality
-  const filePath = newName || oldName || 'unknown';
+  const filePath = newName || oldName || "unknown";
   const commentsForFile = useMemo(
     () => comments.filter((c) => c.filePath === filePath),
     [comments, filePath]
@@ -180,7 +180,7 @@ export default function DiffCard({
       filePath,
       side,
       lineNumber,
-      text: '',
+      text: "",
       ...(codeLine !== undefined ? { codeLine } : {}),
     };
     setDraft(widgetKey, draft);
@@ -198,10 +198,10 @@ export default function DiffCard({
     return (
       <CommentWidgetLine
         draft={draft}
-        widgetKey={widgetKey}
-        onSave={props.onClose}
         onCancel={props.onClose}
+        onSave={props.onClose}
         projectId={projectId}
+        widgetKey={widgetKey}
       />
     );
   };
@@ -215,12 +215,12 @@ export default function DiffCard({
   // Title row
   const title = (
     <p
-      className="text-sm font-mono overflow-x-auto flex-1"
-      style={{ color: 'hsl(var(--muted-foreground) / 0.7)' }}
+      className="flex-1 overflow-x-auto font-mono text-sm"
+      style={{ color: "hsl(var(--muted-foreground) / 0.7)" }}
     >
-      <Icon className="h-3 w-3 inline mr-2" aria-hidden />
+      <Icon aria-hidden className="mr-2 inline h-3 w-3" />
       {label && <span className="mr-2">{label}</span>}
-      {diff.change === 'renamed' && oldName ? (
+      {diff.change === "renamed" && oldName ? (
         <span className="inline-flex items-center gap-2">
           <span>{oldName}</span>
           <span aria-hidden>→</span>
@@ -229,14 +229,14 @@ export default function DiffCard({
       ) : (
         <span>{newName}</span>
       )}
-      <span className="ml-3" style={{ color: 'hsl(var(--console-success))' }}>
+      <span className="ml-3" style={{ color: "hsl(var(--console-success))" }}>
         +{add}
       </span>
-      <span className="ml-2" style={{ color: 'hsl(var(--console-error))' }}>
+      <span className="ml-2" style={{ color: "hsl(var(--console-error))" }}>
         -{del}
       </span>
       {commentsForFile.length > 0 && (
-        <span className="ml-3 inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-primary/10 text-primary rounded">
+        <span className="ml-3 inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-primary text-xs">
           <MessageSquare className="h-3 w-3" />
           {commentsForFile.length}
         </span>
@@ -255,10 +255,10 @@ export default function DiffCard({
 
       // If a URL is returned, open it in a new window/tab
       if (response.url) {
-        window.open(response.url, '_blank');
+        window.open(response.url, "_blank");
       }
     } catch (err) {
-      console.error('Failed to open file in IDE:', err);
+      console.error("Failed to open file in IDE:", err);
     }
   };
 
@@ -266,15 +266,15 @@ export default function DiffCard({
 
   return (
     <div className="my-4 border">
-      <div className="sticky top-0 z-[5] flex items-center px-4 py-2 bg-background border-b">
+      <div className="sticky top-0 z-[5] flex items-center border-b bg-background px-4 py-2">
         {expandable && (
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="h-6 w-6 p-0 mr-2"
-            title={expanded ? 'Collapse' : 'Expand'}
             aria-expanded={expanded}
+            className="mr-2 h-6 w-6 p-0"
+            onClick={onToggle}
+            size="sm"
+            title={expanded ? "Collapse" : "Expand"}
+            variant="ghost"
           >
             {expanded ? (
               <ChevronUp className="h-3 w-3" />
@@ -285,17 +285,17 @@ export default function DiffCard({
         )}
         {title}
         <Button
-          variant="ghost"
-          size="sm"
+          className="ml-2 h-6 w-6 p-0"
+          disabled={diff.change === "deleted"}
           onClick={(e) => {
             e.stopPropagation();
             handleOpenInIDE();
           }}
-          className="h-6 w-6 p-0 ml-2"
+          size="sm"
           title="Open in IDE"
-          disabled={diff.change === 'deleted'}
+          variant="ghost"
         >
-          <ExternalLink className="h-3 w-3" aria-hidden />
+          <ExternalLink aria-hidden className="h-3 w-3" />
         </Button>
       </div>
 
@@ -303,35 +303,35 @@ export default function DiffCard({
         <div>
           <DiffView
             diffFile={diffFile}
-            diffViewWrap={wrapText}
-            diffViewTheme={theme}
+            diffViewAddWidget
+            diffViewFontSize={12}
             diffViewHighlight
             diffViewMode={
-              globalMode === 'split' ? DiffModeEnum.Split : DiffModeEnum.Unified
+              globalMode === "split" ? DiffModeEnum.Split : DiffModeEnum.Unified
             }
-            diffViewFontSize={12}
-            diffViewAddWidget
-            onAddWidgetClick={handleAddWidgetClick}
-            renderWidgetLine={renderWidgetLine}
+            diffViewTheme={theme}
+            diffViewWrap={wrapText}
             extendData={extendData}
+            onAddWidgetClick={handleAddWidgetClick}
             renderExtendLine={renderExtendLine}
+            renderWidgetLine={renderWidgetLine}
           />
         </div>
       )}
       {expanded && !diffFile && (
         <div
-          className="px-4 pb-4 text-xs font-mono"
-          style={{ color: 'hsl(var(--muted-foreground) / 0.9)' }}
+          className="px-4 pb-4 font-mono text-xs"
+          style={{ color: "hsl(var(--muted-foreground) / 0.9)" }}
         >
           {isOmitted
-            ? 'Content omitted due to file size. Open in editor to view.'
+            ? "Content omitted due to file size. Open in editor to view."
             : isContentEqual
-              ? diff.change === 'renamed'
-                ? 'File renamed with no content changes.'
-                : diff.change === 'permissionChange'
-                  ? 'File permission changed.'
-                  : 'No content changes to display.'
-              : 'Failed to render diff for this file.'}
+              ? diff.change === "renamed"
+                ? "File renamed with no content changes."
+                : diff.change === "permissionChange"
+                  ? "File permission changed."
+                  : "No content changes to display."
+              : "Failed to render diff for this file."}
         </div>
       )}
     </div>

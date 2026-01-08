@@ -1,4 +1,4 @@
-import { ObjectFieldTemplateProps } from '@rjsf/utils';
+import type { ObjectFieldTemplateProps } from "@rjsf/utils";
 
 export const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
   const { properties } = props;

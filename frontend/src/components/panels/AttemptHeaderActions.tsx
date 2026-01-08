@@ -1,19 +1,17 @@
-import { useTranslation } from 'react-i18next';
-import { Eye, FileDiff, X } from 'lucide-react';
-import { Button } from '../ui/button';
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+import { Eye, FileDiff, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { TaskWithAttemptStatus, Workspace } from "shared/types";
+import type { SharedTaskRecord } from "@/hooks/useProjectTasks";
+import type { LayoutMode } from "../layout/TasksLayout";
+import { ActionsDropdown } from "../ui/actions-dropdown";
+import { Button } from "../ui/button";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip';
-import type { LayoutMode } from '../layout/TasksLayout';
-import type { TaskWithAttemptStatus } from 'shared/types';
-import type { Workspace } from 'shared/types';
-import { ActionsDropdown } from '../ui/actions-dropdown';
-import { usePostHog } from 'posthog-js/react';
-import type { SharedTaskRecord } from '@/hooks/useProjectTasks';
+} from "../ui/tooltip";
 
 interface AttemptHeaderActionsProps {
   onClose: () => void;
@@ -32,84 +30,59 @@ export const AttemptHeaderActions = ({
   attempt,
   sharedTask,
 }: AttemptHeaderActionsProps) => {
-  const { t } = useTranslation('tasks');
-  const posthog = usePostHog();
+  const { t } = useTranslation("tasks");
 
   return (
     <>
-      {typeof mode !== 'undefined' && onModeChange && (
+      {typeof mode !== "undefined" && onModeChange && (
         <TooltipProvider>
           <ToggleGroup
-            type="single"
-            value={mode ?? ''}
+            aria-label="Layout mode"
+            className="inline-flex gap-4"
             onValueChange={(v) => {
               const newMode = (v as LayoutMode) || null;
-
-              // Track view navigation
-              if (newMode === 'preview') {
-                posthog?.capture('preview_navigated', {
-                  trigger: 'button',
-                  timestamp: new Date().toISOString(),
-                  source: 'frontend',
-                });
-              } else if (newMode === 'diffs') {
-                posthog?.capture('diffs_navigated', {
-                  trigger: 'button',
-                  timestamp: new Date().toISOString(),
-                  source: 'frontend',
-                });
-              } else if (newMode === null) {
-                // Closing the view (clicked active button)
-                posthog?.capture('view_closed', {
-                  trigger: 'button',
-                  from_view: mode ?? 'attempt',
-                  timestamp: new Date().toISOString(),
-                  source: 'frontend',
-                });
-              }
-
               onModeChange(newMode);
             }}
-            className="inline-flex gap-4"
-            aria-label="Layout mode"
+            type="single"
+            value={mode ?? ""}
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <ToggleGroupItem
-                  value="preview"
+                  active={mode === "preview"}
                   aria-label="Preview"
-                  active={mode === 'preview'}
+                  value="preview"
                 >
                   <Eye className="h-4 w-4" />
                 </ToggleGroupItem>
               </TooltipTrigger>
               <TooltipContent side="bottom">
-                {t('attemptHeaderActions.preview')}
+                {t("attemptHeaderActions.preview")}
               </TooltipContent>
             </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
                 <ToggleGroupItem
-                  value="diffs"
+                  active={mode === "diffs"}
                   aria-label="Diffs"
-                  active={mode === 'diffs'}
+                  value="diffs"
                 >
                   <FileDiff className="h-4 w-4" />
                 </ToggleGroupItem>
               </TooltipTrigger>
               <TooltipContent side="bottom">
-                {t('attemptHeaderActions.diffs')}
+                {t("attemptHeaderActions.diffs")}
               </TooltipContent>
             </Tooltip>
           </ToggleGroup>
         </TooltipProvider>
       )}
-      {typeof mode !== 'undefined' && onModeChange && (
+      {typeof mode !== "undefined" && onModeChange && (
         <div className="h-4 w-px bg-border" />
       )}
-      <ActionsDropdown task={task} attempt={attempt} sharedTask={sharedTask} />
-      <Button variant="icon" aria-label="Close" onClick={onClose}>
+      <ActionsDropdown attempt={attempt} sharedTask={sharedTask} task={task} />
+      <Button aria-label="Close" onClick={onClose} variant="icon">
         <X size={16} />
       </Button>
     </>

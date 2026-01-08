@@ -1,5 +1,5 @@
-import { WidgetProps } from '@rjsf/utils';
-import { Textarea } from '@/components/ui/textarea';
+import type { WidgetProps } from "@rjsf/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 export const TextareaWidget = (props: WidgetProps) => {
   const {
@@ -17,7 +17,7 @@ export const TextareaWidget = (props: WidgetProps) => {
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = event.target.value;
-    onChange(newValue === '' ? options.emptyValue : newValue);
+    onChange(newValue === "" ? options.emptyValue : newValue);
   };
 
   const handleBlur = (event: React.FocusEvent<HTMLTextAreaElement>) => {
@@ -35,19 +35,19 @@ export const TextareaWidget = (props: WidgetProps) => {
   // Get rows from ui:options or default based on field name
   const rows =
     options.rows ||
-    ((schema.title || '').toLowerCase().includes('prompt') ? 4 : 3);
+    ((schema.title || "").toLowerCase().includes("prompt") ? 4 : 3);
 
   return (
     <Textarea
-      id={id}
-      value={value ?? ''}
-      placeholder={placeholder || ''}
-      disabled={disabled || readonly}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      onFocus={handleFocus}
-      rows={rows}
       className="resize-vertical"
+      disabled={disabled || readonly}
+      id={id}
+      onBlur={handleBlur}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      placeholder={placeholder || ""}
+      rows={rows}
+      value={value ?? ""}
     />
   );
 };

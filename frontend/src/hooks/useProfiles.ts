@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { profilesApi } from '@/lib/api';
-import type { JsonValue } from 'shared/types';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import type { JsonValue } from "shared/types";
+import { profilesApi } from "@/lib/api";
 
 export type UseProfilesReturn = {
   // data
@@ -25,7 +25,7 @@ export function useProfiles(): UseProfilesReturn {
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['profiles'],
+    queryKey: ["profiles"],
     queryFn: () => profilesApi.load(),
     staleTime: 1000 * 60, // 1 minute cache
   });
@@ -35,7 +35,7 @@ export function useProfiles(): UseProfilesReturn {
     onSuccess: (_, content) => {
       // Optimistically update cache with new content
       queryClient.setQueryData<{ content: string; path: string }>(
-        ['profiles'],
+        ["profiles"],
         (old) => (old ? { ...old, content } : old)
       );
     },
@@ -59,9 +59,9 @@ export function useProfiles(): UseProfilesReturn {
   };
 
   return {
-    profilesContent: data?.content ?? '',
+    profilesContent: data?.content ?? "",
     parsedProfiles,
-    profilesPath: data?.path ?? '',
+    profilesPath: data?.path ?? "",
     isLoading,
     isError,
     error,

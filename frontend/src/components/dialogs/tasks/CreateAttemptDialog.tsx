@@ -1,5 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { BaseCodingAgent, ExecutorProfileId } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { ExecutorProfileSelector } from "@/components/settings";
+import RepoBranchSelector from "@/components/tasks/RepoBranchSelector";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,26 +13,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import RepoBranchSelector from '@/components/tasks/RepoBranchSelector';
-import { ExecutorProfileSelector } from '@/components/settings';
-import { useAttemptCreation } from '@/hooks/useAttemptCreation';
+} from "@/components/ui/dialog";
+import { useProject } from "@/contexts/ProjectContext";
 import {
-  useNavigateWithSearch,
-  useTask,
   useAttempt,
-  useRepoBranchSelection,
+  useNavigateWithSearch,
   useProjectRepos,
-} from '@/hooks';
-import { useTaskAttemptsWithSessions } from '@/hooks/useTaskAttempts';
-import { useProject } from '@/contexts/ProjectContext';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { paths } from '@/lib/paths';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
-import type { ExecutorProfileId, BaseCodingAgent } from 'shared/types';
-import { useKeySubmitTask, Scope } from '@/keyboard';
+  useRepoBranchSelection,
+  useTask,
+} from "@/hooks";
+import { useAttemptCreation } from "@/hooks/useAttemptCreation";
+import { useTaskAttemptsWithSessions } from "@/hooks/useTaskAttempts";
+import { Scope, useKeySubmitTask } from "@/keyboard";
+import { defineModal } from "@/lib/modals";
+import { paths } from "@/lib/paths";
 
 export interface CreateAttemptDialogProps {
   taskId: string;
@@ -37,7 +37,7 @@ const CreateAttemptDialogImpl = NiceModal.create<CreateAttemptDialogProps>(
     const modal = useModal();
     const navigate = useNavigateWithSearch();
     const { projectId } = useProject();
-    const { t } = useTranslation('tasks');
+    const { t } = useTranslation("tasks");
     const { profiles, config } = useUserSystem();
     const { createAttempt, isCreating, error } = useAttemptCreation({
       taskId,
@@ -141,8 +141,7 @@ const CreateAttemptDialogImpl = NiceModal.create<CreateAttemptDialogProps>(
 
     const handleCreate = async () => {
       if (
-        !effectiveProfile ||
-        !allBranchesSelected ||
+        !(effectiveProfile && allBranchesSelected) ||
         projectRepos.length === 0
       )
         return;
@@ -156,7 +155,7 @@ const CreateAttemptDialogImpl = NiceModal.create<CreateAttemptDialogProps>(
 
         modal.hide();
       } catch (err) {
-        console.error('Failed to create attempt:', err);
+        console.error("Failed to create attempt:", err);
       }
     };
 
@@ -171,12 +170,12 @@ const CreateAttemptDialogImpl = NiceModal.create<CreateAttemptDialogProps>(
     });
 
     return (
-      <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
+      <Dialog onOpenChange={handleOpenChange} open={modal.visible}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{t('createAttemptDialog.title')}</DialogTitle>
+            <DialogTitle>{t("createAttemptDialog.title")}</DialogTitle>
             <DialogDescription>
-              {t('createAttemptDialog.description')}
+              {t("createAttemptDialog.description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -184,40 +183,40 @@ const CreateAttemptDialogImpl = NiceModal.create<CreateAttemptDialogProps>(
             {profiles && (
               <div className="space-y-2">
                 <ExecutorProfileSelector
+                  onProfileSelect={setUserSelectedProfile}
                   profiles={profiles}
                   selectedProfile={effectiveProfile}
-                  onProfileSelect={setUserSelectedProfile}
                   showLabel={true}
                 />
               </div>
             )}
 
             <RepoBranchSelector
-              configs={repoBranchConfigs}
-              onBranchChange={setRepoBranch}
-              isLoading={isLoadingBranches}
               className="space-y-2"
+              configs={repoBranchConfigs}
+              isLoading={isLoadingBranches}
+              onBranchChange={setRepoBranch}
             />
 
             {error && (
-              <div className="text-sm text-destructive">
-                {t('createAttemptDialog.error')}
+              <div className="text-destructive text-sm">
+                {t("createAttemptDialog.error")}
               </div>
             )}
           </div>
 
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={() => modal.hide()}
               disabled={isCreating}
+              onClick={() => modal.hide()}
+              variant="outline"
             >
-              {t('common:buttons.cancel')}
+              {t("common:buttons.cancel")}
             </Button>
-            <Button onClick={handleCreate} disabled={!canCreate}>
+            <Button disabled={!canCreate} onClick={handleCreate}>
               {isCreating
-                ? t('createAttemptDialog.creating')
-                : t('createAttemptDialog.start')}
+                ? t("createAttemptDialog.creating")
+                : t("createAttemptDialog.start")}
             </Button>
           </DialogFooter>
         </DialogContent>

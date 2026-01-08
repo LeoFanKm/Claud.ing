@@ -1,13 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback } from "react";
 import {
-  useNavigate,
-  useSearchParams,
-  parsePath,
-  type To,
+  type NavigateFunction,
   type NavigateOptions,
   type Path,
-  type NavigateFunction,
-} from 'react-router-dom';
+  parsePath,
+  type To,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 /**
  * Custom hook that wraps React Router's useNavigate to automatically preserve
@@ -56,13 +56,13 @@ export function useNavigateWithSearch(): NavigateFunction {
   return useCallback(
     (to: To | number, options?: NavigateOptions) => {
       // Handle numeric navigation (back/forward)
-      if (typeof to === 'number') {
+      if (typeof to === "number") {
         navigate(to);
         return;
       }
 
       // Handle object-style navigation
-      if (typeof to === 'object') {
+      if (typeof to === "object") {
         // Only add current search params if none provided
         const currentSearch = searchParams.toString();
 
@@ -100,7 +100,7 @@ export function useNavigateWithSearch(): NavigateFunction {
         ? parsed.search
         : currentSearch
           ? `?${currentSearch}`
-          : '';
+          : "";
 
       navigate(
         {

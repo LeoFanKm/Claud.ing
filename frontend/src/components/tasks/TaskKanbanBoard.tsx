@@ -1,26 +1,26 @@
-import { memo } from 'react';
-import { useAuth } from '@/hooks';
+import { memo } from "react";
+import type { TaskStatus, TaskWithAttemptStatus } from "shared/types";
 import {
   type DragEndEvent,
   KanbanBoard,
   KanbanCards,
   KanbanHeader,
   KanbanProvider,
-} from '@/components/ui/shadcn-io/kanban';
-import { TaskCard } from './TaskCard';
-import type { TaskStatus, TaskWithAttemptStatus } from 'shared/types';
-import { statusBoardColors, statusLabels } from '@/utils/statusLabels';
-import type { SharedTaskRecord } from '@/hooks/useProjectTasks';
-import { SharedTaskCard } from './SharedTaskCard';
+} from "@/components/ui/shadcn-io/kanban";
+import { useAuth } from "@/hooks";
+import type { SharedTaskRecord } from "@/hooks/useProjectTasks";
+import { statusBoardColors, statusLabels } from "@/utils/statusLabels";
+import { SharedTaskCard } from "./SharedTaskCard";
+import { TaskCard } from "./TaskCard";
 
 export type KanbanColumnItem =
   | {
-      type: 'task';
+      type: "task";
       task: TaskWithAttemptStatus;
       sharedTask?: SharedTaskRecord;
     }
   | {
-      type: 'shared';
+      type: "shared";
       task: SharedTaskRecord;
     };
 
@@ -54,46 +54,45 @@ function TaskKanbanBoard({
       {Object.entries(columns).map(([status, items]) => {
         const statusKey = status as TaskStatus;
         return (
-          <KanbanBoard key={status} id={statusKey}>
+          <KanbanBoard id={statusKey} key={status}>
             <KanbanHeader
-              name={statusLabels[statusKey]}
               color={statusBoardColors[statusKey]}
+              name={statusLabels[statusKey]}
               onAddTask={onCreateTask}
             />
             <KanbanCards>
               {items.map((item, index) => {
                 const isOwnTask =
-                  item.type === 'task' &&
-                  (!item.sharedTask?.assignee_user_id ||
-                    !userId ||
+                  item.type === "task" &&
+                  (!(item.sharedTask?.assignee_user_id && userId) ||
                     item.sharedTask?.assignee_user_id === userId);
 
                 if (isOwnTask) {
                   return (
                     <TaskCard
-                      key={item.task.id}
-                      task={item.task}
                       index={index}
-                      status={statusKey}
-                      onViewDetails={onViewTaskDetails}
                       isOpen={selectedTaskId === item.task.id}
+                      key={item.task.id}
+                      onViewDetails={onViewTaskDetails}
                       projectId={projectId}
                       sharedTask={item.sharedTask}
+                      status={statusKey}
+                      task={item.task}
                     />
                   );
                 }
 
                 const sharedTask =
-                  item.type === 'shared' ? item.task : item.sharedTask!;
+                  item.type === "shared" ? item.task : item.sharedTask!;
 
                 return (
                   <SharedTaskCard
-                    key={`shared-${item.task.id}`}
-                    task={sharedTask}
                     index={index}
-                    status={statusKey}
                     isSelected={selectedSharedTaskId === item.task.id}
+                    key={`shared-${item.task.id}`}
                     onViewDetails={onViewSharedTask}
+                    status={statusKey}
+                    task={sharedTask}
                   />
                 );
               })}

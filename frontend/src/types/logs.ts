@@ -1,11 +1,11 @@
-import type { NormalizedEntry, ExecutorAction } from 'shared/types';
+import type { ExecutorAction, NormalizedEntry } from "shared/types";
 
 export interface UnifiedLogEntry {
   id: string;
   ts: number; // epoch-ms timestamp for sorting and react-window key
   processId: string;
   processName: string;
-  channel: 'raw' | 'stdout' | 'stderr' | 'normalized' | 'process_start';
+  channel: "raw" | "stdout" | "stderr" | "normalized" | "process_start";
   payload: string | NormalizedEntry | ProcessStartPayload;
 }
 

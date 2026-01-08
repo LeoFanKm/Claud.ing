@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useJsonPatchWsStream } from './useJsonPatchWsStream';
-import type { ExecutionProcess } from 'shared/types';
+import { useCallback } from "react";
+import type { ExecutionProcess } from "shared/types";
+import { useJsonPatchWsStream } from "./useJsonPatchWsStream";
 
 type ExecutionProcessState = {
   execution_processes: Record<string, ExecutionProcess>;
@@ -29,8 +29,8 @@ export const useExecutionProcesses = (
 
   if (taskAttemptId) {
     const params = new URLSearchParams({ workspace_id: taskAttemptId });
-    if (typeof showSoftDeleted === 'boolean') {
-      params.set('show_soft_deleted', String(showSoftDeleted));
+    if (typeof showSoftDeleted === "boolean") {
+      params.set("show_soft_deleted", String(showSoftDeleted));
     }
     endpoint = `/api/execution-processes/stream/ws?${params.toString()}`;
   }
@@ -55,10 +55,10 @@ export const useExecutionProcesses = (
   );
   const isAttemptRunning = executionProcesses.some(
     (process) =>
-      (process.run_reason === 'codingagent' ||
-        process.run_reason === 'setupscript' ||
-        process.run_reason === 'cleanupscript') &&
-      process.status === 'running'
+      (process.run_reason === "codingagent" ||
+        process.run_reason === "setupscript" ||
+        process.run_reason === "cleanupscript") &&
+      process.status === "running"
   );
   const isLoading = !!taskAttemptId && !data && !error; // until first snapshot
 

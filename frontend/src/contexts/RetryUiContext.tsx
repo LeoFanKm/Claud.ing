@@ -1,11 +1,12 @@
-import React, {
+import type React from "react";
+import {
   createContext,
   useCallback,
   useContext,
   useMemo,
   useState,
-} from 'react';
-import { useExecutionProcessesContext } from '@/contexts/ExecutionProcessesContext';
+} from "react";
+import { useExecutionProcessesContext } from "@/contexts/ExecutionProcessesContext";
 
 type RetryUiContextType = {
   activeRetryProcessId: string | null;
@@ -39,7 +40,7 @@ export function RetryUiProvider({
 
   const isProcessGreyed = useCallback(
     (processId?: string) => {
-      if (!activeRetryProcessId || !processId) return false;
+      if (!(activeRetryProcessId && processId)) return false;
       const activeOrder = processOrder[activeRetryProcessId];
       const thisOrder = processOrder[processId];
       // Grey out processes that come AFTER the retry target

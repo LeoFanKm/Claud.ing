@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { isLoggedIn } from "../auth";
 import {
-  initOAuth,
-  getProfile,
-  logout,
-  listOrganizations,
   createOrganization,
+  getProfile,
+  initOAuth,
+  listOrganizations,
+  logout,
   type OAuthProvider,
-  type ProfileResponse,
   type OrganizationWithRole,
+  type ProfileResponse,
 } from "../api";
-import {
-  generateVerifier,
-  generateChallenge,
-  storeVerifier,
-} from "../pkce";
+import { isLoggedIn } from "../auth";
+import { generateChallenge, generateVerifier, storeVerifier } from "../pkce";
 
 export default function AccountPage() {
   const navigate = useNavigate();
@@ -23,7 +19,7 @@ export default function AccountPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [organizations, setOrganizations] = useState<OrganizationWithRole[]>(
-    [],
+    []
   );
   const [error, setError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState(false);
@@ -123,31 +119,31 @@ export default function AccountPage() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="w-full max-w-md bg-white shadow rounded-lg p-6 space-y-4">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+        <div className="w-full max-w-md space-y-4 rounded-lg bg-white p-6 shadow">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Sign In</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="font-bold text-2xl text-gray-900">Sign In</h1>
+            <p className="mt-1 text-gray-600">
               Sign in to manage your account and organizations
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
 
-          <div className="border-t border-gray-200 pt-4 space-y-3">
+          <div className="space-y-3 border-gray-200 border-t pt-4">
             <OAuthButton
+              disabled={oauthLoading}
               label="Continue with GitHub"
               onClick={() => handleOAuthLogin("github")}
-              disabled={oauthLoading}
             />
             <OAuthButton
+              disabled={oauthLoading}
               label="Continue with Google"
               onClick={() => handleOAuthLogin("google")}
-              disabled={oauthLoading}
             />
           </div>
         </div>
@@ -157,20 +153,20 @@ export default function AccountPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="mx-auto max-w-2xl space-y-6">
         {/* Profile Card */}
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="rounded-lg bg-white p-6 shadow">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
               {profile?.providers[0]?.avatar_url && (
                 <img
-                  src={profile.providers[0].avatar_url}
                   alt="Avatar"
-                  className="w-16 h-16 rounded-full"
+                  className="h-16 w-16 rounded-full"
+                  src={profile.providers[0].avatar_url}
                 />
               )}
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="font-bold text-gray-900 text-xl">
                   {profile?.providers[0]?.display_name ||
                     profile?.username ||
                     "User"}
@@ -179,21 +175,21 @@ export default function AccountPage() {
               </div>
             </div>
             <button
+              className="text-gray-600 text-sm hover:text-gray-900"
               onClick={handleLogout}
-              className="text-sm text-gray-600 hover:text-gray-900"
             >
               Sign out
             </button>
           </div>
 
           {profile && profile.providers.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-600 mb-2">Connected accounts:</p>
+            <div className="mt-4 border-gray-200 border-t pt-4">
+              <p className="mb-2 text-gray-600 text-sm">Connected accounts:</p>
               <div className="flex flex-wrap gap-2">
                 {profile.providers.map((p) => (
                   <span
+                    className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 font-medium text-gray-800 text-xs"
                     key={p.provider}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                   >
                     {p.provider}
                     {p.username && ` (${p.username})`}
@@ -205,14 +201,14 @@ export default function AccountPage() {
         </div>
 
         {/* Organizations Card */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-900 text-lg">
               Organizations
             </h2>
             <button
+              className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm text-white transition-colors hover:bg-gray-800"
               onClick={() => setShowCreateForm(!showCreateForm)}
-              className="text-sm px-3 py-1.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               {showCreateForm ? "Cancel" : "New Organization"}
             </button>
@@ -220,53 +216,56 @@ export default function AccountPage() {
 
           {showCreateForm && (
             <form
+              className="mb-4 space-y-3 rounded-lg bg-gray-50 p-4"
               onSubmit={handleCreateOrg}
-              className="mb-4 p-4 bg-gray-50 rounded-lg space-y-3"
             >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block font-medium text-gray-700 text-sm">
                   Name
                 </label>
                 <input
-                  type="text"
-                  value={newOrgName}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-900"
                   onChange={(e) => {
                     setNewOrgName(e.target.value);
-                    if (!newOrgSlug || newOrgSlug === generateSlug(newOrgName)) {
+                    if (
+                      !newOrgSlug ||
+                      newOrgSlug === generateSlug(newOrgName)
+                    ) {
                       setNewOrgSlug(generateSlug(e.target.value));
                     }
                   }}
                   placeholder="My Organization"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   required
+                  type="text"
+                  value={newOrgName}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block font-medium text-gray-700 text-sm">
                   Slug
                 </label>
                 <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  maxLength={63}
+                  minLength={3}
+                  onChange={(e) => setNewOrgSlug(e.target.value.toLowerCase())}
+                  pattern="[a-z0-9\-_]+"
+                  placeholder="my-organization"
+                  required
                   type="text"
                   value={newOrgSlug}
-                  onChange={(e) => setNewOrgSlug(e.target.value.toLowerCase())}
-                  placeholder="my-organization"
-                  pattern="[a-z0-9\-_]+"
-                  minLength={3}
-                  maxLength={63}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                  required
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="mt-1 text-gray-500 text-xs">
                   Only lowercase letters, numbers, hyphens, and underscores
                 </p>
               </div>
               {createError && (
-                <p className="text-sm text-red-600">{createError}</p>
+                <p className="text-red-600 text-sm">{createError}</p>
               )}
               <button
-                type="submit"
+                className="w-full rounded-lg bg-gray-900 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={createLoading}
-                className="w-full py-2 px-4 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
               >
                 {createLoading ? "Creating..." : "Create Organization"}
               </button>
@@ -281,22 +280,22 @@ export default function AccountPage() {
             <div className="divide-y divide-gray-200">
               {organizations.map((org) => (
                 <Link
+                  className="-mx-2 flex items-center justify-between rounded px-2 py-3 transition-colors hover:bg-gray-50"
                   key={org.id}
                   to={`/account/organizations/${org.id}`}
-                  className="flex items-center justify-between py-3 hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
                 >
                   <div>
                     <p className="font-medium text-gray-900">{org.name}</p>
-                    <p className="text-sm text-gray-500">@{org.slug}</p>
+                    <p className="text-gray-500 text-sm">@{org.slug}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {org.is_personal && (
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                      <span className="rounded bg-blue-100 px-2 py-0.5 text-blue-700 text-xs">
                         Personal
                       </span>
                     )}
                     <span
-                      className={`text-xs px-2 py-0.5 rounded ${
+                      className={`rounded px-2 py-0.5 text-xs ${
                         org.user_role === "ADMIN"
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-700"
@@ -305,16 +304,16 @@ export default function AccountPage() {
                       {org.user_role}
                     </span>
                     <svg
-                      className="w-5 h-5 text-gray-400"
+                      className="h-5 w-5 text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path
+                        d="M9 5l7 7-7 7"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M9 5l7 7-7 7"
                       />
                     </svg>
                   </div>
@@ -339,9 +338,9 @@ function OAuthButton({
 }) {
   return (
     <button
-      onClick={onClick}
+      className="w-full rounded-lg bg-gray-900 px-4 py-3 font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
       disabled={disabled}
-      className="w-full py-3 px-4 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      onClick={onClick}
     >
       {label}
     </button>
@@ -350,7 +349,7 @@ function OAuthButton({
 
 function LoadingCard({ text }: { text: string }) {
   return (
-    <div className="min-h-screen grid place-items-center bg-gray-50">
+    <div className="grid min-h-screen place-items-center bg-gray-50">
       <div className="text-gray-600">{text}</div>
     </div>
   );

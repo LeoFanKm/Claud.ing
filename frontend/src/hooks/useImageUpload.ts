@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { imagesApi } from '@/lib/api';
-import type { ImageResponse } from 'shared/types';
+import { useCallback } from "react";
+import type { ImageResponse } from "shared/types";
+import { imagesApi } from "@/lib/api";
 
 export function useImageUpload() {
   const upload = useCallback(async (file: File): Promise<ImageResponse> => {

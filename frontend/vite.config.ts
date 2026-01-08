@@ -1,9 +1,9 @@
 // vite.config.ts
-import { sentryVitePlugin } from "@sentry/vite-plugin";
-import { defineConfig, Plugin } from "vite";
+
 import react from "@vitejs/plugin-react";
-import path from "path";
 import fs from "fs";
+import path from "path";
+import { defineConfig, type Plugin } from "vite";
 
 function executorSchemasPlugin(): Plugin {
   const VIRTUAL_ID = "virtual:executor-schemas";
@@ -49,10 +49,12 @@ export default schemas;
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
-    react(),
-    sentryVitePlugin({ org: "bloop-ai", project: "vibe-kanban" }),
+    react({
+      // Use automatic JSX runtime for smaller bundle
+      jsxRuntime: "automatic",
+    }),
     executorSchemasPlugin(),
   ],
   resolve: {
@@ -62,13 +64,13 @@ export default defineConfig({
     },
   },
   server: {
-    port: parseInt(process.env.FRONTEND_PORT || "3000"),
+    port: Number.parseInt(process.env.FRONTEND_PORT || "3000"),
     proxy: {
       "/api": {
         target: `http://localhost:${process.env.BACKEND_PORT || "3001"}`,
         changeOrigin: true,
         ws: true,
-      }
+      },
     },
     fs: {
       allow: [path.resolve(__dirname, "."), path.resolve(__dirname, "..")],
@@ -77,6 +79,107 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ["wa-sqlite"],
+    // Pre-bundle these for faster dev startup
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@tanstack/react-query",
+      "zustand",
+      "clsx",
+      "tailwind-merge",
+    ],
   },
-  build: { sourcemap: true },
-});
+  // CSS optimization
+  css: {
+    devSourcemap: true,
+  },
+  // Esbuild options for faster builds
+  esbuild: {
+    // TEMPORARILY DISABLED for debugging - keep console in production
+    // drop: mode === "production" ? ["console", "debugger"] : [],
+    // Target modern browsers for smaller output
+    target: "es2020",
+  },
+  build: {
+    // Target modern browsers
+    target: "es2020",
+    // Generate sourcemaps for debugging (can disable in production for smaller builds)
+    sourcemap: mode === "development",
+    // Minify with esbuild (faster than terser)
+    minify: "esbuild",
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1000,
+    // CSS code splitting
+    cssCodeSplit: true,
+    // Rollup options
+    rollupOptions: {
+      output: {
+        // Better chunk naming for caching
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash].[ext]",
+        manualChunks: {
+          // React core - loaded first, cached longest
+          "vendor-react": ["react", "react-dom"],
+          // Router - needed for all navigation
+          "vendor-router": ["react-router-dom"],
+          // Core UI utilities - used across the app
+          "vendor-ui-core": [
+            "@radix-ui/react-slot",
+            "clsx",
+            "tailwind-merge",
+            "class-variance-authority",
+          ],
+          // Radix UI components - loaded on demand
+          "vendor-radix": [
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-label",
+            "@radix-ui/react-select",
+            "@radix-ui/react-switch",
+            "@radix-ui/react-toggle-group",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-accordion",
+          ],
+          // Icons and animations - can be lazy loaded
+          "vendor-icons": ["lucide-react"],
+          "vendor-animation": ["framer-motion"],
+          // State management
+          "vendor-state": ["zustand", "@tanstack/react-query"],
+          // TanStack ecosystem
+          "vendor-tanstack-extra": [
+            "@tanstack/react-form",
+            "@tanstack/react-db",
+            "@tanstack/electric-db-collection",
+          ],
+          // i18n - needed early but cached well
+          "vendor-i18n": [
+            "i18next",
+            "i18next-browser-languagedetector",
+            "react-i18next",
+          ],
+          // Heavy components - lazy loaded
+          "vendor-codemirror": [
+            "@codemirror/lang-json",
+            "@codemirror/language",
+            "@codemirror/lint",
+            "@codemirror/view",
+            "@uiw/react-codemirror",
+          ],
+          "vendor-lexical": ["lexical"],
+          "vendor-diff": ["@git-diff-view/react", "@git-diff-view/file"],
+          "vendor-virtuoso": ["@virtuoso.dev/message-list"],
+          "vendor-rjsf": ["@rjsf/core", "@rjsf/utils", "@rjsf/validator-ajv8"],
+          // Auth - only loaded when Clerk is enabled
+          "vendor-clerk": ["@clerk/clerk-react"],
+          // DnD - only needed for kanban
+          "vendor-dnd": ["@dnd-kit/core", "@dnd-kit/utilities"],
+          // Modals
+          "vendor-modals": ["@ebay/nice-modal-react"],
+          // Utilities
+          "vendor-utils": ["lodash", "rfc6902"],
+        },
+      },
+    },
+  },
+}));

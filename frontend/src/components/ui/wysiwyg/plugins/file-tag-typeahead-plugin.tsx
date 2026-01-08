@@ -1,23 +1,23 @@
-import { useState, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   LexicalTypeaheadMenuPlugin,
   MenuOption,
-} from '@lexical/react/LexicalTypeaheadMenuPlugin';
-import { $createTextNode } from 'lexical';
-import { Tag as TagIcon, FileText } from 'lucide-react';
+} from "@lexical/react/LexicalTypeaheadMenuPlugin";
+import { $createTextNode } from "lexical";
+import { FileText, Tag as TagIcon } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
-  searchTagsAndFiles,
   type SearchResultItem,
-} from '@/lib/searchTagsAndFiles';
+  searchTagsAndFiles,
+} from "@/lib/searchTagsAndFiles";
 
 class FileTagOption extends MenuOption {
   item: SearchResultItem;
 
   constructor(item: SearchResultItem) {
     const key =
-      item.type === 'tag' ? `tag-${item.tag!.id}` : `file-${item.file!.path}`;
+      item.type === "tag" ? `tag-${item.tag!.id}` : `file-${item.file!.path}`;
     super(key);
     this.item = item;
   }
@@ -84,7 +84,7 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
           setOptions(results.map((r) => new FileTagOption(r)));
         })
         .catch((err) => {
-          console.error('Failed to search tags/files', err);
+          console.error("Failed to search tags/files", err);
         });
     },
     [projectId]
@@ -92,40 +92,6 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
 
   return (
     <LexicalTypeaheadMenuPlugin<FileTagOption>
-      triggerFn={(text) => {
-        // Match @ followed by any non-whitespace characters
-        const match = /(?:^|\s)@([^\s@]*)$/.exec(text);
-        if (!match) return null;
-        const offset = match.index + match[0].indexOf('@');
-        return {
-          leadOffset: offset,
-          matchingString: match[1],
-          replaceableString: match[0].slice(match[0].indexOf('@')),
-        };
-      }}
-      options={options}
-      onQueryChange={onQueryChange}
-      onSelectOption={(option, nodeToReplace, closeMenu) => {
-        editor.update(() => {
-          const textToInsert =
-            option.item.type === 'tag'
-              ? (option.item.tag?.content ?? '')
-              : (option.item.file?.path ?? '');
-
-          if (!nodeToReplace) return;
-
-          // Create the node we want to insert
-          const textNode = $createTextNode(textToInsert);
-
-          // Replace the trigger text (e.g., "@test") with selected content
-          nodeToReplace.replace(textNode);
-
-          // Move the cursor to the end of the inserted text
-          textNode.select(textToInsert.length, textToInsert.length);
-        });
-
-        closeMenu();
-      }}
       menuRenderFn={(
         anchorRef,
         { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
@@ -145,28 +111,28 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
           setTimeout(() => {
             const itemEl = itemRefs.current.get(selectedIndex);
             if (itemEl) {
-              itemEl.scrollIntoView({ block: 'nearest' });
+              itemEl.scrollIntoView({ block: "nearest" });
             }
           }, 0);
         }
 
-        const tagResults = options.filter((r) => r.item.type === 'tag');
-        const fileResults = options.filter((r) => r.item.type === 'file');
+        const tagResults = options.filter((r) => r.item.type === "tag");
+        const fileResults = options.filter((r) => r.item.type === "file");
 
         return createPortal(
           <div
-            className="fixed bg-background border border-border rounded-md shadow-lg overflow-y-auto"
+            className="fixed overflow-y-auto rounded-md border border-border bg-background shadow-lg"
             style={{
               top,
               bottom,
               left,
               maxHeight,
               minWidth: MIN_WIDTH,
-              zIndex: 10000,
+              zIndex: 10_000,
             }}
           >
             {options.length === 0 ? (
-              <div className="p-2 text-sm text-muted-foreground">
+              <div className="p-2 text-muted-foreground text-sm">
                 No tags or files found
               </div>
             ) : (
@@ -174,7 +140,7 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
                 {/* Tags Section */}
                 {tagResults.length > 0 && (
                   <>
-                    <div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">
+                    <div className="px-3 py-1 font-semibold text-muted-foreground text-xs uppercase">
                       Tags
                     </div>
                     {tagResults.map((option) => {
@@ -182,27 +148,27 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
                       const tag = option.item.tag!;
                       return (
                         <div
+                          className={`cursor-pointer px-3 py-2 text-sm ${
+                            index === selectedIndex
+                              ? "bg-muted text-foreground"
+                              : "hover:bg-muted"
+                          }`}
                           key={option.key}
+                          onClick={() => selectOptionAndCleanUp(option)}
+                          onMouseEnter={() => setHighlightedIndex(index)}
                           ref={(el) => {
                             if (el) itemRefs.current.set(index, el);
                             else itemRefs.current.delete(index);
                           }}
-                          className={`px-3 py-2 cursor-pointer text-sm ${
-                            index === selectedIndex
-                              ? 'bg-muted text-foreground'
-                              : 'hover:bg-muted'
-                          }`}
-                          onMouseEnter={() => setHighlightedIndex(index)}
-                          onClick={() => selectOptionAndCleanUp(option)}
                         >
                           <div className="flex items-center gap-2 font-medium">
                             <TagIcon className="h-3.5 w-3.5 text-blue-600" />
                             <span>@{tag.tag_name}</span>
                           </div>
                           {tag.content && (
-                            <div className="text-xs text-muted-foreground mt-0.5 truncate">
+                            <div className="mt-0.5 truncate text-muted-foreground text-xs">
                               {tag.content.slice(0, 60)}
-                              {tag.content.length > 60 ? '...' : ''}
+                              {tag.content.length > 60 ? "..." : ""}
                             </div>
                           )}
                         </div>
@@ -214,8 +180,8 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
                 {/* Files Section */}
                 {fileResults.length > 0 && (
                   <>
-                    {tagResults.length > 0 && <div className="border-t my-1" />}
-                    <div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">
+                    {tagResults.length > 0 && <div className="my-1 border-t" />}
+                    <div className="px-3 py-1 font-semibold text-muted-foreground text-xs uppercase">
                       Files
                     </div>
                     {fileResults.map((option) => {
@@ -223,24 +189,24 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
                       const file = option.item.file!;
                       return (
                         <div
+                          className={`cursor-pointer px-3 py-2 text-sm ${
+                            index === selectedIndex
+                              ? "bg-muted text-foreground"
+                              : "hover:bg-muted"
+                          }`}
                           key={option.key}
+                          onClick={() => selectOptionAndCleanUp(option)}
+                          onMouseEnter={() => setHighlightedIndex(index)}
                           ref={(el) => {
                             if (el) itemRefs.current.set(index, el);
                             else itemRefs.current.delete(index);
                           }}
-                          className={`px-3 py-2 cursor-pointer text-sm ${
-                            index === selectedIndex
-                              ? 'bg-muted text-foreground'
-                              : 'hover:bg-muted'
-                          }`}
-                          onMouseEnter={() => setHighlightedIndex(index)}
-                          onClick={() => selectOptionAndCleanUp(option)}
                         >
-                          <div className="flex items-center gap-2 font-medium truncate">
-                            <FileText className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <div className="flex items-center gap-2 truncate font-medium">
+                            <FileText className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
                             <span>{file.name}</span>
                           </div>
-                          <div className="text-xs text-muted-foreground truncate">
+                          <div className="truncate text-muted-foreground text-xs">
                             {file.path}
                           </div>
                         </div>
@@ -253,6 +219,40 @@ export function FileTagTypeaheadPlugin({ projectId }: { projectId?: string }) {
           </div>,
           document.body
         );
+      }}
+      onQueryChange={onQueryChange}
+      onSelectOption={(option, nodeToReplace, closeMenu) => {
+        editor.update(() => {
+          const textToInsert =
+            option.item.type === "tag"
+              ? (option.item.tag?.content ?? "")
+              : (option.item.file?.path ?? "");
+
+          if (!nodeToReplace) return;
+
+          // Create the node we want to insert
+          const textNode = $createTextNode(textToInsert);
+
+          // Replace the trigger text (e.g., "@test") with selected content
+          nodeToReplace.replace(textNode);
+
+          // Move the cursor to the end of the inserted text
+          textNode.select(textToInsert.length, textToInsert.length);
+        });
+
+        closeMenu();
+      }}
+      options={options}
+      triggerFn={(text) => {
+        // Match @ followed by any non-whitespace characters
+        const match = /(?:^|\s)@([^\s@]*)$/.exec(text);
+        if (!match) return null;
+        const offset = match.index + match[0].indexOf("@");
+        return {
+          leadOffset: offset,
+          matchingString: match[1],
+          replaceableString: match[0].slice(match[0].indexOf("@")),
+        };
       }}
     />
   );

@@ -1,3 +1,27 @@
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { Label } from "@radix-ui/react-label";
+import { Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type {
+  GhCliSetupError,
+  TaskWithAttemptStatus,
+  Workspace,
+} from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import type {
+  GhCliSupportContent,
+  GhCliSupportVariant,
+} from "@/components/dialogs/auth/GhCliSetupDialog";
+import {
+  GhCliHelpInstructions,
+  GhCliSetupDialog,
+  mapGhCliErrorToUi,
+} from "@/components/dialogs/auth/GhCliSetupDialog";
+import BranchSelector from "@/components/tasks/BranchSelector";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -5,34 +29,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@radix-ui/react-label';
-import { Textarea } from '@/components/ui/textarea.tsx';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import BranchSelector from '@/components/tasks/BranchSelector';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { attemptsApi } from '@/lib/api.ts';
-import { useTranslation } from 'react-i18next';
-
-import { TaskWithAttemptStatus, Workspace } from 'shared/types';
-import { Loader2 } from 'lucide-react';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { useAuth, useRepoBranches } from '@/hooks';
-import {
-  GhCliHelpInstructions,
-  GhCliSetupDialog,
-  mapGhCliErrorToUi,
-} from '@/components/dialogs/auth/GhCliSetupDialog';
-import type {
-  GhCliSupportContent,
-  GhCliSupportVariant,
-} from '@/components/dialogs/auth/GhCliSetupDialog';
-import type { GhCliSetupError } from 'shared/types';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { defineModal } from '@/lib/modals';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea.tsx";
+import { useAuth, useRepoBranches } from "@/hooks";
+import { attemptsApi } from "@/lib/api.ts";
+import { defineModal } from "@/lib/modals";
 
 interface CreatePRDialogProps {
   attempt: Workspace;
@@ -44,12 +46,12 @@ interface CreatePRDialogProps {
 const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
   ({ attempt, task, repoId, targetBranch }) => {
     const modal = useModal();
-    const { t } = useTranslation('tasks');
+    const { t } = useTranslation("tasks");
     const { isLoaded } = useAuth();
     const { environment, config } = useUserSystem();
-    const [prTitle, setPrTitle] = useState('');
-    const [prBody, setPrBody] = useState('');
-    const [prBaseBranch, setPrBaseBranch] = useState('');
+    const [prTitle, setPrTitle] = useState("");
+    const [prBody, setPrBody] = useState("");
+    const [prBaseBranch, setPrBaseBranch] = useState("");
     const [creatingPR, setCreatingPR] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [ghCliHelp, setGhCliHelp] = useState<GhCliSupportContent | null>(
@@ -66,18 +68,18 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
     );
 
     const getGhCliHelpTitle = (variant: GhCliSupportVariant) =>
-      variant === 'homebrew'
-        ? 'Homebrew is required for automatic setup'
-        : 'GitHub CLI needs manual setup';
+      variant === "homebrew"
+        ? "Homebrew is required for automatic setup"
+        : "GitHub CLI needs manual setup";
 
     // Initialize form when dialog opens
     useEffect(() => {
-      if (!modal.visible || !isLoaded) {
+      if (!(modal.visible && isLoaded)) {
         return;
       }
 
       setPrTitle(`${task.title} (vibe-kanban)`);
-      setPrBody(task.description || '');
+      setPrBody(task.description || "");
       setError(null);
       setGhCliHelp(null);
     }, [modal.visible, isLoaded, task]);
@@ -99,12 +101,12 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
     }, [branches, prBaseBranch, targetBranch]);
 
     const isMacEnvironment = useMemo(
-      () => environment?.os_type?.toLowerCase().includes('mac'),
+      () => environment?.os_type?.toLowerCase().includes("mac"),
       [environment?.os_type]
     );
 
     const handleConfirmCreatePR = useCallback(async () => {
-      if (!repoId || !attempt.id) return;
+      if (!(repoId && attempt.id)) return;
 
       setError(null);
       setGhCliHelp(null);
@@ -144,9 +146,9 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
       });
 
       if (result.success) {
-        setPrTitle('');
-        setPrBody('');
-        setPrBaseBranch('');
+        setPrTitle("");
+        setPrBody("");
+        setPrBaseBranch("");
         setIsDraft(false);
         setAutoGenerateDescription(
           config?.pr_auto_description_enabled ?? false
@@ -159,7 +161,7 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
       setCreatingPR(false);
 
       const defaultGhCliErrorMessage =
-        result.message || 'Failed to run GitHub CLI setup.';
+        result.message || "Failed to run GitHub CLI setup.";
 
       const showGhCliSetupDialog = async () => {
         const setupResult = await GhCliSetupDialog.show({
@@ -171,14 +173,14 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
 
       if (result.error) {
         if (
-          result.error.type === 'github_cli_not_installed' ||
-          result.error.type === 'github_cli_not_logged_in'
+          result.error.type === "github_cli_not_installed" ||
+          result.error.type === "github_cli_not_logged_in"
         ) {
           if (isMacEnvironment) {
             await showGhCliSetupDialog();
           } else {
             const ui = mapGhCliErrorToUi(
-              'SETUP_HELPER_NOT_SUPPORTED',
+              "SETUP_HELPER_NOT_SUPPORTED",
               defaultGhCliErrorMessage,
               t
             );
@@ -186,21 +188,23 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
             setError(ui.variant ? null : ui.message);
           }
           return;
-        } else if (
-          result.error.type === 'git_cli_not_installed' ||
-          result.error.type === 'git_cli_not_logged_in'
+        }
+        if (
+          result.error.type === "git_cli_not_installed" ||
+          result.error.type === "git_cli_not_logged_in"
         ) {
           const gitCliErrorKey =
-            result.error.type === 'git_cli_not_logged_in'
-              ? 'createPrDialog.errors.gitCliNotLoggedIn'
-              : 'createPrDialog.errors.gitCliNotInstalled';
+            result.error.type === "git_cli_not_logged_in"
+              ? "createPrDialog.errors.gitCliNotLoggedIn"
+              : "createPrDialog.errors.gitCliNotInstalled";
 
           setError(result.message || t(gitCliErrorKey));
           setGhCliHelp(null);
           return;
-        } else if (result.error.type === 'target_branch_not_found') {
+        }
+        if (result.error.type === "target_branch_not_found") {
           setError(
-            t('createPrDialog.errors.targetBranchNotFound', {
+            t("createPrDialog.errors.targetBranchNotFound", {
               branch: result.error.branch,
             })
           );
@@ -213,7 +217,7 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
         setError(result.message);
         setGhCliHelp(null);
       } else {
-        setError(t('createPrDialog.errors.failedToCreate'));
+        setError(t("createPrDialog.errors.failedToCreate"));
         setGhCliHelp(null);
       }
     }, [
@@ -233,9 +237,9 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
     const handleCancelCreatePR = useCallback(() => {
       modal.hide();
       // Reset form to empty state
-      setPrTitle('');
-      setPrBody('');
-      setPrBaseBranch('');
+      setPrTitle("");
+      setPrBody("");
+      setPrBaseBranch("");
       setIsDraft(false);
       setAutoGenerateDescription(config?.pr_auto_description_enabled ?? false);
     }, [modal, config?.pr_auto_description_enabled]);
@@ -243,98 +247,94 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
     return (
       <>
         <Dialog
-          open={modal.visible}
           onOpenChange={() => handleCancelCreatePR()}
+          open={modal.visible}
         >
           <DialogContent className="sm:max-w-[525px]">
             <DialogHeader>
-              <DialogTitle>{t('createPrDialog.title')}</DialogTitle>
+              <DialogTitle>{t("createPrDialog.title")}</DialogTitle>
               <DialogDescription>
-                {t('createPrDialog.description')}
+                {t("createPrDialog.description")}
               </DialogDescription>
             </DialogHeader>
-            {!isLoaded ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
+            {isLoaded ? (
               <div className="space-y-4 py-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="pr-auto-generate"
                     checked={autoGenerateDescription}
-                    onCheckedChange={setAutoGenerateDescription}
                     className="h-5 w-5"
+                    id="pr-auto-generate"
+                    onCheckedChange={setAutoGenerateDescription}
                   />
                   <Label
-                    htmlFor="pr-auto-generate"
                     className="cursor-pointer text-sm"
+                    htmlFor="pr-auto-generate"
                   >
-                    {t('createPrDialog.autoGenerateLabel')}
+                    {t("createPrDialog.autoGenerateLabel")}
                   </Label>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pr-title">
-                    {t('createPrDialog.titleLabel')}
+                    {t("createPrDialog.titleLabel")}
                   </Label>
                   <Input
-                    id="pr-title"
-                    value={prTitle}
-                    onChange={(e) => setPrTitle(e.target.value)}
-                    placeholder={t('createPrDialog.titlePlaceholder')}
-                    disabled={autoGenerateDescription}
                     className={
                       autoGenerateDescription
-                        ? 'opacity-50 cursor-not-allowed'
-                        : ''
+                        ? "cursor-not-allowed opacity-50"
+                        : ""
                     }
+                    disabled={autoGenerateDescription}
+                    id="pr-title"
+                    onChange={(e) => setPrTitle(e.target.value)}
+                    placeholder={t("createPrDialog.titlePlaceholder")}
+                    value={prTitle}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pr-body">
-                    {t('createPrDialog.descriptionLabel')}
+                    {t("createPrDialog.descriptionLabel")}
                   </Label>
                   <Textarea
-                    id="pr-body"
-                    value={prBody}
-                    onChange={(e) => setPrBody(e.target.value)}
-                    placeholder={t('createPrDialog.descriptionPlaceholder')}
-                    rows={4}
-                    disabled={autoGenerateDescription}
                     className={
                       autoGenerateDescription
-                        ? 'opacity-50 cursor-not-allowed'
-                        : ''
+                        ? "cursor-not-allowed opacity-50"
+                        : ""
                     }
+                    disabled={autoGenerateDescription}
+                    id="pr-body"
+                    onChange={(e) => setPrBody(e.target.value)}
+                    placeholder={t("createPrDialog.descriptionPlaceholder")}
+                    rows={4}
+                    value={prBody}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pr-base">
-                    {t('createPrDialog.baseBranchLabel')}
+                    {t("createPrDialog.baseBranchLabel")}
                   </Label>
                   <BranchSelector
                     branches={branches}
-                    selectedBranch={prBaseBranch}
+                    className={
+                      branchesLoading ? "cursor-not-allowed opacity-50" : ""
+                    }
                     onBranchSelect={setPrBaseBranch}
                     placeholder={
                       branchesLoading
-                        ? t('createPrDialog.loadingBranches')
-                        : t('createPrDialog.selectBaseBranch')
+                        ? t("createPrDialog.loadingBranches")
+                        : t("createPrDialog.selectBaseBranch")
                     }
-                    className={
-                      branchesLoading ? 'opacity-50 cursor-not-allowed' : ''
-                    }
+                    selectedBranch={prBaseBranch}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="pr-draft"
                     checked={isDraft}
-                    onCheckedChange={setIsDraft}
                     className="h-5 w-5"
+                    id="pr-draft"
+                    onCheckedChange={setIsDraft}
                   />
-                  <Label htmlFor="pr-draft" className="cursor-pointer text-sm">
-                    {t('createPrDialog.draftLabel')}
+                  <Label className="cursor-pointer text-sm" htmlFor="pr-draft">
+                    {t("createPrDialog.draftLabel")}
                   </Label>
                 </div>
                 {ghCliHelp?.variant && (
@@ -345,31 +345,35 @@ const CreatePRDialogImpl = NiceModal.create<CreatePRDialogProps>(
                     <AlertDescription className="space-y-3">
                       <p>{ghCliHelp.message}</p>
                       <GhCliHelpInstructions
-                        variant={ghCliHelp.variant}
                         t={t}
+                        variant={ghCliHelp.variant}
                       />
                     </AlertDescription>
                   </Alert>
                 )}
                 {error && <Alert variant="destructive">{error}</Alert>}
               </div>
+            ) : (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
             )}
             <DialogFooter>
-              <Button variant="outline" onClick={handleCancelCreatePR}>
-                {t('common:buttons.cancel')}
+              <Button onClick={handleCancelCreatePR} variant="outline">
+                {t("common:buttons.cancel")}
               </Button>
               <Button
-                onClick={handleConfirmCreatePR}
-                disabled={creatingPR || !prTitle.trim()}
                 className="bg-blue-600 hover:bg-blue-700"
+                disabled={creatingPR || !prTitle.trim()}
+                onClick={handleConfirmCreatePR}
               >
                 {creatingPR ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('createPrDialog.creating')}
+                    {t("createPrDialog.creating")}
                   </>
                 ) : (
-                  t('createPrDialog.createButton')
+                  t("createPrDialog.createButton")
                 )}
               </Button>
             </DialogFooter>

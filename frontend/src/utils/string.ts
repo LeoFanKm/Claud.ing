@@ -5,9 +5,9 @@
  */
 export const toPrettyCase = (value: string): string => {
   return value
-    .split('_')
+    .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    .join(" ");
 };
 
 /**
@@ -17,8 +17,8 @@ export const toPrettyCase = (value: string): string => {
  * @returns Formatted project name
  */
 export const generateProjectNameFromPath = (path: string): string => {
-  const dirName = path.split('/').filter(Boolean).pop() || '';
-  return dirName.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  const dirName = path.split("/").filter(Boolean).pop() || "";
+  return dirName.replace(/[-_]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
 /**
@@ -26,5 +26,5 @@ export const generateProjectNameFromPath = (path: string): string => {
  * Handles CRLF/CR/LF endings while leaving other trailing whitespace intact.
  */
 export const stripLineEnding = (value: string): string => {
-  return value.replace(/(?:\r\n|\r|\n)$/, '');
+  return value.replace(/(?:\r\n|\r|\n)$/, "");
 };

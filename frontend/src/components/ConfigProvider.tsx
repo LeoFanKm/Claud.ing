@@ -53,8 +53,8 @@ const DEFAULT_WEB_CONFIG = {
     config_version: "1.0.0",
     theme: "SYSTEM",
     executor_profile: "default",
-    disclaimer_acknowledged: true,
-    onboarding_acknowledged: true,
+    disclaimer_acknowledged: false,
+    onboarding_acknowledged: false,
     notifications: {
       sound_enabled: false,
       push_enabled: false,

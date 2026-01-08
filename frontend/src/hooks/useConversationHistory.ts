@@ -1,24 +1,25 @@
 // useConversationHistory.ts
+
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-  CommandExitStatus,
-  ExecutionProcess,
+  type CommandExitStatus,
+  type ExecutionProcess,
   ExecutionProcessStatus,
-  ExecutorAction,
-  NormalizedEntry,
-  PatchType,
-  ToolStatus,
-  Workspace,
-} from 'shared/types';
-import { useExecutionProcessesContext } from '@/contexts/ExecutionProcessesContext';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { streamJsonPatchEntries } from '@/utils/streamJsonPatchEntries';
+  type ExecutorAction,
+  type NormalizedEntry,
+  type PatchType,
+  type ToolStatus,
+  type Workspace,
+} from "shared/types";
+import { useExecutionProcessesContext } from "@/contexts/ExecutionProcessesContext";
+import { streamJsonPatchEntries } from "@/utils/streamJsonPatchEntries";
 
 export type PatchTypeWithKey = PatchType & {
   patchKey: string;
   executionProcessId: string;
 };
 
-export type AddEntryType = 'initial' | 'running' | 'historic';
+export type AddEntryType = "initial" | "running" | "historic";
 
 export type OnEntriesUpdated = (
   newEntries: PatchTypeWithKey[],
@@ -45,18 +46,18 @@ interface UseConversationHistoryParams {
   onEntriesUpdated: OnEntriesUpdated;
 }
 
-interface UseConversationHistoryResult {}
+type UseConversationHistoryResult = {};
 
 const MIN_INITIAL_ENTRIES = 10;
 const REMAINING_BATCH_SIZE = 50;
 
 const makeLoadingPatch = (executionProcessId: string): PatchTypeWithKey => ({
-  type: 'NORMALIZED_ENTRY',
+  type: "NORMALIZED_ENTRY",
   content: {
     entry_type: {
-      type: 'loading',
+      type: "loading",
     },
-    content: '',
+    content: "",
     timestamp: null,
   },
   patchKey: `${executionProcessId}:loading`,
@@ -74,20 +75,20 @@ const nextActionPatch: (
   needs_setup,
   setup_help_text
 ) => ({
-  type: 'NORMALIZED_ENTRY',
+  type: "NORMALIZED_ENTRY",
   content: {
     entry_type: {
-      type: 'next_action',
-      failed: failed,
-      execution_processes: execution_processes,
-      needs_setup: needs_setup,
+      type: "next_action",
+      failed,
+      execution_processes,
+      needs_setup,
       setup_help_text: setup_help_text ?? null,
     },
-    content: '',
+    content: "",
     timestamp: null,
   },
-  patchKey: 'next_action',
-  executionProcessId: '',
+  patchKey: "next_action",
+  executionProcessId: "",
 });
 
 export const useConversationHistory = ({
@@ -116,17 +117,17 @@ export const useConversationHistory = ({
   useEffect(() => {
     executionProcesses.current = executionProcessesRaw.filter(
       (ep) =>
-        ep.run_reason === 'setupscript' ||
-        ep.run_reason === 'cleanupscript' ||
-        ep.run_reason === 'codingagent'
+        ep.run_reason === "setupscript" ||
+        ep.run_reason === "cleanupscript" ||
+        ep.run_reason === "codingagent"
     );
   }, [executionProcessesRaw]);
 
   const loadEntriesForHistoricExecutionProcess = (
     executionProcess: ExecutionProcess
   ) => {
-    let url = '';
-    if (executionProcess.executor_action.typ.type === 'ScriptRequest') {
+    let url = "";
+    if (executionProcess.executor_action.typ.type === "ScriptRequest") {
       url = `/api/execution-processes/${executionProcess.id}/raw-logs/ws`;
     } else {
       url = `/api/execution-processes/${executionProcess.id}/normalized-logs/ws`;
@@ -161,7 +162,7 @@ export const useConversationHistory = ({
   const patchWithKey = (
     patch: PatchType,
     executionProcessId: string,
-    index: number | 'user'
+    index: number | "user"
   ) => {
     return {
       ...patch,
@@ -177,9 +178,9 @@ export const useConversationHistory = ({
       .filter(
         (p) =>
           p.executionProcess.executor_action.typ.type ===
-            'CodingAgentFollowUpRequest' ||
+            "CodingAgentFollowUpRequest" ||
           p.executionProcess.executor_action.typ.type ===
-            'CodingAgentInitialRequest'
+            "CodingAgentInitialRequest"
       )
       .sort(
         (a, b) =>
@@ -196,7 +197,7 @@ export const useConversationHistory = ({
       executionProcesses?.current.filter(
         (p) =>
           p.status === ExecutionProcessStatus.running &&
-          p.run_reason !== 'devserver'
+          p.run_reason !== "devserver"
       ) ?? []
     );
   };
@@ -225,43 +226,43 @@ export const useConversationHistory = ({
           const entries: PatchTypeWithKey[] = [];
           if (
             p.executionProcess.executor_action.typ.type ===
-              'CodingAgentInitialRequest' ||
+              "CodingAgentInitialRequest" ||
             p.executionProcess.executor_action.typ.type ===
-              'CodingAgentFollowUpRequest'
+              "CodingAgentFollowUpRequest"
           ) {
             // New user message
             const userNormalizedEntry: NormalizedEntry = {
               entry_type: {
-                type: 'user_message',
+                type: "user_message",
               },
               content: p.executionProcess.executor_action.typ.prompt,
               timestamp: null,
             };
             const userPatch: PatchType = {
-              type: 'NORMALIZED_ENTRY',
+              type: "NORMALIZED_ENTRY",
               content: userNormalizedEntry,
             };
             const userPatchTypeWithKey = patchWithKey(
               userPatch,
               p.executionProcess.id,
-              'user'
+              "user"
             );
             entries.push(userPatchTypeWithKey);
 
             // Remove all coding agent added user messages, replace with our custom one
             const entriesExcludingUser = p.entries.filter(
               (e) =>
-                e.type !== 'NORMALIZED_ENTRY' ||
-                e.content.entry_type.type !== 'user_message'
+                e.type !== "NORMALIZED_ENTRY" ||
+                e.content.entry_type.type !== "user_message"
             );
 
             const hasPendingApprovalEntry = entriesExcludingUser.some(
               (entry) => {
-                if (entry.type !== 'NORMALIZED_ENTRY') return false;
+                if (entry.type !== "NORMALIZED_ENTRY") return false;
                 const entryType = entry.content.entry_type;
                 return (
-                  entryType.type === 'tool_use' &&
-                  entryType.status.status === 'pending_approval'
+                  entryType.type === "tool_use" &&
+                  entryType.status.status === "pending_approval"
                 );
               }
             );
@@ -293,10 +294,10 @@ export const useConversationHistory = ({
 
               // Check if this failed process has a SetupRequired entry
               const hasSetupRequired = entriesExcludingUser.some((entry) => {
-                if (entry.type !== 'NORMALIZED_ENTRY') return false;
+                if (entry.type !== "NORMALIZED_ENTRY") return false;
                 if (
-                  entry.content.entry_type.type === 'error_message' &&
-                  entry.content.entry_type.error_type.type === 'setup_required'
+                  entry.content.entry_type.type === "error_message" &&
+                  entry.content.entry_type.error_type.type === "setup_required"
                 ) {
                   setupHelpText = entry.content.content;
                   return true;
@@ -313,19 +314,19 @@ export const useConversationHistory = ({
               entries.push(makeLoadingPatch(p.executionProcess.id));
             }
           } else if (
-            p.executionProcess.executor_action.typ.type === 'ScriptRequest'
+            p.executionProcess.executor_action.typ.type === "ScriptRequest"
           ) {
             // Add setup and cleanup script as a tool call
-            let toolName = '';
+            let toolName = "";
             switch (p.executionProcess.executor_action.typ.context) {
-              case 'SetupScript':
-                toolName = 'Setup Script';
+              case "SetupScript":
+                toolName = "Setup Script";
                 break;
-              case 'CleanupScript':
-                toolName = 'Cleanup Script';
+              case "CleanupScript":
+                toolName = "Cleanup Script";
                 break;
-              case 'ToolInstallScript':
-                toolName = 'Tool Install Script';
+              case "ToolInstallScript":
+                toolName = "Tool Install Script";
                 break;
               default:
                 return [];
@@ -349,28 +350,28 @@ export const useConversationHistory = ({
 
             const exitCode = Number(executionProcess?.exit_code) || 0;
             const exit_status: CommandExitStatus | null =
-              executionProcess?.status === 'running'
+              executionProcess?.status === "running"
                 ? null
                 : {
-                    type: 'exit_code',
+                    type: "exit_code",
                     code: exitCode,
                   };
 
             const toolStatus: ToolStatus =
               executionProcess?.status === ExecutionProcessStatus.running
-                ? { status: 'created' }
+                ? { status: "created" }
                 : exitCode === 0
-                  ? { status: 'success' }
-                  : { status: 'failed' };
+                  ? { status: "success" }
+                  : { status: "failed" };
 
-            const output = p.entries.map((line) => line.content).join('\n');
+            const output = p.entries.map((line) => line.content).join("\n");
 
             const toolNormalizedEntry: NormalizedEntry = {
               entry_type: {
-                type: 'tool_use',
+                type: "tool_use",
                 tool_name: toolName,
                 action_type: {
-                  action: 'command_run',
+                  action: "command_run",
                   command: p.executionProcess.executor_action.typ.script,
                   result: {
                     output,
@@ -383,7 +384,7 @@ export const useConversationHistory = ({
               timestamp: null,
             };
             const toolPatch: PatchType = {
-              type: 'NORMALIZED_ENTRY',
+              type: "NORMALIZED_ENTRY",
               content: toolNormalizedEntry,
             };
             const toolPatchWithKey: PatchTypeWithKey = patchWithKey(
@@ -399,7 +400,7 @@ export const useConversationHistory = ({
         });
 
       // Emit the next action bar if no process running
-      if (!hasRunningProcess && !hasPendingApproval) {
+      if (!(hasRunningProcess || hasPendingApproval)) {
         allEntries.push(
           nextActionPatch(
             lastProcessFailedOrKilled,
@@ -431,8 +432,8 @@ export const useConversationHistory = ({
   const loadRunningAndEmit = useCallback(
     (executionProcess: ExecutionProcess): Promise<void> => {
       return new Promise((resolve, reject) => {
-        let url = '';
-        if (executionProcess.executor_action.typ.type === 'ScriptRequest') {
+        let url = "";
+        if (executionProcess.executor_action.typ.type === "ScriptRequest") {
           url = `/api/execution-processes/${executionProcess.id}/raw-logs/ws`;
         } else {
           url = `/api/execution-processes/${executionProcess.id}/normalized-logs/ws`;
@@ -448,10 +449,10 @@ export const useConversationHistory = ({
                 entries: patchesWithKey,
               };
             });
-            emitEntries(displayedExecutionProcesses.current, 'running', false);
+            emitEntries(displayedExecutionProcesses.current, "running", false);
           },
           onFinished: () => {
-            emitEntries(displayedExecutionProcesses.current, 'running', false);
+            emitEntries(displayedExecutionProcesses.current, "running", false);
             controller.close();
             resolve();
           },
@@ -572,12 +573,12 @@ export const useConversationHistory = ({
   }, []);
 
   const idListKey = useMemo(
-    () => executionProcessesRaw?.map((p) => p.id).join(','),
+    () => executionProcessesRaw?.map((p) => p.id).join(","),
     [executionProcessesRaw]
   );
 
   const idStatusKey = useMemo(
-    () => executionProcessesRaw?.map((p) => `${p.id}:${p.status}`).join(','),
+    () => executionProcessesRaw?.map((p) => `${p.id}:${p.status}`).join(","),
     [executionProcessesRaw]
   );
 
@@ -598,7 +599,7 @@ export const useConversationHistory = ({
       mergeIntoDisplayed((state) => {
         Object.assign(state, allInitialEntries);
       });
-      emitEntries(displayedExecutionProcesses.current, 'initial', false);
+      emitEntries(displayedExecutionProcesses.current, "initial", false);
       loadedInitialEntries.current = true;
 
       // Then load the remaining in batches
@@ -609,7 +610,7 @@ export const useConversationHistory = ({
         if (cancelled) return;
       }
       await new Promise((resolve) => setTimeout(resolve, 100));
-      emitEntries(displayedExecutionProcesses.current, 'historic', false);
+      emitEntries(displayedExecutionProcesses.current, "historic", false);
     })();
     return () => {
       cancelled = true;
@@ -630,8 +631,8 @@ export const useConversationHistory = ({
       if (!displayedExecutionProcesses.current[activeProcess.id]) {
         const runningOrInitial =
           Object.keys(displayedExecutionProcesses.current).length > 1
-            ? 'running'
-            : 'initial';
+            ? "running"
+            : "initial";
         ensureProcessVisible(activeProcess);
         emitEntries(
           displayedExecutionProcesses.current,
@@ -680,7 +681,7 @@ export const useConversationHistory = ({
     displayedExecutionProcesses.current = {};
     loadedInitialEntries.current = false;
     streamingProcessIdsRef.current.clear();
-    emitEntries(displayedExecutionProcesses.current, 'initial', true);
+    emitEntries(displayedExecutionProcesses.current, "initial", true);
   }, [attempt.id, emitEntries]);
 
   return {};

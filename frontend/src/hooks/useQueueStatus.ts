@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
-import { queueApi } from '@/lib/api';
-import type { QueueStatus, QueuedMessage } from 'shared/types';
+import { useCallback, useEffect, useState } from "react";
+import type { QueuedMessage, QueueStatus } from "shared/types";
+import { queueApi } from "@/lib/api";
 
 interface UseQueueStatusResult {
   /** Current queue status */
@@ -21,7 +21,7 @@ interface UseQueueStatusResult {
 
 export function useQueueStatus(sessionId?: string): UseQueueStatusResult {
   const [queueStatus, setQueueStatus] = useState<QueueStatus>({
-    status: 'empty',
+    status: "empty",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,7 +31,7 @@ export function useQueueStatus(sessionId?: string): UseQueueStatusResult {
       const status = await queueApi.getStatus(sessionId);
       setQueueStatus(status);
     } catch (e) {
-      console.error('Failed to fetch queue status:', e);
+      console.error("Failed to fetch queue status:", e);
     }
   }, [sessionId]);
 
@@ -65,13 +65,13 @@ export function useQueueStatus(sessionId?: string): UseQueueStatusResult {
     if (sessionId) {
       refresh();
     } else {
-      setQueueStatus({ status: 'empty' });
+      setQueueStatus({ status: "empty" });
     }
   }, [sessionId, refresh]);
 
-  const isQueued = queueStatus.status === 'queued';
+  const isQueued = queueStatus.status === "queued";
   const queuedMessage = isQueued
-    ? (queueStatus as Extract<QueueStatus, { status: 'queued' }>).message
+    ? (queueStatus as Extract<QueueStatus, { status: "queued" }>).message
     : null;
 
   return {

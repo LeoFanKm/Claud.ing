@@ -1,13 +1,13 @@
-import { SplitSide } from '@git-diff-view/react';
+import type { SplitSide } from "@git-diff-view/react";
 import {
   createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
+  type ReactNode,
   useCallback,
-} from 'react';
-import { genId } from '@/utils/id';
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { genId } from "@/utils/id";
 
 export interface ReviewComment {
   id: string;
@@ -29,7 +29,7 @@ export interface ReviewDraft {
 interface ReviewContextType {
   comments: ReviewComment[];
   drafts: Record<string, ReviewDraft>;
-  addComment: (comment: Omit<ReviewComment, 'id'>) => void;
+  addComment: (comment: Omit<ReviewComment, "id">) => void;
   updateComment: (id: string, text: string) => void;
   deleteComment: (id: string) => void;
   clearComments: () => void;
@@ -42,7 +42,7 @@ const ReviewContext = createContext<ReviewContextType | null>(null);
 export function useReview() {
   const context = useContext(ReviewContext);
   if (!context) {
-    throw new Error('useReview must be used within a ReviewProvider');
+    throw new Error("useReview must be used within a ReviewProvider");
   }
   return context;
 }
@@ -61,7 +61,7 @@ export function ReviewProvider({
     return () => clearComments();
   }, [attemptId]);
 
-  const addComment = (comment: Omit<ReviewComment, 'id'>) => {
+  const addComment = (comment: Omit<ReviewComment, "id">) => {
     const newComment: ReviewComment = {
       ...comment,
       id: genId(),
@@ -98,14 +98,14 @@ export function ReviewProvider({
   };
 
   const generateReviewMarkdown = useCallback(() => {
-    if (comments.length === 0) return '';
+    if (comments.length === 0) return "";
 
     const commentsNum = comments.length;
 
     const header = `## Review Comments (${commentsNum})\n\n`;
     const formatCodeLine = (line?: string) => {
-      if (!line) return '';
-      if (line.includes('`')) {
+      if (!line) return "";
+      if (line.includes("`")) {
         return `\`\`\`\n${line}\n\`\`\``;
       }
       return `\`${line}\``;
@@ -117,13 +117,13 @@ export function ReviewProvider({
         // Format file paths in comment body with backticks
         const bodyWithFormattedPaths = comment.text
           .trim()
-          .replace(/([/\\]?[\w.-]+(?:[/\\][\w.-]+)+)/g, '`$1`');
+          .replace(/([/\\]?[\w.-]+(?:[/\\][\w.-]+)+)/g, "`$1`");
         if (codeLine) {
           return `**${comment.filePath}** (Line ${comment.lineNumber})\n${codeLine}\n\n> ${bodyWithFormattedPaths}\n`;
         }
         return `**${comment.filePath}** (Line ${comment.lineNumber})\n\n> ${bodyWithFormattedPaths}\n`;
       })
-      .join('\n');
+      .join("\n");
 
     return header + commentsMd;
   }, [comments]);

@@ -1,10 +1,10 @@
-import { useMutation } from '@tanstack/react-query';
-import { sessionsApi } from '@/lib/api';
+import { useMutation } from "@tanstack/react-query";
+import type { ExecutionProcess, RepoBranchStatus } from "shared/types";
 import {
   RestoreLogsDialog,
   type RestoreLogsDialogResult,
-} from '@/components/dialogs';
-import type { RepoBranchStatus, ExecutionProcess } from 'shared/types';
+} from "@/components/dialogs";
+import { sessionsApi } from "@/lib/api";
 
 export interface RetryProcessParams {
   message: string;
@@ -16,8 +16,8 @@ export interface RetryProcessParams {
 
 class RetryDialogCancelledError extends Error {
   constructor() {
-    super('Retry dialog was cancelled');
-    this.name = 'RetryDialogCancelledError';
+    super("Retry dialog was cancelled");
+    this.name = "RetryDialogCancelledError";
   }
 }
 
@@ -45,7 +45,7 @@ export function useRetryProcess(
       } catch {
         throw new RetryDialogCancelledError();
       }
-      if (!modalResult || modalResult.action !== 'confirmed') {
+      if (!modalResult || modalResult.action !== "confirmed") {
         throw new RetryDialogCancelledError();
       }
 
@@ -66,7 +66,7 @@ export function useRetryProcess(
       if (err instanceof RetryDialogCancelledError) {
         return;
       }
-      console.error('Failed to send retry:', err);
+      console.error("Failed to send retry:", err);
       onError?.(err);
     },
   });

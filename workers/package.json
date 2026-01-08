@@ -1,0 +1,33 @@
+{
+  "name": "clauding-workers",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers API for claud.ing",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.13.1",
+  "dependencies": {
+    "@clerk/backend": "^2.29.0",
+    "@hono/zod-validator": "^0.7.6",
+    "@neondatabase/serverless": "^1.0.2",
+    "hono": "^4.11.3",
+    "pg": "^8.16.3",
+    "stripe": "^20.1.0",
+    "zod": "^4.3.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260101.0",
+    "@vitest/coverage-v8": "^4.0.16",
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.16",
+    "wrangler": "^4.56.0"
+  }
+}

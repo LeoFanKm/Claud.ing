@@ -85,13 +85,7 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Text",
-        "Text",
-        "Text",
-        "Text",
-        "Timestamptz"
-      ]
+      "Left": ["Text", "Text", "Text", "Text", "Timestamptz"]
     },
     "nullable": [
       false,

@@ -32,22 +32,22 @@ export interface Coordinates {
 export interface OpenInEditorPayload {
   selected: SelectedComponent;
   components: ComponentInfo[];
-  trigger: 'alt-click' | 'context-menu';
+  trigger: "alt-click" | "context-menu";
   coords?: Coordinates;
   clickedElement?: ClickedElement;
 }
 
 export interface ClickToComponentMessage {
-  source: 'click-to-component';
+  source: "click-to-component";
   version: number;
-  type: 'ready' | 'open-in-editor' | 'enable-button';
+  type: "ready" | "open-in-editor" | "enable-button";
   payload?: OpenInEditorPayload;
 }
 
 export interface ClickToComponentEnableMessage {
-  source: 'click-to-component';
+  source: "click-to-component";
   version: 1;
-  type: 'enable-button';
+  type: "enable-button";
 }
 
 export interface EventHandlers {
@@ -76,24 +76,24 @@ export class ClickToComponentListener {
       const data = event.data as ClickToComponentMessage;
 
       // Only handle messages from our click-to-component tool
-      if (!data || data.source !== 'click-to-component') {
+      if (!data || data.source !== "click-to-component") {
         return;
       }
 
       switch (data.type) {
-        case 'ready':
+        case "ready":
           if (event.source) {
             const enableMsg: ClickToComponentEnableMessage = {
-              source: 'click-to-component',
+              source: "click-to-component",
               version: 1,
-              type: 'enable-button',
+              type: "enable-button",
             };
-            (event.source as Window).postMessage(enableMsg, '*');
+            (event.source as Window).postMessage(enableMsg, "*");
           }
           this.handlers.onReady?.();
           break;
 
-        case 'open-in-editor':
+        case "open-in-editor":
           if (data.payload) {
             this.handlers.onOpenInEditor?.(data.payload);
           }
@@ -104,7 +104,7 @@ export class ClickToComponentListener {
       }
     };
 
-    window.addEventListener('message', this.messageListener);
+    window.addEventListener("message", this.messageListener);
   }
 
   /**
@@ -112,7 +112,7 @@ export class ClickToComponentListener {
    */
   stop(): void {
     if (this.messageListener) {
-      window.removeEventListener('message', this.messageListener);
+      window.removeEventListener("message", this.messageListener);
       this.messageListener = null;
     }
   }
@@ -129,7 +129,7 @@ export class ClickToComponentListener {
    */
   sendToIframe(iframe: HTMLIFrameElement, message: unknown): void {
     if (iframe.contentWindow) {
-      iframe.contentWindow.postMessage(message, '*');
+      iframe.contentWindow.postMessage(message, "*");
     }
   }
 }

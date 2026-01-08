@@ -1,13 +1,13 @@
 import {
   Table,
-  TableHead,
   TableBody,
-  TableRow,
-  TableHeaderCell,
   TableCell,
   TableEmpty,
+  TableHead,
+  TableHeaderCell,
   TableLoading,
-} from './table';
+  TableRow,
+} from "./table";
 
 export type ColumnDef<T> = {
   id: string;
@@ -47,8 +47,8 @@ export function DataTable<T>({
           ) : (
             columns.map((column) => (
               <TableHeaderCell
-                key={column.id}
                 className={column.headerClassName}
+                key={column.id}
               >
                 {column.header}
               </TableHeaderCell>
@@ -60,14 +60,14 @@ export function DataTable<T>({
         {isLoading ? (
           <TableLoading colSpan={colSpan} />
         ) : data.length === 0 ? (
-          <TableEmpty colSpan={colSpan}>{emptyState || 'No data'}</TableEmpty>
+          <TableEmpty colSpan={colSpan}>{emptyState || "No data"}</TableEmpty>
         ) : (
           data.map((row) => {
             const key = keyExtractor(row);
             const handleClick = onRowClick ? () => onRowClick(row) : undefined;
             const handleKeyDown = onRowClick
               ? (e: React.KeyboardEvent) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     onRowClick(row);
                   }
@@ -76,15 +76,15 @@ export function DataTable<T>({
 
             return (
               <TableRow
-                key={key}
                 clickable={!!onRowClick}
-                role={onRowClick ? 'button' : undefined}
-                tabIndex={onRowClick ? 0 : undefined}
+                key={key}
                 onClick={handleClick}
                 onKeyDown={handleKeyDown}
+                role={onRowClick ? "button" : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
               >
                 {columns.map((column) => (
-                  <TableCell key={column.id} className={column.className}>
+                  <TableCell className={column.className} key={column.id}>
                     {column.accessor(row)}
                   </TableCell>
                 ))}

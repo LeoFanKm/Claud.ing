@@ -1,6 +1,6 @@
-import NiceModal from '@ebay/nice-modal-react';
-import type React from 'react';
-import type { NiceModalHocProps } from '@ebay/nice-modal-react';
+import type { NiceModalHocProps } from "@ebay/nice-modal-react";
+import NiceModal from "@ebay/nice-modal-react";
+import type React from "react";
 
 // Use this instead of {} to avoid ban-types
 export type NoProps = Record<string, never>;
@@ -27,24 +27,24 @@ export function defineModal<P, R>(
     NiceModal.show(
       component as React.FC<ComponentProps<P>>,
       args[0] as ComponentProps<P>
-    ) as Promise<R>) as Modalized<P, R>['show'];
+    ) as Promise<R>) as Modalized<P, R>["show"];
   c.hide = () => NiceModal.hide(component as React.FC<ComponentProps<P>>);
   c.remove = () => NiceModal.remove(component as React.FC<ComponentProps<P>>);
   return c;
 }
 
 // Common modal result types for standardization
-export type ConfirmResult = 'confirmed' | 'canceled';
-export type DeleteResult = 'deleted' | 'canceled';
-export type SaveResult = 'saved' | 'canceled';
+export type ConfirmResult = "confirmed" | "canceled";
+export type DeleteResult = "deleted" | "canceled";
+export type SaveResult = "saved" | "canceled";
 
 // Error handling utility for modal operations
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
-  return 'An unknown error occurred';
+  return "An unknown error occurred";
 }

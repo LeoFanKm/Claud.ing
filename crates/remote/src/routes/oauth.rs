@@ -3,23 +3,29 @@ use std::borrow::Cow;
 use axum::{
     Json, Router,
     extract::{Extension, Path, Query, State},
-    http::StatusCode,
+    http::{Request, StatusCode},
     response::{IntoResponse, Redirect, Response},
     routing::{get, post},
 };
+use axum_extra::headers::{Authorization, HeaderMapExt, authorization::Bearer};
 use serde::Deserialize;
 use tracing::warn;
 use url::Url;
 use utils::api::oauth::{
     HandoffInitRequest, HandoffInitResponse, HandoffRedeemRequest, HandoffRedeemResponse,
-    ProfileResponse, ProviderProfile,
+    ProfileResponse, ProviderProfile, StatusResponse,
 };
 use uuid::Uuid;
 
 use crate::{
     AppState,
     auth::{CallbackResult, HandoffError, RequestContext},
-    db::{oauth::OAuthHandoffError, oauth_accounts::OAuthAccountRepository},
+    cache::invalidate_session_cache,
+    db::{
+        auth::{AuthSessionRepository, OAuthProviderData},
+        oauth::OAuthHandoffError,
+        oauth_accounts::OAuthAccountRepository,
+    },
 };
 
 pub fn public_router() -> Router<AppState> {
@@ -28,6 +34,7 @@ pub fn public_router() -> Router<AppState> {
         .route("/oauth/web/redeem", post(web_redeem))
         .route("/oauth/{provider}/start", get(authorize_start))
         .route("/oauth/{provider}/callback", get(authorize_callback))
+        .route("/auth/status", get(auth_status))
 }
 
 pub fn protected_router() -> Router<AppState> {
@@ -213,7 +220,11 @@ pub async fn logout(
     let repo = AuthSessionRepository::new(state.pool());
 
     match repo.revoke(ctx.session_id).await {
-        Ok(_) | Err(AuthSessionError::NotFound) => StatusCode::NO_CONTENT.into_response(),
+        Ok(_) | Err(AuthSessionError::NotFound) => {
+            // Invalidate session cache on logout
+            invalidate_session_cache(state.cache(), ctx.session_id).await;
+            StatusCode::NO_CONTENT.into_response()
+        }
         Err(AuthSessionError::Database(error)) => {
             warn!(?error, session_id = %ctx.session_id, "failed to revoke auth session");
             StatusCode::INTERNAL_SERVER_ERROR.into_response()
@@ -317,4 +328,84 @@ fn append_query_params(
         }
     }
     Ok(url)
+}
+
+/// Check authentication status - returns logged_in status and profile if authenticated.
+/// This endpoint does not require authentication; it checks if the provided token is valid.
+///
+/// Optimized: Uses single JOIN query instead of N+1 queries (session + user + oauth_accounts).
+pub async fn auth_status(
+    State(state): State<AppState>,
+    request: Request<axum::body::Body>,
+) -> Json<StatusResponse> {
+    // Try to extract Bearer token from Authorization header
+    let bearer = match request.headers().typed_get::<Authorization<Bearer>>() {
+        Some(Authorization(token)) => token.token().to_owned(),
+        None => {
+            return Json(StatusResponse {
+                logged_in: false,
+                profile: None,
+                degraded: None,
+            });
+        }
+    };
+
+    // Try to decode the access token
+    let jwt = state.jwt();
+    let identity = match jwt.decode_access_token(&bearer) {
+        Ok(details) => details,
+        Err(_) => {
+            return Json(StatusResponse {
+                logged_in: false,
+                profile: None,
+                degraded: None,
+            });
+        }
+    };
+
+    // Single JOIN query: session + user + oauth_accounts
+    let pool = state.pool();
+    let session_repo = AuthSessionRepository::new(pool);
+    let auth_data = match session_repo.get_auth_status_data(identity.session_id).await {
+        Ok(Some(data)) if data.session_revoked_at.is_none() => data,
+        _ => {
+            return Json(StatusResponse {
+                logged_in: false,
+                profile: None,
+                degraded: None,
+            });
+        }
+    };
+
+    // Touch session to keep it active (fire-and-forget)
+    let _ = session_repo.touch(auth_data.session_id).await;
+
+    // Convert OAuthProviderData to ProviderProfile
+    let providers: Vec<ProviderProfile> = auth_data
+        .providers
+        .into_iter()
+        .map(provider_data_to_profile)
+        .collect();
+
+    Json(StatusResponse {
+        logged_in: true,
+        profile: Some(ProfileResponse {
+            user_id: auth_data.user_id,
+            username: auth_data.username,
+            email: auth_data.email,
+            providers,
+        }),
+        degraded: None,
+    })
+}
+
+/// Convert internal OAuthProviderData to API ProviderProfile
+fn provider_data_to_profile(data: OAuthProviderData) -> ProviderProfile {
+    ProviderProfile {
+        provider: data.provider,
+        username: data.username,
+        display_name: data.display_name,
+        email: data.email,
+        avatar_url: data.avatar_url,
+    }
 }

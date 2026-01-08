@@ -1,5 +1,5 @@
-import { useCallback, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const globalVisited: string[] = [];
 
@@ -22,7 +22,7 @@ export function usePreviousPath() {
     // Find last non-settings route in history
     const lastNonSettingsPath = [...globalVisited]
       .reverse()
-      .find((p) => !p.startsWith('/settings'));
-    navigate(lastNonSettingsPath || '/');
+      .find((p) => !p.startsWith("/settings"));
+    navigate(lastNonSettingsPath || "/");
   }, [navigate]);
 }

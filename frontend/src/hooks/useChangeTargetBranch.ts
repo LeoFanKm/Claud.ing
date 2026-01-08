@@ -1,10 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { attemptsApi } from '@/lib/api';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   ChangeTargetBranchRequest,
   ChangeTargetBranchResponse,
-} from 'shared/types';
-import { repoBranchKeys } from './useRepoBranches';
+} from "shared/types";
+import { attemptsApi } from "@/lib/api";
+import { repoBranchKeys } from "./useRepoBranches";
 
 type ChangeTargetBranchParams = {
   newTargetBranch: string;
@@ -26,7 +26,7 @@ export function useChangeTargetBranch(
   >({
     mutationFn: async ({ newTargetBranch, repoId }) => {
       if (!attemptId) {
-        throw new Error('Attempt id is not set');
+        throw new Error("Attempt id is not set");
       }
 
       const payload: ChangeTargetBranchRequest = {
@@ -38,11 +38,11 @@ export function useChangeTargetBranch(
     onSuccess: (data) => {
       if (attemptId) {
         queryClient.invalidateQueries({
-          queryKey: ['branchStatus', attemptId],
+          queryKey: ["branchStatus", attemptId],
         });
         // Invalidate taskAttempt query to refresh attempt.target_branch
         queryClient.invalidateQueries({
-          queryKey: ['taskAttempt', attemptId],
+          queryKey: ["taskAttempt", attemptId],
         });
       }
 
@@ -55,10 +55,10 @@ export function useChangeTargetBranch(
       onSuccess?.(data);
     },
     onError: (err) => {
-      console.error('Failed to change target branch:', err);
+      console.error("Failed to change target branch:", err);
       if (attemptId) {
         queryClient.invalidateQueries({
-          queryKey: ['branchStatus', attemptId],
+          queryKey: ["branchStatus", attemptId],
         });
       }
       onError?.(err);

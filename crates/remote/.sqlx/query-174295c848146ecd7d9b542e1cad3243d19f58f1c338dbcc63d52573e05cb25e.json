@@ -10,24 +10,16 @@
           "Custom": {
             "name": "member_role",
             "kind": {
-              "Enum": [
-                "admin",
-                "member"
-              ]
+              "Enum": ["admin", "member"]
             }
           }
         }
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid",
-        "Uuid"
-      ]
+      "Left": ["Uuid", "Uuid"]
     },
-    "nullable": [
-      false
-    ]
+    "nullable": [false]
   },
   "hash": "174295c848146ecd7d9b542e1cad3243d19f58f1c338dbcc63d52573e05cb25e"
 }

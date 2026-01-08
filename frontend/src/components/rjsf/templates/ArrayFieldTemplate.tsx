@@ -1,9 +1,9 @@
 import type {
-  ArrayFieldTemplateProps,
   ArrayFieldItemTemplateProps,
-} from '@rjsf/utils';
-import { Button } from '@/components/ui/button';
-import { Plus, X } from 'lucide-react';
+  ArrayFieldTemplateProps,
+} from "@rjsf/utils";
+import { Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const ArrayFieldTemplate = (props: ArrayFieldTemplateProps) => {
   const { canAdd, items, onAddClick, disabled, readonly } = props;
@@ -18,14 +18,14 @@ export const ArrayFieldTemplate = (props: ArrayFieldTemplateProps) => {
 
       {canAdd && (
         <Button
+          className="w-full"
+          disabled={disabled || readonly}
+          onClick={onAddClick}
+          size="sm"
           type="button"
           variant="outline"
-          size="sm"
-          onClick={onAddClick}
-          disabled={disabled || readonly}
-          className="w-full"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Item
         </Button>
       )}
@@ -43,15 +43,15 @@ export const ArrayFieldItemTemplate = (props: ArrayFieldItemTemplateProps) => {
       {/* Remove button */}
       {buttonsProps.hasRemove && (
         <Button
+          className="h-8 w-8 shrink-0 p-0 text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+          disabled={disabled || readonly || buttonsProps.disabled}
+          onClick={buttonsProps.onRemoveItem}
+          size="sm"
+          title="Remove item"
           type="button"
           variant="ghost"
-          size="sm"
-          onClick={buttonsProps.onRemoveItem}
-          disabled={disabled || readonly || buttonsProps.disabled}
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 shrink-0"
-          title="Remove item"
         >
-          <X className="w-4 h-4" />
+          <X className="h-4 w-4" />
         </Button>
       )}
     </div>

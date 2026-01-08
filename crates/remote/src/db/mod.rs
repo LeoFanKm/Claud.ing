@@ -20,8 +20,13 @@ pub(crate) async fn migrate(pool: &PgPool) -> Result<(), MigrateError> {
 }
 
 pub(crate) async fn create_pool(database_url: &str) -> Result<PgPool, sqlx::Error> {
+    let max_connections: u32 = std::env::var("DATABASE_MAX_CONNECTIONS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(30);
+
     PgPoolOptions::new()
-        .max_connections(10)
+        .max_connections(max_connections)
         .connect(database_url)
         .await
 }
@@ -35,10 +40,13 @@ pub(crate) async fn ensure_electric_role_password(
     }
 
     // PostgreSQL doesn't support parameter binding for ALTER ROLE PASSWORD
-    // We need to escape the password properly and embed it directly in the SQL
-    let escaped_password = password.replace("'", "''");
-    let sql = format!("ALTER ROLE electric_sync WITH PASSWORD '{escaped_password}'");
+    // Use PostgreSQL's quote_literal() function for safe escaping to prevent SQL injection
+    let quoted: (String,) = sqlx::query_as("SELECT quote_literal($1)")
+        .bind(password)
+        .fetch_one(pool)
+        .await?;
 
+    let sql = format!("ALTER ROLE electric_sync WITH PASSWORD {}", quoted.0);
     sqlx::query(&sql).execute(pool).await?;
 
     Ok(())

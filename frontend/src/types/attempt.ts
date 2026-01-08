@@ -1,4 +1,4 @@
-import type { Workspace, Session } from 'shared/types';
+import type { Session, Workspace } from "shared/types";
 
 /**
  * WorkspaceWithSession includes the latest Session for the workspace.

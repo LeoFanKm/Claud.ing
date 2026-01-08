@@ -1,7 +1,7 @@
 export {
-  ArrayFieldTemplate,
   ArrayFieldItemTemplate,
-} from './ArrayFieldTemplate';
-export { FieldTemplate } from './FieldTemplate';
-export { ObjectFieldTemplate } from './ObjectFieldTemplate';
-export { FormTemplate } from './FormTemplate';
+  ArrayFieldTemplate,
+} from "./ArrayFieldTemplate";
+export { FieldTemplate } from "./FieldTemplate";
+export { FormTemplate } from "./FormTemplate";
+export { ObjectFieldTemplate } from "./ObjectFieldTemplate";

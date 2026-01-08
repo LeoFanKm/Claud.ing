@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import { DiffView, DiffModeEnum } from '@git-diff-view/react';
-import { generateDiffFile } from '@git-diff-view/file';
-import '@/styles/diff-style-overrides.css';
-import '@/styles/edit-diff-overrides.css';
+import { generateDiffFile } from "@git-diff-view/file";
+import { DiffModeEnum, DiffView } from "@git-diff-view/react";
+import { useMemo } from "react";
+import "@/styles/diff-style-overrides.css";
+import "@/styles/edit-diff-overrides.css";
 
 type Props = {
   content: string;
   lang: string | null;
-  theme?: 'light' | 'dark';
+  theme?: "light" | "dark";
 };
 
 /**
@@ -19,12 +19,12 @@ function FileContentView({ content, lang, theme }: Props) {
   const diffFile = useMemo(() => {
     try {
       const instance = generateDiffFile(
-        '', // old file
-        '', // old content (empty)
-        '', // new file
+        "", // old file
+        "", // old content (empty)
+        "", // new file
         content, // new content
-        '', // old lang
-        lang || 'plaintext' // new lang
+        "", // old lang
+        lang || "plaintext" // new lang
       );
       instance.initRaw();
       return instance;
@@ -34,18 +34,18 @@ function FileContentView({ content, lang, theme }: Props) {
   }, [content, lang]);
 
   return diffFile ? (
-    <div className="border mt-2">
+    <div className="mt-2 border">
       <DiffView
         diffFile={diffFile}
-        diffViewWrap={false}
-        diffViewTheme={theme}
+        diffViewFontSize={12}
         diffViewHighlight
         diffViewMode={DiffModeEnum.Unified}
-        diffViewFontSize={12}
+        diffViewTheme={theme}
+        diffViewWrap={false}
       />
     </div>
   ) : (
-    <pre className="text-xs font-mono overflow-x-auto whitespace-pre">
+    <pre className="overflow-x-auto whitespace-pre font-mono text-xs">
       {content}
     </pre>
   );

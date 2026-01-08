@@ -85,16 +85,7 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid",
-        "Text",
-        "Text",
-        "Text",
-        "Int8",
-        "Text",
-        "Text",
-        "Int4"
-      ]
+      "Left": ["Uuid", "Text", "Text", "Text", "Int8", "Text", "Text", "Int4"]
     },
     "nullable": [
       false,

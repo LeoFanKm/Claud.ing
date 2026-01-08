@@ -1,41 +1,40 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { BaseCodingAgent, ExecutorConfig, McpConfig } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/components/ui/carousel';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { JSONEditor } from '@/components/ui/json-editor';
-import { Loader2 } from 'lucide-react';
-import type { BaseCodingAgent, ExecutorConfig } from 'shared/types';
-import { McpConfig } from 'shared/types';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { mcpServersApi } from '@/lib/api';
-import { McpConfigStrategyGeneral } from '@/lib/mcpStrategies';
+} from "@/components/ui/carousel";
+import { JSONEditor } from "@/components/ui/json-editor";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { mcpServersApi } from "@/lib/api";
+import { McpConfigStrategyGeneral } from "@/lib/mcpStrategies";
 
 export function McpSettings() {
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation("settings");
   const { config, profiles } = useUserSystem();
-  const [mcpServers, setMcpServers] = useState('{}');
+  const [mcpServers, setMcpServers] = useState("{}");
   const [mcpConfig, setMcpConfig] = useState<McpConfig | null>(null);
   const [mcpError, setMcpError] = useState<string | null>(null);
   const [mcpLoading, setMcpLoading] = useState(true);
@@ -43,7 +42,7 @@ export function McpSettings() {
     null
   );
   const [mcpApplying, setMcpApplying] = useState(false);
-  const [mcpConfigPath, setMcpConfigPath] = useState<string>('');
+  const [mcpConfigPath, setMcpConfigPath] = useState<string>("");
   const [success, setSuccess] = useState(false);
 
   // Initialize selected profile when config loads
@@ -67,7 +66,7 @@ export function McpSettings() {
       setMcpLoading(true);
       setMcpError(null);
       // Set default empty config based on agent type using strategy
-      setMcpConfigPath('');
+      setMcpConfigPath("");
 
       try {
         // Load MCP servers for the selected profile/agent
@@ -76,7 +75,7 @@ export function McpSettings() {
           ? Object.keys(profiles).find((key) => profiles[key] === profile)
           : null;
         if (!profileKey) {
-          throw new Error('Profile key not found');
+          throw new Error("Profile key not found");
         }
 
         const result = await mcpServersApi.load({
@@ -94,11 +93,11 @@ export function McpSettings() {
       } catch (err: unknown) {
         if (
           err instanceof Error &&
-          err.message.includes('does not support MCP')
+          err.message.includes("does not support MCP")
         ) {
           setMcpError(err.message);
         } else {
-          console.error('Error loading MCP servers:', err);
+          console.error("Error loading MCP servers:", err);
         }
       } finally {
         setMcpLoading(false);
@@ -123,12 +122,12 @@ export function McpSettings() {
         McpConfigStrategyGeneral.validateFullConfig(mcpConfig, parsedConfig);
       } catch (err) {
         if (err instanceof SyntaxError) {
-          setMcpError(t('settings.mcp.errors.invalidJson'));
+          setMcpError(t("settings.mcp.errors.invalidJson"));
         } else {
           setMcpError(
             err instanceof Error
               ? err.message
-              : t('settings.mcp.errors.validationError')
+              : t("settings.mcp.errors.validationError")
           );
         }
       }
@@ -136,7 +135,7 @@ export function McpSettings() {
   };
 
   const handleApplyMcpServers = async () => {
-    if (!selectedProfile || !mcpConfig) return;
+    if (!(selectedProfile && mcpConfig)) return;
 
     setMcpApplying(true);
     setMcpError(null);
@@ -160,7 +159,7 @@ export function McpSettings() {
               )
             : null;
           if (!selectedProfileKey) {
-            throw new Error('Selected profile key not found');
+            throw new Error("Selected profile key not found");
           }
 
           await mcpServersApi.save(
@@ -175,19 +174,19 @@ export function McpSettings() {
           setTimeout(() => setSuccess(false), 3000);
         } catch (mcpErr) {
           if (mcpErr instanceof SyntaxError) {
-            setMcpError(t('settings.mcp.errors.invalidJson'));
+            setMcpError(t("settings.mcp.errors.invalidJson"));
           } else {
             setMcpError(
               mcpErr instanceof Error
                 ? mcpErr.message
-                : t('settings.mcp.errors.saveFailed')
+                : t("settings.mcp.errors.saveFailed")
             );
           }
         }
       }
     } catch (err) {
-      setMcpError(t('settings.mcp.errors.applyFailed'));
-      console.error('Error applying MCP servers:', err);
+      setMcpError(t("settings.mcp.errors.applyFailed"));
+      console.error("Error applying MCP servers:", err);
     } finally {
       setMcpApplying(false);
     }
@@ -208,7 +207,7 @@ export function McpSettings() {
       setMcpError(
         err instanceof Error
           ? err.message
-          : t('settings.mcp.errors.addServerFailed')
+          : t("settings.mcp.errors.addServerFailed")
       );
     }
   };
@@ -218,14 +217,14 @@ export function McpSettings() {
     unknown
   >;
   const meta =
-    typeof preconfiguredObj.meta === 'object' && preconfiguredObj.meta !== null
+    typeof preconfiguredObj.meta === "object" && preconfiguredObj.meta !== null
       ? (preconfiguredObj.meta as Record<
           string,
           { name?: string; description?: string; url?: string; icon?: string }
         >)
       : {};
   const servers = Object.fromEntries(
-    Object.entries(preconfiguredObj).filter(([k]) => k !== 'meta')
+    Object.entries(preconfiguredObj).filter(([k]) => k !== "meta")
   ) as Record<string, unknown>;
   const getMetaFor = (key: string) => meta[key] || {};
 
@@ -234,7 +233,7 @@ export function McpSettings() {
       <div className="py-8">
         <Alert variant="destructive">
           <AlertDescription>
-            {t('settings.mcp.errors.loadFailed')}
+            {t("settings.mcp.errors.loadFailed")}
           </AlertDescription>
         </Alert>
       </div>
@@ -246,7 +245,7 @@ export function McpSettings() {
       {mcpError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {t('settings.mcp.errors.mcpError', { error: mcpError })}
+            {t("settings.mcp.errors.mcpError", { error: mcpError })}
           </AlertDescription>
         </Alert>
       )}
@@ -254,37 +253,37 @@ export function McpSettings() {
       {success && (
         <Alert variant="success">
           <AlertDescription className="font-medium">
-            {t('settings.mcp.save.successMessage')}
+            {t("settings.mcp.save.successMessage")}
           </AlertDescription>
         </Alert>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.mcp.title')}</CardTitle>
-          <CardDescription>{t('settings.mcp.description')}</CardDescription>
+          <CardTitle>{t("settings.mcp.title")}</CardTitle>
+          <CardDescription>{t("settings.mcp.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="mcp-executor">
-              {t('settings.mcp.labels.agent')}
+              {t("settings.mcp.labels.agent")}
             </Label>
             <Select
-              value={
-                selectedProfile
-                  ? Object.keys(profiles || {}).find(
-                      (key) => profiles![key] === selectedProfile
-                    ) || ''
-                  : ''
-              }
               onValueChange={(value: string) => {
                 const profile = profiles?.[value];
                 if (profile) setSelectedProfile(profile);
               }}
+              value={
+                selectedProfile
+                  ? Object.keys(profiles || {}).find(
+                      (key) => profiles![key] === selectedProfile
+                    ) || ""
+                  : ""
+              }
             >
               <SelectTrigger id="mcp-executor">
                 <SelectValue
-                  placeholder={t('settings.mcp.labels.agentPlaceholder')}
+                  placeholder={t("settings.mcp.labels.agentPlaceholder")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -298,22 +297,22 @@ export function McpSettings() {
                     ))}
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground">
-              {t('settings.mcp.labels.agentHelper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.mcp.labels.agentHelper")}
             </p>
           </div>
 
-          {mcpError && mcpError.includes('does not support MCP') ? (
+          {mcpError && mcpError.includes("does not support MCP") ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
               <div className="flex">
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                    {t('settings.mcp.errors.notSupported')}
+                  <h3 className="font-medium text-amber-800 text-sm dark:text-amber-200">
+                    {t("settings.mcp.errors.notSupported")}
                   </h3>
-                  <div className="mt-2 text-sm text-amber-700 dark:text-amber-300">
+                  <div className="mt-2 text-amber-700 text-sm dark:text-amber-300">
                     <p>{mcpError}</p>
                     <p className="mt-1">
-                      {t('settings.mcp.errors.supportMessage')}
+                      {t("settings.mcp.errors.supportMessage")}
                     </p>
                   </div>
                 </div>
@@ -322,33 +321,33 @@ export function McpSettings() {
           ) : (
             <div className="space-y-2">
               <Label htmlFor="mcp-servers">
-                {t('settings.mcp.labels.serverConfig')}
+                {t("settings.mcp.labels.serverConfig")}
               </Label>
               <JSONEditor
+                disabled={mcpLoading}
                 id="mcp-servers"
+                minHeight={300}
+                onChange={handleMcpServersChange}
                 placeholder={
                   mcpLoading
-                    ? t('settings.mcp.save.loading')
+                    ? t("settings.mcp.save.loading")
                     : '{\n  "server-name": {\n    "type": "stdio",\n    "command": "your-command",\n    "args": ["arg1", "arg2"]\n  }\n}'
                 }
                 value={
-                  mcpLoading ? t('settings.mcp.loading.jsonEditor') : mcpServers
+                  mcpLoading ? t("settings.mcp.loading.jsonEditor") : mcpServers
                 }
-                onChange={handleMcpServersChange}
-                disabled={mcpLoading}
-                minHeight={300}
               />
-              {mcpError && !mcpError.includes('does not support MCP') && (
-                <p className="text-sm text-destructive dark:text-red-400">
+              {mcpError && !mcpError.includes("does not support MCP") && (
+                <p className="text-destructive text-sm dark:text-red-400">
                   {mcpError}
                 </p>
               )}
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 {mcpLoading ? (
-                  t('settings.mcp.loading.configuration')
+                  t("settings.mcp.loading.configuration")
                 ) : (
                   <span>
-                    {t('settings.mcp.labels.saveLocation')}
+                    {t("settings.mcp.labels.saveLocation")}
                     {mcpConfigPath && (
                       <span className="ml-2 font-mono text-xs">
                         {mcpConfigPath}
@@ -359,16 +358,16 @@ export function McpSettings() {
               </div>
 
               {mcpConfig?.preconfigured &&
-                typeof mcpConfig.preconfigured === 'object' && (
+                typeof mcpConfig.preconfigured === "object" && (
                   <div className="pt-4">
-                    <Label>{t('settings.mcp.labels.popularServers')}</Label>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {t('settings.mcp.labels.serverHelper')}
+                    <Label>{t("settings.mcp.labels.popularServers")}</Label>
+                    <p className="mb-2 text-muted-foreground text-sm">
+                      {t("settings.mcp.labels.serverHelper")}
                     </p>
 
                     <div className="relative overflow-hidden rounded-xl border bg-background">
                       <Carousel className="w-full px-4 py-3">
-                        <CarouselContent className="gap-3 justify-center">
+                        <CarouselContent className="justify-center gap-3">
                           {Object.entries(servers).map(([key]) => {
                             const metaObj = getMetaFor(key) as {
                               name?: string;
@@ -378,31 +377,31 @@ export function McpSettings() {
                             };
                             const name = metaObj.name || key;
                             const description =
-                              metaObj.description || 'No description';
+                              metaObj.description || "No description";
                             const icon = metaObj.icon
                               ? `/${metaObj.icon}`
                               : null;
 
                             return (
                               <CarouselItem
-                                key={name}
                                 className="sm:basis-1/3 lg:basis-1/4"
+                                key={name}
                               >
                                 <button
-                                  type="button"
-                                  onClick={() => addServer(key)}
                                   aria-label={`Add ${name} to config`}
                                   className="group w-full text-left outline-none"
+                                  onClick={() => addServer(key)}
+                                  type="button"
                                 >
-                                  <Card className="h-32 rounded-xl border hover:shadow-md transition">
+                                  <Card className="h-32 rounded-xl border transition hover:shadow-md">
                                     <CardHeader className="pb-0">
                                       <div className="flex items-center gap-3">
-                                        <div className="w-6 h-6 rounded-lg border bg-muted grid place-items-center overflow-hidden">
+                                        <div className="grid h-6 w-6 place-items-center overflow-hidden rounded-lg border bg-muted">
                                           {icon ? (
                                             <img
-                                              src={icon}
                                               alt=""
-                                              className="w-full h-full object-cover"
+                                              className="h-full w-full object-cover"
+                                              src={icon}
                                             />
                                           ) : (
                                             <span className="font-semibold">
@@ -410,14 +409,14 @@ export function McpSettings() {
                                             </span>
                                           )}
                                         </div>
-                                        <CardTitle className="text-base font-medium truncate">
+                                        <CardTitle className="truncate font-medium text-base">
                                           {name}
                                         </CardTitle>
                                       </div>
                                     </CardHeader>
 
-                                    <CardContent className="pt-2 px-4">
-                                      <p className="text-sm text-muted-foreground line-clamp-3">
+                                    <CardContent className="px-4 pt-2">
+                                      <p className="line-clamp-3 text-muted-foreground text-sm">
                                         {description}
                                       </p>
                                     </CardContent>
@@ -428,8 +427,8 @@ export function McpSettings() {
                           })}
                         </CarouselContent>
 
-                        <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border bg-background/80 shadow-sm backdrop-blur hover:bg-background" />
-                        <CarouselNext className="right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border bg-background/80 shadow-sm backdrop-blur hover:bg-background" />
+                        <CarouselPrevious className="top-1/2 left-2 h-8 w-8 -translate-y-1/2 rounded-full border bg-background/80 shadow-sm backdrop-blur hover:bg-background" />
+                        <CarouselNext className="top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-full border bg-background/80 shadow-sm backdrop-blur hover:bg-background" />
                       </Carousel>
                     </div>
                   </div>
@@ -440,17 +439,17 @@ export function McpSettings() {
       </Card>
 
       {/* Sticky Save Button */}
-      <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t py-4">
+      <div className="sticky bottom-0 z-10 border-t bg-background/80 py-4 backdrop-blur-sm">
         <div className="flex justify-end">
           <Button
-            onClick={handleApplyMcpServers}
             disabled={mcpApplying || mcpLoading || !!mcpError || success}
+            onClick={handleApplyMcpServers}
           >
             {mcpApplying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {success && <span className="mr-2">✓</span>}
             {success
-              ? t('settings.mcp.save.success')
-              : t('settings.mcp.save.button')}
+              ? t("settings.mcp.save.success")
+              : t("settings.mcp.save.button")}
           </Button>
         </div>
       </div>

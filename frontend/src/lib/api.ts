@@ -1,101 +1,222 @@
 // Import all necessary types from shared types
 
-import {
-  ApprovalStatus,
+import type {
+  AbortConflictsRequest,
   ApiResponse,
-  Config,
-  CreateFollowUpAttempt,
-  EditorType,
-  CreateGitHubPrRequest,
-  CreateTask,
-  CreateAndStartTaskRequest,
-  CreateTaskAttemptBody,
-  CreateTag,
-  DirectoryListResponse,
-  DirectoryEntry,
-  ExecutionProcess,
-  ExecutionProcessRepoState,
-  GitBranch,
-  Project,
-  ProjectRepo,
-  Repo,
-  RepoWithTargetBranch,
-  CreateProject,
-  CreateProjectRepo,
-  UpdateProjectRepo,
-  SearchResult,
-  ShareTaskResponse,
-  Task,
-  TaskRelationships,
-  Tag,
-  TagSearchParams,
-  TaskWithAttemptStatus,
-  UpdateProject,
-  UpdateTask,
-  UpdateTag,
-  UserSystemInfo,
-  McpServerQuery,
-  UpdateMcpServersBody,
-  GetMcpServerResponse,
-  ImageResponse,
-  GitOperationError,
   ApprovalResponse,
-  RebaseTaskAttemptRequest,
-  ChangeTargetBranchRequest,
-  ChangeTargetBranchResponse,
-  RenameBranchRequest,
-  RenameBranchResponse,
-  CheckEditorAvailabilityResponse,
+  ApprovalStatus,
   AvailabilityInfo,
   BaseCodingAgent,
-  RunAgentSetupRequest,
-  RunAgentSetupResponse,
-  GhCliSetupError,
-  RunScriptError,
-  StatusResponse,
-  ListOrganizationsResponse,
-  OrganizationMemberWithProfile,
-  ListMembersResponse,
-  RemoteProjectMembersResponse,
-  CreateOrganizationRequest,
-  CreateOrganizationResponse,
+  ChangeTargetBranchRequest,
+  ChangeTargetBranchResponse,
+  CheckEditorAvailabilityResponse,
+  Config,
+  CreateAndStartTaskRequest,
+  CreateFollowUpAttempt,
+  CreateGitHubPrRequest,
   CreateInvitationRequest,
   CreateInvitationResponse,
-  RevokeInvitationRequest,
-  UpdateMemberRoleRequest,
-  CreateRemoteProjectRequest,
-  LinkToExistingRequest,
-  UpdateMemberRoleResponse,
-  Invitation,
-  RemoteProject,
-  ListInvitationsResponse,
-  OpenEditorResponse,
-  OpenEditorRequest,
+  CreateOrganizationRequest,
+  CreateOrganizationResponse,
   CreatePrError,
+  CreateProject,
+  CreateProjectRepo,
+  CreateRemoteProjectRequest,
+  CreateScratch,
+  CreateTag,
+  CreateTask,
+  CreateTaskAttemptBody,
+  CurrentUserResponse,
+  DirectoryEntry,
+  DirectoryListResponse,
+  EditorType,
+  ExecutionProcess,
+  ExecutionProcessRepoState,
+  GetMcpServerResponse,
+  GhCliSetupError,
+  GitBranch,
+  GitOperationError,
+  ImageResponse,
+  Invitation,
+  LinkToExistingRequest,
+  ListInvitationsResponse,
+  ListMembersResponse,
+  ListOrganizationsResponse,
+  McpServerQuery,
+  MergeTaskAttemptRequest,
+  OpenEditorRequest,
+  OpenEditorResponse,
+  OrganizationMemberWithProfile,
+  PrCommentsResponse,
+  Project,
+  ProjectRepo,
+  PushError,
+  PushTaskAttemptRequest,
+  QueueStatus,
+  RebaseTaskAttemptRequest,
+  RemoteProject,
+  RemoteProjectMembersResponse,
+  RenameBranchRequest,
+  RenameBranchResponse,
+  Repo,
+  RepoBranchStatus,
+  RepoWithTargetBranch,
+  RevokeInvitationRequest,
+  RunAgentSetupRequest,
+  RunAgentSetupResponse,
+  RunScriptError,
   Scratch,
   ScratchType,
-  CreateScratch,
-  UpdateScratch,
-  PushError,
-  TokenResponse,
-  CurrentUserResponse,
-  SharedTaskResponse,
-  SharedTaskDetails,
-  QueueStatus,
-  PrCommentsResponse,
-  MergeTaskAttemptRequest,
-  PushTaskAttemptRequest,
-  RepoBranchStatus,
-  AbortConflictsRequest,
+  SearchResult,
   Session,
+  SharedTaskDetails,
+  SharedTaskResponse,
+  ShareTaskResponse,
+  StatusResponse,
+  Tag,
+  TagSearchParams,
+  Task,
+  TaskRelationships,
+  TaskWithAttemptStatus,
+  TokenResponse,
+  UpdateMcpServersBody,
+  UpdateMemberRoleRequest,
+  UpdateMemberRoleResponse,
+  UpdateProject,
+  UpdateProjectRepo,
+  UpdateScratch,
+  UpdateTag,
+  UpdateTask,
+  UserSystemInfo,
   Workspace,
-} from 'shared/types';
-import type { WorkspaceWithSession } from '@/types/attempt';
-import { createWorkspaceWithSession } from '@/types/attempt';
+} from "shared/types";
+import type { WorkspaceWithSession } from "@/types/attempt";
+import { createWorkspaceWithSession } from "@/types/attempt";
+
+// ============================================================================
+// API Configuration
+// ============================================================================
+
+/**
+ * API Base URL - defaults to empty for local development (uses Vite proxy)
+ * Set VITE_API_BASE_URL in production to Workers API endpoint
+ */
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
+/**
+ * Detect if we're running in Web mode (Cloudflare Workers backend)
+ * vs Local mode (Rust desktop backend)
+ *
+ * Detection logic:
+ * 1. Explicit VITE_API_BASE_URL set → remote mode
+ * 2. Running on known production domains (claud.ing) → remote mode
+ * 3. Running on localhost/127.0.0.1 → local mode (desktop app)
+ * 4. Running on any other domain → assume remote mode (cloud deployment)
+ */
+function detectRemoteApiMode(): boolean {
+  // Explicit environment variable takes precedence
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return true;
+  }
+
+  // Check if running in browser
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const hostname = window.location.hostname;
+
+  // Known production domains - Web mode
+  const productionDomains = ["claud.ing", "www.claud.ing"];
+  if (productionDomains.includes(hostname)) {
+    return true;
+  }
+
+  // Cloudflare Pages preview domains - Web mode
+  if (hostname.endsWith(".pages.dev")) {
+    return true;
+  }
+
+  // Localhost/127.0.0.1 - Local desktop mode
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return false;
+  }
+
+  // Any other domain - assume Web mode (cloud deployment)
+  return true;
+}
+
+/**
+ * Whether the remote API is enabled (Workers API)
+ */
+export const isRemoteApiEnabled = detectRemoteApiMode();
+
+// ============================================================================
+// Authentication
+// ============================================================================
+
+/**
+ * Token getter function type - set by ClerkProvider integration
+ */
+type TokenGetter = () => Promise<string | null>;
+
+let tokenGetter: TokenGetter | null = null;
+
+/**
+ * Configure the authentication token getter
+ * Called from ClerkProvider integration to enable authenticated requests
+ */
+export function setAuthTokenGetter(getter: TokenGetter) {
+  tokenGetter = getter;
+}
+
+/**
+ * Clear the authentication token getter (on logout)
+ */
+export function clearAuthTokenGetter() {
+  tokenGetter = null;
+}
+
+// Timeout for getting auth token (3 seconds)
+const AUTH_TOKEN_TIMEOUT_MS = 15000; // Increased from 3s to 15s to handle Clerk initialization
+
+/**
+ * Get the current auth token (if available)
+ * Has a timeout to prevent hanging if Clerk is slow to initialize
+ */
+async function getAuthToken(): Promise<string | null> {
+  if (!tokenGetter) return null;
+  try {
+    // Race between token getter and timeout
+    const result = await Promise.race([
+      tokenGetter(),
+      new Promise<null>((resolve) =>
+        setTimeout(() => {
+          console.warn(
+            "[API] Auth token fetch timed out after",
+            AUTH_TOKEN_TIMEOUT_MS,
+            "ms"
+          );
+          resolve(null);
+        }, AUTH_TOKEN_TIMEOUT_MS)
+      ),
+    ]);
+    return result;
+  } catch (error) {
+    console.warn("[API] Failed to get auth token:", error);
+    return null;
+  }
+}
+
+// ============================================================================
+// Error Handling
+// ============================================================================
 
 export class ApiError<E = unknown> extends Error {
   public status?: number;
   public error_data?: E;
+  public isAuthError: boolean;
+  public isNetworkError: boolean;
 
   constructor(
     message: string,
@@ -104,22 +225,122 @@ export class ApiError<E = unknown> extends Error {
     error_data?: E
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = statusCode;
     this.error_data = error_data;
+    this.isAuthError = statusCode === 401 || statusCode === 403;
+    this.isNetworkError = statusCode === undefined;
   }
 }
 
+/**
+ * Auth error event - emitted when authentication fails
+ * Components can listen to handle logout/redirect
+ */
+export type AuthErrorHandler = (error: ApiError) => void;
+let authErrorHandler: AuthErrorHandler | null = null;
+
+export function setAuthErrorHandler(handler: AuthErrorHandler) {
+  authErrorHandler = handler;
+}
+
+// ============================================================================
+// Request Helper
+// ============================================================================
+
+/**
+ * Build full URL with base URL prefix
+ */
+function buildUrl(path: string): string {
+  // If path already has a protocol, return as-is
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  // Ensure path starts with /
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${API_BASE_URL}${normalizedPath}`;
+}
+
+// Default timeout for API requests (10 seconds)
+const API_TIMEOUT_MS = 10000;
+
 const makeRequest = async (url: string, options: RequestInit = {}) => {
   const headers = new Headers(options.headers ?? {});
-  if (!headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+
+  // Set default content type
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
 
-  return fetch(url, {
-    ...options,
-    headers,
-  });
+  // Add authentication header if token is available
+  const token = await getAuthToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  // Build full URL
+  const fullUrl = buildUrl(url);
+
+  // Create abort controller for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, API_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(fullUrl, {
+      ...options,
+      headers,
+      credentials: isRemoteApiEnabled ? "include" : "same-origin",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    // Handle auth errors globally
+    if (response.status === 401 || response.status === 403) {
+      const error = new ApiError(
+        response.status === 401 ? "Unauthorized" : "Forbidden",
+        response.status,
+        response
+      );
+      if (authErrorHandler) {
+        authErrorHandler(error);
+      }
+    }
+
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    // Check if it was a timeout
+    if (error instanceof Error && error.name === "AbortError") {
+      const timeoutError = new ApiError(
+        `Request timed out after ${API_TIMEOUT_MS}ms`,
+        undefined,
+        undefined
+      );
+      console.error("[API Timeout]", {
+        url: fullUrl,
+        timeout: API_TIMEOUT_MS,
+        timestamp: new Date().toISOString(),
+      });
+      throw timeoutError;
+    }
+
+    // Network error
+    const networkError = new ApiError(
+      error instanceof Error ? error.message : "Network error",
+      undefined,
+      undefined
+    );
+    console.error("[API Network Error]", {
+      url: fullUrl,
+      error: networkError.message,
+      timestamp: new Date().toISOString(),
+    });
+    throw networkError;
+  }
 };
 
 export type Ok<T> = { success: true; data: T };
@@ -181,7 +402,7 @@ export const handleApiResponse = async <T, E = T>(
       errorMessage = response.statusText || errorMessage;
     }
 
-    console.error('[API Error]', {
+    console.error("[API Error]", {
       message: errorMessage,
       status: response.status,
       response,
@@ -200,7 +421,7 @@ export const handleApiResponse = async <T, E = T>(
   if (!result.success) {
     // Check for error_data first (structured errors), then fall back to message
     if (result.error_data) {
-      console.error('[API Error with data]', {
+      console.error("[API Error with data]", {
         error_data: result.error_data,
         message: result.message,
         status: response.status,
@@ -210,22 +431,22 @@ export const handleApiResponse = async <T, E = T>(
       });
       // Throw a properly typed error with the error data
       throw new ApiError<E>(
-        result.message || 'API request failed',
+        result.message || "API request failed",
         response.status,
         response,
         result.error_data
       );
     }
 
-    console.error('[API Error]', {
-      message: result.message || 'API request failed',
+    console.error("[API Error]", {
+      message: result.message || "API request failed",
       status: response.status,
       response,
       endpoint: response.url,
       timestamp: new Date().toISOString(),
     });
     throw new ApiError<E>(
-      result.message || 'API request failed',
+      result.message || "API request failed",
       response.status,
       response
     );
@@ -236,9 +457,14 @@ export const handleApiResponse = async <T, E = T>(
 
 // Project Management APIs
 export const projectsApi = {
+  getList: async (): Promise<Project[]> => {
+    const response = await makeRequest("/api/projects");
+    return handleApiResponse<Project[]>(response);
+  },
+
   create: async (data: CreateProject): Promise<Project> => {
-    const response = await makeRequest('/api/projects', {
-      method: 'POST',
+    const response = await makeRequest("/api/projects", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Project>(response);
@@ -246,7 +472,7 @@ export const projectsApi = {
 
   update: async (id: string, data: UpdateProject): Promise<Project> => {
     const response = await makeRequest(`/api/projects/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Project>(response);
@@ -263,7 +489,7 @@ export const projectsApi = {
 
   delete: async (id: string): Promise<void> => {
     const response = await makeRequest(`/api/projects/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<void>(response);
   },
@@ -273,7 +499,7 @@ export const projectsApi = {
     data: OpenEditorRequest
   ): Promise<OpenEditorResponse> => {
     const response = await makeRequest(`/api/projects/${id}/open-editor`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<OpenEditorResponse>(response);
@@ -285,7 +511,7 @@ export const projectsApi = {
     mode?: string,
     options?: RequestInit
   ): Promise<SearchResult[]> => {
-    const modeParam = mode ? `&mode=${encodeURIComponent(mode)}` : '';
+    const modeParam = mode ? `&mode=${encodeURIComponent(mode)}` : "";
     const response = await makeRequest(
       `/api/projects/${id}/search?q=${encodeURIComponent(query)}${modeParam}`,
       options
@@ -298,7 +524,7 @@ export const projectsApi = {
     data: LinkToExistingRequest
   ): Promise<Project> => {
     const response = await makeRequest(`/api/projects/${localProjectId}/link`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Project>(response);
@@ -311,7 +537,7 @@ export const projectsApi = {
     const response = await makeRequest(
       `/api/projects/${localProjectId}/link/create`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -320,7 +546,7 @@ export const projectsApi = {
 
   unlink: async (projectId: string): Promise<Project> => {
     const response = await makeRequest(`/api/projects/${projectId}/link`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<Project>(response);
   },
@@ -339,7 +565,7 @@ export const projectsApi = {
     const response = await makeRequest(
       `/api/projects/${projectId}/repositories`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -353,7 +579,7 @@ export const projectsApi = {
     const response = await makeRequest(
       `/api/projects/${projectId}/repositories/${repoId}`,
       {
-        method: 'DELETE',
+        method: "DELETE",
       }
     );
     return handleApiResponse<void>(response);
@@ -377,7 +603,7 @@ export const projectsApi = {
     const response = await makeRequest(
       `/api/projects/${projectId}/repositories/${repoId}`,
       {
-        method: 'PUT',
+        method: "PUT",
         body: JSON.stringify(data),
       }
     );
@@ -393,8 +619,8 @@ export const tasksApi = {
   },
 
   create: async (data: CreateTask): Promise<Task> => {
-    const response = await makeRequest(`/api/tasks`, {
-      method: 'POST',
+    const response = await makeRequest("/api/tasks", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Task>(response);
@@ -403,8 +629,8 @@ export const tasksApi = {
   createAndStart: async (
     data: CreateAndStartTaskRequest
   ): Promise<TaskWithAttemptStatus> => {
-    const response = await makeRequest(`/api/tasks/create-and-start`, {
-      method: 'POST',
+    const response = await makeRequest("/api/tasks/create-and-start", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<TaskWithAttemptStatus>(response);
@@ -412,7 +638,7 @@ export const tasksApi = {
 
   update: async (taskId: string, data: UpdateTask): Promise<Task> => {
     const response = await makeRequest(`/api/tasks/${taskId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Task>(response);
@@ -420,14 +646,14 @@ export const tasksApi = {
 
   delete: async (taskId: string): Promise<void> => {
     const response = await makeRequest(`/api/tasks/${taskId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<void>(response);
   },
 
   share: async (taskId: string): Promise<ShareTaskResponse> => {
     const response = await makeRequest(`/api/tasks/${taskId}/share`, {
-      method: 'POST',
+      method: "POST",
     });
     return handleApiResponse<ShareTaskResponse>(response);
   },
@@ -443,7 +669,7 @@ export const tasksApi = {
     const response = await makeRequest(
       `/api/shared-tasks/${sharedTaskId}/assign`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(payload),
       }
     );
@@ -453,14 +679,14 @@ export const tasksApi = {
 
   unshare: async (sharedTaskId: string): Promise<void> => {
     const response = await makeRequest(`/api/shared-tasks/${sharedTaskId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<void>(response);
   },
 
   linkToLocal: async (data: SharedTaskDetails): Promise<Task | null> => {
-    const response = await makeRequest(`/api/shared-tasks/link-to-local`, {
-      method: 'POST',
+    const response = await makeRequest("/api/shared-tasks/link-to-local", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Task | null>(response);
@@ -485,8 +711,8 @@ export const sessionsApi = {
     workspace_id: string;
     executor?: string;
   }): Promise<Session> => {
-    const response = await makeRequest('/api/sessions', {
-      method: 'POST',
+    const response = await makeRequest("/api/sessions", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Session>(response);
@@ -497,7 +723,7 @@ export const sessionsApi = {
     data: CreateFollowUpAttempt
   ): Promise<ExecutionProcess> => {
     const response = await makeRequest(`/api/sessions/${sessionId}/follow-up`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<ExecutionProcess>(response);
@@ -533,8 +759,8 @@ export const attemptsApi = {
   },
 
   create: async (data: CreateTaskAttemptBody): Promise<Workspace> => {
-    const response = await makeRequest(`/api/task-attempts`, {
-      method: 'POST',
+    const response = await makeRequest("/api/task-attempts", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Workspace>(response);
@@ -542,7 +768,7 @@ export const attemptsApi = {
 
   stop: async (attemptId: string): Promise<void> => {
     const response = await makeRequest(`/api/task-attempts/${attemptId}/stop`, {
-      method: 'POST',
+      method: "POST",
     });
     return handleApiResponse<void>(response);
   },
@@ -554,7 +780,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/run-agent-setup`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -568,7 +794,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/open-editor`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -594,7 +820,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/merge`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -606,7 +832,7 @@ export const attemptsApi = {
     data: PushTaskAttemptRequest
   ): Promise<Result<void, PushError>> => {
     const response = await makeRequest(`/api/task-attempts/${attemptId}/push`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponseAsResult<void, PushError>(response);
@@ -619,7 +845,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/push/force`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -633,7 +859,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/rebase`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -647,7 +873,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/change-target-branch`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -664,7 +890,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/rename-branch`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(payload),
       }
     );
@@ -678,7 +904,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/conflicts/abort`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
       }
     );
@@ -690,7 +916,7 @@ export const attemptsApi = {
     data: CreateGitHubPrRequest
   ): Promise<Result<string, CreatePrError>> => {
     const response = await makeRequest(`/api/task-attempts/${attemptId}/pr`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponseAsResult<string, CreatePrError>(response);
@@ -700,7 +926,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/start-dev-server`,
       {
-        method: 'POST',
+        method: "POST",
       }
     );
     return handleApiResponse<void>(response);
@@ -710,7 +936,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/gh-cli-setup`,
       {
-        method: 'POST',
+        method: "POST",
       }
     );
     return handleApiResponse<ExecutionProcess, GhCliSetupError>(response);
@@ -722,7 +948,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/run-setup-script`,
       {
-        method: 'POST',
+        method: "POST",
       }
     );
     return handleApiResponseAsResult<ExecutionProcess, RunScriptError>(
@@ -736,7 +962,7 @@ export const attemptsApi = {
     const response = await makeRequest(
       `/api/task-attempts/${attemptId}/run-cleanup-script`,
       {
-        method: 'POST',
+        method: "POST",
       }
     );
     return handleApiResponseAsResult<ExecutionProcess, RunScriptError>(
@@ -775,7 +1001,7 @@ export const executionProcessesApi = {
     const response = await makeRequest(
       `/api/execution-processes/${processId}/stop`,
       {
-        method: 'POST',
+        method: "POST",
       }
     );
     return handleApiResponse<void>(response);
@@ -785,7 +1011,7 @@ export const executionProcessesApi = {
 // File System APIs
 export const fileSystemApi = {
   list: async (path?: string): Promise<DirectoryListResponse> => {
-    const queryParam = path ? `?path=${encodeURIComponent(path)}` : '';
+    const queryParam = path ? `?path=${encodeURIComponent(path)}` : "";
     const response = await makeRequest(
       `/api/filesystem/directory${queryParam}`
     );
@@ -793,7 +1019,7 @@ export const fileSystemApi = {
   },
 
   listGitRepos: async (path?: string): Promise<DirectoryEntry[]> => {
-    const queryParam = path ? `?path=${encodeURIComponent(path)}` : '';
+    const queryParam = path ? `?path=${encodeURIComponent(path)}` : "";
     const response = await makeRequest(
       `/api/filesystem/git-repos${queryParam}`
     );
@@ -807,8 +1033,8 @@ export const repoApi = {
     path: string;
     display_name?: string;
   }): Promise<Repo> => {
-    const response = await makeRequest('/api/repos', {
-      method: 'POST',
+    const response = await makeRequest("/api/repos", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Repo>(response);
@@ -823,8 +1049,8 @@ export const repoApi = {
     parent_path: string;
     folder_name: string;
   }): Promise<Repo> => {
-    const response = await makeRequest('/api/repos/init', {
-      method: 'POST',
+    const response = await makeRequest("/api/repos/init", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Repo>(response);
@@ -834,15 +1060,37 @@ export const repoApi = {
 // Config APIs (backwards compatible)
 export const configApi = {
   getConfig: async (): Promise<UserSystemInfo> => {
-    const response = await makeRequest('/api/info', { cache: 'no-store' });
+    const response = await makeRequest("/api/info", { cache: "no-store" });
     return handleApiResponse<UserSystemInfo>(response);
   },
+  // Get config for Web mode (from /api/config endpoint in Workers)
+  // Note: Workers API returns { success: true, data: Config } format
+  getWebConfig: async (): Promise<Config> => {
+    const response = await makeRequest("/api/config", { cache: "no-store" });
+    const result = await handleApiResponse<{ success: boolean; data: Config }>(
+      response
+    );
+    // Handle wrapped response format from Workers API
+    if (result && typeof result === "object" && "data" in result) {
+      return result.data;
+    }
+    // Fallback for direct Config response (backwards compatibility)
+    return result as unknown as Config;
+  },
   saveConfig: async (config: Config): Promise<Config> => {
-    const response = await makeRequest('/api/config', {
-      method: 'PUT',
+    const response = await makeRequest("/api/config", {
+      method: "PUT",
       body: JSON.stringify(config),
     });
-    return handleApiResponse<Config>(response);
+    const result = await handleApiResponse<{ success: boolean; data: Config }>(
+      response
+    );
+    // Handle wrapped response format from Workers API
+    if (result && typeof result === "object" && "data" in result) {
+      return result.data;
+    }
+    // Fallback for direct Config response (backwards compatibility)
+    return result as unknown as Config;
   },
   checkEditorAvailability: async (
     editorType: EditorType
@@ -867,14 +1115,14 @@ export const tagsApi = {
   list: async (params?: TagSearchParams): Promise<Tag[]> => {
     const queryParam = params?.search
       ? `?search=${encodeURIComponent(params.search)}`
-      : '';
+      : "";
     const response = await makeRequest(`/api/tags${queryParam}`);
     return handleApiResponse<Tag[]>(response);
   },
 
   create: async (data: CreateTag): Promise<Tag> => {
-    const response = await makeRequest('/api/tags', {
-      method: 'POST',
+    const response = await makeRequest("/api/tags", {
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Tag>(response);
@@ -882,7 +1130,7 @@ export const tagsApi = {
 
   update: async (tagId: string, data: UpdateTag): Promise<Tag> => {
     const response = await makeRequest(`/api/tags/${tagId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Tag>(response);
@@ -890,7 +1138,7 @@ export const tagsApi = {
 
   delete: async (tagId: string): Promise<void> => {
     const response = await makeRequest(`/api/tags/${tagId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<void>(response);
   },
@@ -910,19 +1158,19 @@ export const mcpServersApi = {
     const params = new URLSearchParams(query);
     // params.set('profile', profile);
     const response = await makeRequest(`/api/mcp-config?${params.toString()}`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('[API Error] Failed to save MCP servers', {
+      console.error("[API Error] Failed to save MCP servers", {
         message: errorData.message,
         status: response.status,
         response,
         timestamp: new Date().toISOString(),
       });
       throw new ApiError(
-        errorData.message || 'Failed to save MCP servers',
+        errorData.message || "Failed to save MCP servers",
         response.status,
         response
       );
@@ -933,15 +1181,15 @@ export const mcpServersApi = {
 // Profiles API
 export const profilesApi = {
   load: async (): Promise<{ content: string; path: string }> => {
-    const response = await makeRequest('/api/profiles');
+    const response = await makeRequest("/api/profiles");
     return handleApiResponse<{ content: string; path: string }>(response);
   },
   save: async (content: string): Promise<string> => {
-    const response = await makeRequest('/api/profiles', {
-      method: 'PUT',
+    const response = await makeRequest("/api/profiles", {
+      method: "PUT",
       body: content,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
     return handleApiResponse<string>(response);
@@ -952,12 +1200,19 @@ export const profilesApi = {
 export const imagesApi = {
   upload: async (file: File): Promise<ImageResponse> => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append("image", file);
 
-    const response = await fetch('/api/images/upload', {
-      method: 'POST',
+    const token = await getAuthToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(buildUrl("/api/images/upload"), {
+      method: "POST",
       body: formData,
-      credentials: 'include',
+      headers,
+      credentials: isRemoteApiEnabled ? "include" : "same-origin",
     });
 
     if (!response.ok) {
@@ -974,13 +1229,23 @@ export const imagesApi = {
 
   uploadForTask: async (taskId: string, file: File): Promise<ImageResponse> => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append("image", file);
 
-    const response = await fetch(`/api/images/task/${taskId}/upload`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
+    const token = await getAuthToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(
+      buildUrl(`/api/images/task/${taskId}/upload`),
+      {
+        method: "POST",
+        body: formData,
+        headers,
+        credentials: isRemoteApiEnabled ? "include" : "same-origin",
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -1003,14 +1268,21 @@ export const imagesApi = {
     file: File
   ): Promise<ImageResponse> => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append("image", file);
+
+    const token = await getAuthToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
 
     const response = await fetch(
-      `/api/task-attempts/${attemptId}/images/upload`,
+      buildUrl(`/api/task-attempts/${attemptId}/images/upload`),
       {
-        method: 'POST',
+        method: "POST",
         body: formData,
-        credentials: 'include',
+        headers,
+        credentials: isRemoteApiEnabled ? "include" : "same-origin",
       }
     );
 
@@ -1028,7 +1300,7 @@ export const imagesApi = {
 
   delete: async (imageId: string): Promise<void> => {
     const response = await makeRequest(`/api/images/${imageId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<void>(response);
   },
@@ -1039,7 +1311,7 @@ export const imagesApi = {
   },
 
   getImageUrl: (imageId: string): string => {
-    return `/api/images/${imageId}/file`;
+    return buildUrl(`/api/images/${imageId}/file`);
   },
 };
 
@@ -1051,8 +1323,8 @@ export const approvalsApi = {
     signal?: AbortSignal
   ): Promise<ApprovalStatus> => {
     const res = await makeRequest(`/api/approvals/${approvalId}/respond`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       signal,
     });
@@ -1067,8 +1339,8 @@ export const oauthApi = {
     provider: string,
     returnTo: string
   ): Promise<{ handoff_id: string; authorize_url: string }> => {
-    const response = await makeRequest('/api/auth/handoff/init', {
-      method: 'POST',
+    const response = await makeRequest("/api/auth/handoff/init", {
+      method: "POST",
       body: JSON.stringify({ provider, return_to: returnTo }),
     });
     return handleApiResponse<{ handoff_id: string; authorize_url: string }>(
@@ -1077,15 +1349,15 @@ export const oauthApi = {
   },
 
   status: async (): Promise<StatusResponse> => {
-    const response = await makeRequest('/api/auth/status', {
-      cache: 'no-store',
+    const response = await makeRequest("/api/auth/status", {
+      cache: "no-store",
     });
     return handleApiResponse<StatusResponse>(response);
   },
 
   logout: async (): Promise<void> => {
-    const response = await makeRequest('/api/auth/logout', {
-      method: 'POST',
+    const response = await makeRequest("/api/auth/logout", {
+      method: "POST",
     });
     if (!response.ok) {
       throw new ApiError(
@@ -1098,14 +1370,14 @@ export const oauthApi = {
 
   /** Returns the current access token for the remote server (auto-refreshes if needed) */
   getToken: async (): Promise<TokenResponse | null> => {
-    const response = await makeRequest('/api/auth/token');
+    const response = await makeRequest("/api/auth/token");
     if (!response.ok) return null;
     return handleApiResponse<TokenResponse>(response);
   },
 
   /** Returns the user ID of the currently authenticated user */
   getCurrentUser: async (): Promise<CurrentUserResponse> => {
-    const response = await makeRequest('/api/auth/user');
+    const response = await makeRequest("/api/auth/user");
     return handleApiResponse<CurrentUserResponse>(response);
   },
 };
@@ -1121,7 +1393,7 @@ export const organizationsApi = {
   },
 
   getUserOrganizations: async (): Promise<ListOrganizationsResponse> => {
-    const response = await makeRequest('/api/organizations');
+    const response = await makeRequest("/api/organizations");
     return handleApiResponse<ListOrganizationsResponse>(response);
   },
 
@@ -1133,9 +1405,9 @@ export const organizationsApi = {
   createOrganization: async (
     data: CreateOrganizationRequest
   ): Promise<CreateOrganizationResponse> => {
-    const response = await makeRequest('/api/organizations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await makeRequest("/api/organizations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
     return handleApiResponse<CreateOrganizationResponse>(response);
@@ -1148,8 +1420,8 @@ export const organizationsApi = {
     const response = await makeRequest(
       `/api/organizations/${orgId}/invitations`,
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }
     );
@@ -1160,7 +1432,7 @@ export const organizationsApi = {
     const response = await makeRequest(
       `/api/organizations/${orgId}/members/${userId}`,
       {
-        method: 'DELETE',
+        method: "DELETE",
       }
     );
     return handleApiResponse<void>(response);
@@ -1174,8 +1446,8 @@ export const organizationsApi = {
     const response = await makeRequest(
       `/api/organizations/${orgId}/members/${userId}/role`,
       {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }
     );
@@ -1198,8 +1470,8 @@ export const organizationsApi = {
     const response = await makeRequest(
       `/api/organizations/${orgId}/invitations/revoke`,
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       }
     );
@@ -1208,7 +1480,7 @@ export const organizationsApi = {
 
   deleteOrganization: async (orgId: string): Promise<void> => {
     const response = await makeRequest(`/api/organizations/${orgId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<void>(response);
   },
@@ -1222,7 +1494,7 @@ export const scratchApi = {
     data: CreateScratch
   ): Promise<Scratch> => {
     const response = await makeRequest(`/api/scratch/${scratchType}/${id}`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<Scratch>(response);
@@ -1239,7 +1511,7 @@ export const scratchApi = {
     data: UpdateScratch
   ): Promise<void> => {
     const response = await makeRequest(`/api/scratch/${scratchType}/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
     return handleApiResponse<void>(response);
@@ -1247,13 +1519,13 @@ export const scratchApi = {
 
   delete: async (scratchType: ScratchType, id: string): Promise<void> => {
     const response = await makeRequest(`/api/scratch/${scratchType}/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<void>(response);
   },
 
   getStreamUrl: (scratchType: ScratchType, id: string): string =>
-    `/api/scratch/${scratchType}/${id}/stream/ws`,
+    buildUrl(`/api/scratch/${scratchType}/${id}/stream/ws`),
 };
 
 // Queue API for session follow-up messages
@@ -1266,7 +1538,7 @@ export const queueApi = {
     data: { message: string; variant: string | null }
   ): Promise<QueueStatus> => {
     const response = await makeRequest(`/api/sessions/${sessionId}/queue`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
     return handleApiResponse<QueueStatus>(response);
@@ -1277,7 +1549,7 @@ export const queueApi = {
    */
   cancel: async (sessionId: string): Promise<QueueStatus> => {
     const response = await makeRequest(`/api/sessions/${sessionId}/queue`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     return handleApiResponse<QueueStatus>(response);
   },

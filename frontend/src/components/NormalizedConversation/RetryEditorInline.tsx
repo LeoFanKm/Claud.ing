@@ -1,20 +1,20 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import WYSIWYGEditor from '@/components/ui/wysiwyg';
-import { useProject } from '@/contexts/ProjectContext';
-import { cn } from '@/lib/utils';
-import { VariantSelector } from '@/components/tasks/VariantSelector';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Loader2, Paperclip, Send, X } from 'lucide-react';
-import { imagesApi } from '@/lib/api';
-import type { WorkspaceWithSession } from '@/types/attempt';
-import { useAttemptExecution } from '@/hooks/useAttemptExecution';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { useBranchStatus } from '@/hooks/useBranchStatus';
-import { useVariant } from '@/hooks/useVariant';
-import { useRetryProcess } from '@/hooks/useRetryProcess';
-import type { ExecutorAction, ExecutorProfileId } from 'shared/types';
+import { AlertCircle, Loader2, Paperclip, Send, X } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { ExecutorAction, ExecutorProfileId } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { VariantSelector } from "@/components/tasks/VariantSelector";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import WYSIWYGEditor from "@/components/ui/wysiwyg";
+import { useProject } from "@/contexts/ProjectContext";
+import { useAttemptExecution } from "@/hooks/useAttemptExecution";
+import { useBranchStatus } from "@/hooks/useBranchStatus";
+import { useRetryProcess } from "@/hooks/useRetryProcess";
+import { useVariant } from "@/hooks/useVariant";
+import { imagesApi } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import type { WorkspaceWithSession } from "@/types/attempt";
 
 export function RetryEditorInline({
   attempt,
@@ -27,7 +27,7 @@ export function RetryEditorInline({
   initialContent: string;
   onCancelled?: () => void;
 }) {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(["common"]);
   const attemptId = attempt.id;
   const { isAttemptRunning, attemptData } = useAttemptExecution(attemptId);
   const { data: branchStatus } = useBranchStatus(attemptId);
@@ -54,10 +54,10 @@ export function RetryEditorInline({
       while (curr) {
         const typ = curr.typ;
         switch (typ.type) {
-          case 'CodingAgentInitialRequest':
-          case 'CodingAgentFollowUpRequest':
+          case "CodingAgentInitialRequest":
+          case "CodingAgentFollowUpRequest":
             return typ.executor_profile_id;
-          case 'ScriptRequest':
+          case "ScriptRequest":
             curr = curr.next_action;
             continue;
         }
@@ -74,9 +74,9 @@ export function RetryEditorInline({
   });
 
   const retryMutation = useRetryProcess(
-    sessionId ?? '',
+    sessionId ?? "",
     () => onCancelled?.(),
-    (err) => setSendError((err as Error)?.message || 'Failed to send retry')
+    (err) => setSendError((err as Error)?.message || "Failed to send retry")
   );
 
   const isSending = retryMutation.isPending;
@@ -123,7 +123,7 @@ export function RetryEditorInline({
             prev ? `${prev}\n\n${imageMarkdown}` : imageMarkdown
           );
         } catch (error) {
-          console.error('Failed to upload image:', error);
+          console.error("Failed to upload image:", error);
         }
       }
     },
@@ -138,12 +138,12 @@ export function RetryEditorInline({
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []).filter((f) =>
-        f.type.startsWith('image/')
+        f.type.startsWith("image/")
       );
       if (files.length > 0) {
         handlePasteFiles(files);
       }
-      e.target.value = '';
+      e.target.value = "";
     },
     [handlePasteFiles]
   );
@@ -152,15 +152,15 @@ export function RetryEditorInline({
     <div className="space-y-2">
       <div className="relative">
         <WYSIWYGEditor
-          placeholder="Edit and resend your message..."
-          value={message}
-          onChange={setMessage}
+          className={cn("min-h-[40px]", "bg-background")}
           disabled={isSending}
+          onChange={setMessage}
           onCmdEnter={handleCmdEnter}
           onPasteFiles={handlePasteFiles}
-          className={cn('min-h-[40px]', 'bg-background')}
+          placeholder="Edit and resend your message..."
           projectId={projectId}
           taskAttemptId={attemptId}
+          value={message}
         />
         {isSending && (
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-background/60">
@@ -171,35 +171,35 @@ export function RetryEditorInline({
 
       <div className="flex items-center gap-2">
         <VariantSelector
-          selectedVariant={selectedVariant}
+          currentProfile={profiles?.[attempt.session?.executor ?? ""] ?? null}
           onChange={setSelectedVariant}
-          currentProfile={profiles?.[attempt.session?.executor ?? ''] ?? null}
+          selectedVariant={selectedVariant}
         />
         <input
+          accept="image/*"
+          className="hidden"
+          multiple
+          onChange={handleFileInputChange}
           ref={fileInputRef}
           type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={handleFileInputChange}
         />
         <div className="ml-auto flex items-center gap-2">
           <Button
-            variant="outline"
-            onClick={handleAttachClick}
-            disabled={isSending}
-            title="Attach image"
             aria-label="Attach image"
+            disabled={isSending}
+            onClick={handleAttachClick}
+            title="Attach image"
+            variant="outline"
           >
             <Paperclip className="h-3 w-3" />
           </Button>
-          <Button variant="outline" onClick={onCancel} disabled={isSending}>
-            <X className="h-3 w-3 mr-1" />{' '}
-            {t('buttons.cancel', { ns: 'common' })}
+          <Button disabled={isSending} onClick={onCancel} variant="outline">
+            <X className="mr-1 h-3 w-3" />{" "}
+            {t("buttons.cancel", { ns: "common" })}
           </Button>
-          <Button onClick={onSend} disabled={!canSend || isSending}>
-            <Send className="h-3 w-3 mr-1" />{' '}
-            {t('buttons.send', { ns: 'common', defaultValue: 'Send' })}
+          <Button disabled={!canSend || isSending} onClick={onSend}>
+            <Send className="mr-1 h-3 w-3" />{" "}
+            {t("buttons.send", { ns: "common", defaultValue: "Send" })}
           </Button>
         </div>
       </div>

@@ -1,12 +1,12 @@
-import { memo } from 'react';
-import { AnsiHtml } from 'fancy-ansi/react';
-import { hasAnsi } from 'fancy-ansi';
-import { clsx } from 'clsx';
+import { clsx } from "clsx";
+import { hasAnsi } from "fancy-ansi";
+import { AnsiHtml } from "fancy-ansi/react";
+import { memo } from "react";
 
 interface RawLogTextProps {
   content: string;
-  channel?: 'stdout' | 'stderr';
-  as?: 'div' | 'span';
+  channel?: "stdout" | "stderr";
+  as?: "div" | "span";
   className?: string;
   linkifyUrls?: boolean;
 }
@@ -14,14 +14,14 @@ interface RawLogTextProps {
 const RawLogText = memo(
   ({
     content,
-    channel = 'stdout',
-    as: Component = 'div',
+    channel = "stdout",
+    as: Component = "div",
     className,
     linkifyUrls = false,
   }: RawLogTextProps) => {
     // Only apply stderr fallback color when no ANSI codes are present
     const hasAnsiCodes = hasAnsi(content);
-    const shouldApplyStderrFallback = channel === 'stderr' && !hasAnsiCodes;
+    const shouldApplyStderrFallback = channel === "stderr" && !hasAnsiCodes;
 
     const renderContent = () => {
       if (!linkifyUrls) {
@@ -35,12 +35,12 @@ const RawLogText = memo(
         if (/^https?:\/\/\S+$/.test(part)) {
           return (
             <a
-              key={index}
+              className="cursor-pointer text-info underline hover:text-info/80"
               href={part}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-info hover:text-info/80 cursor-pointer"
+              key={index}
               onClick={(e) => e.stopPropagation()}
+              rel="noopener noreferrer"
+              target="_blank"
             >
               {part}
             </a>
@@ -54,8 +54,8 @@ const RawLogText = memo(
     return (
       <Component
         className={clsx(
-          'font-mono text-xs break-all whitespace-pre-wrap',
-          shouldApplyStderrFallback && 'text-destructive',
+          "whitespace-pre-wrap break-all font-mono text-xs",
+          shouldApplyStderrFallback && "text-destructive",
           className
         )}
       >
@@ -65,6 +65,6 @@ const RawLogText = memo(
   }
 );
 
-RawLogText.displayName = 'RawLogText';
+RawLogText.displayName = "RawLogText";
 
 export default RawLogText;

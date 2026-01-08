@@ -1,8 +1,7 @@
 /* Diff view color overrides for dark theme - grey theme instead of GitHub blue */
 
 /* Override the library's CSS variables with higher specificity */
-.diff-view-container
-  .diff-tailwindcss-wrapper[data-theme="dark"]
+.diff-view-container .diff-tailwindcss-wrapper[data-theme="dark"]
   .diff-style-root,
 .diff-view-container .diff-style-root {
   --diff-add-content--: rgba(46, 160, 67, 0.15) !important;

@@ -1,5 +1,6 @@
 import NiceModal, { useModal } from "@ebay/nice-modal-react";
 import { AlertTriangle } from "lucide-react";
+import { APP_NAME, WEBSITE_URL } from "@/constants/branding";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,7 +29,7 @@ const DisclaimerDialogImpl = NiceModal.create<NoProps>(() => {
           </div>
           <DialogDescription className="space-y-4 pt-4 text-left">
             <p>
-              Kanban by Clauding runs AI coding agents with{" "}
+              {APP_NAME} runs AI coding agents with{" "}
               <code>--dangerously-skip-permissions</code> / <code>--yolo</code>{" "}
               by default, giving them unrestricted access to execute code and
               run commands on your system.
@@ -42,11 +43,11 @@ const DisclaimerDialogImpl = NiceModal.create<NoProps>(() => {
               Learn more at{" "}
               <a
                 className="text-blue-600 underline hover:no-underline dark:text-blue-400"
-                href="https://claud.ing/docs/getting-started#safety-notice"
+                href={`${WEBSITE_URL}/docs/getting-started#safety-notice`}
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                https://claud.ing/docs/getting-started#safety-notice
+                {WEBSITE_URL}/docs/getting-started#safety-notice
               </a>
             </p>
           </DialogDescription>

@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   getInvitation,
-  initOAuth,
   type Invitation,
+  initOAuth,
   type OAuthProvider,
 } from "../api";
 import {
-  generateVerifier,
   generateChallenge,
-  storeVerifier,
+  generateVerifier,
   storeInvitationToken,
+  storeVerifier,
 } from "../pkce";
 
 export default function InvitationPage() {
@@ -47,7 +47,7 @@ export default function InvitationPage() {
   };
 
   if (error) {
-    return <ErrorCard title="Invalid or expired invitation" body={error} />;
+    return <ErrorCard body={error} title="Invalid or expired invitation" />;
   }
 
   if (!data) {
@@ -55,18 +55,18 @@ export default function InvitationPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white shadow rounded-lg p-6 space-y-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md space-y-4 rounded-lg bg-white p-6 shadow">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="font-bold text-2xl text-gray-900">
             You've been invited
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="mt-1 text-gray-600">
             Join <span className="font-semibold">{data.organization_name}</span>
           </p>
         </div>
 
-        <div className="border-t border-gray-200 pt-4 space-y-2">
+        <div className="space-y-2 border-gray-200 border-t pt-4">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Role:</span>
             <span className="font-medium text-gray-900">{data.role}</span>
@@ -79,19 +79,19 @@ export default function InvitationPage() {
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-4 space-y-3">
-          <p className="text-sm text-gray-600">
+        <div className="space-y-3 border-gray-200 border-t pt-4">
+          <p className="text-gray-600 text-sm">
             Choose a provider to continue:
           </p>
           <OAuthButton
+            disabled={loading}
             label="Continue with GitHub"
             onClick={() => handleOAuthLogin("github")}
-            disabled={loading}
           />
           <OAuthButton
+            disabled={loading}
             label="Continue with Google"
             onClick={() => handleOAuthLogin("google")}
-            disabled={loading}
           />
         </div>
       </div>
@@ -110,9 +110,9 @@ function OAuthButton({
 }) {
   return (
     <button
-      onClick={onClick}
+      className="w-full rounded-lg bg-gray-900 px-4 py-3 font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
       disabled={disabled}
-      className="w-full py-3 px-4 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      onClick={onClick}
     >
       {label}
     </button>
@@ -121,7 +121,7 @@ function OAuthButton({
 
 function LoadingCard({ text }: { text: string }) {
   return (
-    <div className="min-h-screen grid place-items-center bg-gray-50">
+    <div className="grid min-h-screen place-items-center bg-gray-50">
       <div className="text-gray-600">{text}</div>
     </div>
   );
@@ -129,10 +129,10 @@ function LoadingCard({ text }: { text: string }) {
 
 function ErrorCard({ title, body }: { title: string; body?: string }) {
   return (
-    <div className="min-h-screen grid place-items-center bg-gray-50 p-4">
-      <div className="max-w-md w-full bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-red-600">{title}</h2>
-        {body && <p className="text-gray-600 mt-2">{body}</p>}
+    <div className="grid min-h-screen place-items-center bg-gray-50 p-4">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow">
+        <h2 className="font-semibold text-lg text-red-600">{title}</h2>
+        {body && <p className="mt-2 text-gray-600">{body}</p>}
       </div>
     </div>
   );

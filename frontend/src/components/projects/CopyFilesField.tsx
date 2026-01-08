@@ -1,5 +1,5 @@
-import { useTranslation } from 'react-i18next';
-import { MultiFileSearchTextarea } from '@/components/ui/multi-file-search-textarea';
+import { useTranslation } from "react-i18next";
+import { MultiFileSearchTextarea } from "@/components/ui/multi-file-search-textarea";
 
 interface CopyFilesFieldProps {
   value: string;
@@ -14,18 +14,18 @@ export function CopyFilesField({
   projectId,
   disabled = false,
 }: CopyFilesFieldProps) {
-  const { t } = useTranslation('projects');
+  const { t } = useTranslation("projects");
 
   return (
     <MultiFileSearchTextarea
-      value={value}
-      onChange={onChange}
-      placeholder={t('copyFilesPlaceholderWithSearch')}
-      rows={3}
+      className="resize-vertical w-full rounded-md border border-input bg-background px-3 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
       disabled={disabled}
-      className="w-full px-3 py-2 text-sm border border-input bg-background text-foreground disabled:opacity-50 rounded-md resize-vertical focus:outline-none focus:ring-2 focus:ring-ring"
-      projectId={projectId}
       maxRows={6}
+      onChange={onChange}
+      placeholder={t("copyFilesPlaceholderWithSearch")}
+      projectId={projectId}
+      rows={3}
+      value={value}
     />
   );
 }

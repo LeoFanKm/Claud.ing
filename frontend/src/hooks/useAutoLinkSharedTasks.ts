@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { useCurrentUser } from '@/hooks/auth/useCurrentUser';
-import { useTaskMutations } from '@/hooks/useTaskMutations';
-import type { SharedTaskRecord } from './useProjectTasks';
-import type { SharedTaskDetails, TaskWithAttemptStatus } from 'shared/types';
+import { useEffect, useRef } from "react";
+import type { SharedTaskDetails, TaskWithAttemptStatus } from "shared/types";
+import { useCurrentUser } from "@/hooks/auth/useCurrentUser";
+import { useTaskMutations } from "@/hooks/useTaskMutations";
+import type { SharedTaskRecord } from "./useProjectTasks";
 
 interface UseAutoLinkSharedTasksProps {
   sharedTasksById: Record<string, SharedTaskRecord>;

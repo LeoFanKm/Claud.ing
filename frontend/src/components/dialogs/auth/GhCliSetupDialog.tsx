@@ -1,25 +1,25 @@
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { GhCliSetupError } from "shared/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal, getErrorMessage } from '@/lib/modals';
-import { attemptsApi } from '@/lib/api';
-import type { GhCliSetupError } from 'shared/types';
-import { useRef, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+} from "@/components/ui/dialog";
+import { attemptsApi } from "@/lib/api";
+import { defineModal, getErrorMessage } from "@/lib/modals";
 
 interface GhCliSetupDialogProps {
   attemptId: string;
 }
 
-export type GhCliSupportVariant = 'homebrew' | 'manual';
+export type GhCliSupportVariant = "homebrew" | "manual";
 
 export interface GhCliSupportContent {
   message: string;
@@ -35,21 +35,21 @@ export const mapGhCliErrorToUi = (
     return { message: fallbackMessage, variant: null };
   }
 
-  if (error === 'BREW_MISSING') {
+  if (error === "BREW_MISSING") {
     return {
-      message: t('settings:integrations.github.cliSetup.errors.brewMissing'),
-      variant: 'homebrew',
+      message: t("settings:integrations.github.cliSetup.errors.brewMissing"),
+      variant: "homebrew",
     };
   }
 
-  if (error === 'SETUP_HELPER_NOT_SUPPORTED') {
+  if (error === "SETUP_HELPER_NOT_SUPPORTED") {
     return {
-      message: t('settings:integrations.github.cliSetup.errors.notSupported'),
-      variant: 'manual',
+      message: t("settings:integrations.github.cliSetup.errors.notSupported"),
+      variant: "manual",
     };
   }
 
-  if (typeof error === 'object' && 'OTHER' in error) {
+  if (typeof error === "object" && "OTHER" in error) {
     return {
       message: error.OTHER.message || fallbackMessage,
       variant: null,
@@ -66,21 +66,21 @@ export const GhCliHelpInstructions = ({
   variant: GhCliSupportVariant;
   t: (key: string) => string;
 }) => {
-  if (variant === 'homebrew') {
+  if (variant === "homebrew") {
     return (
       <div className="space-y-2 text-sm">
         <p>
-          {t('settings:integrations.github.cliSetup.help.homebrew.description')}{' '}
+          {t("settings:integrations.github.cliSetup.help.homebrew.description")}{" "}
           <a
-            href="https://brew.sh/"
-            target="_blank"
-            rel="noreferrer"
             className="underline"
+            href="https://brew.sh/"
+            rel="noreferrer"
+            target="_blank"
           >
-            {t('settings:integrations.github.cliSetup.help.homebrew.brewSh')}
-          </a>{' '}
+            {t("settings:integrations.github.cliSetup.help.homebrew.brewSh")}
+          </a>{" "}
           {t(
-            'settings:integrations.github.cliSetup.help.homebrew.manualInstall'
+            "settings:integrations.github.cliSetup.help.homebrew.manualInstall"
           )}
         </p>
         <pre className="rounded bg-muted px-2 py-1 text-xs">
@@ -88,7 +88,7 @@ export const GhCliHelpInstructions = ({
         </pre>
         <p>
           {t(
-            'settings:integrations.github.cliSetup.help.homebrew.afterInstall'
+            "settings:integrations.github.cliSetup.help.homebrew.afterInstall"
           )}
           <br />
           <code className="rounded bg-muted px-1 py-0.5 text-xs">
@@ -102,16 +102,16 @@ export const GhCliHelpInstructions = ({
   return (
     <div className="space-y-2 text-sm">
       <p>
-        {t('settings:integrations.github.cliSetup.help.manual.description')}{' '}
+        {t("settings:integrations.github.cliSetup.help.manual.description")}{" "}
         <a
-          href="https://cli.github.com/"
-          target="_blank"
-          rel="noreferrer"
           className="underline"
+          href="https://cli.github.com/"
+          rel="noreferrer"
+          target="_blank"
         >
-          {t('settings:integrations.github.cliSetup.help.manual.officialDocs')}
-        </a>{' '}
-        {t('settings:integrations.github.cliSetup.help.manual.andAuthenticate')}
+          {t("settings:integrations.github.cliSetup.help.manual.officialDocs")}
+        </a>{" "}
+        {t("settings:integrations.github.cliSetup.help.manual.andAuthenticate")}
       </p>
       <pre className="rounded bg-muted px-2 py-1 text-xs">
         gh auth login --web --git-protocol https
@@ -146,17 +146,17 @@ const GhCliSetupDialogImpl = NiceModal.create<GhCliSetupDialogProps>(
       } catch (err: unknown) {
         const rawMessage =
           getErrorMessage(err) ||
-          t('settings:integrations.github.cliSetup.errors.setupFailed');
+          t("settings:integrations.github.cliSetup.errors.setupFailed");
 
         const maybeErrorData =
-          typeof err === 'object' && err !== null && 'error_data' in err
+          typeof err === "object" && err !== null && "error_data" in err
             ? (err as { error_data?: unknown }).error_data
             : undefined;
 
         const isGhCliSetupError = (x: unknown): x is GhCliSetupError =>
-          x === 'BREW_MISSING' ||
-          x === 'SETUP_HELPER_NOT_SUPPORTED' ||
-          (typeof x === 'object' && x !== null && 'OTHER' in x);
+          x === "BREW_MISSING" ||
+          x === "SETUP_HELPER_NOT_SUPPORTED" ||
+          (typeof x === "object" && x !== null && "OTHER" in x);
 
         const errorData = isGhCliSetupError(maybeErrorData)
           ? maybeErrorData
@@ -187,41 +187,41 @@ const GhCliSetupDialogImpl = NiceModal.create<GhCliSetupDialogProps>(
 
     return (
       <Dialog
-        open={modal.visible}
         onOpenChange={(open) => !open && handleClose()}
+        open={modal.visible}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {t('settings:integrations.github.cliSetup.title')}
+              {t("settings:integrations.github.cliSetup.title")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p>{t('settings:integrations.github.cliSetup.description')}</p>
+            <p>{t("settings:integrations.github.cliSetup.description")}</p>
 
             <div className="space-y-2">
               <p className="text-sm">
-                {t('settings:integrations.github.cliSetup.setupWillTitle')}
+                {t("settings:integrations.github.cliSetup.setupWillTitle")}
               </p>
-              <ol className="text-sm list-decimal list-inside space-y-1 ml-2">
+              <ol className="ml-2 list-inside list-decimal space-y-1 text-sm">
                 <li>
                   {t(
-                    'settings:integrations.github.cliSetup.steps.checkInstalled'
+                    "settings:integrations.github.cliSetup.steps.checkInstalled"
                   )}
                 </li>
                 <li>
                   {t(
-                    'settings:integrations.github.cliSetup.steps.installHomebrew'
+                    "settings:integrations.github.cliSetup.steps.installHomebrew"
                   )}
                 </li>
                 <li>
                   {t(
-                    'settings:integrations.github.cliSetup.steps.authenticate'
+                    "settings:integrations.github.cliSetup.steps.authenticate"
                   )}
                 </li>
               </ol>
-              <p className="text-sm text-muted-foreground mt-4">
-                {t('settings:integrations.github.cliSetup.setupNote')}
+              <p className="mt-4 text-muted-foreground text-sm">
+                {t("settings:integrations.github.cliSetup.setupNote")}
               </p>
             </div>
             {errorInfo && (
@@ -229,29 +229,29 @@ const GhCliSetupDialogImpl = NiceModal.create<GhCliSetupDialogProps>(
                 <AlertDescription className="space-y-2">
                   <p>{errorInfo.message}</p>
                   {errorInfo.variant && (
-                    <GhCliHelpInstructions variant={errorInfo.variant} t={t} />
+                    <GhCliHelpInstructions t={t} variant={errorInfo.variant} />
                   )}
                 </AlertDescription>
               </Alert>
             )}
           </div>
           <DialogFooter>
-            <Button onClick={handleRunSetup} disabled={isRunning}>
+            <Button disabled={isRunning} onClick={handleRunSetup}>
               {isRunning ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('settings:integrations.github.cliSetup.running')}
+                  {t("settings:integrations.github.cliSetup.running")}
                 </>
               ) : (
-                t('settings:integrations.github.cliSetup.runSetup')
+                t("settings:integrations.github.cliSetup.runSetup")
               )}
             </Button>
             <Button
-              variant="outline"
-              onClick={handleClose}
               disabled={isRunning}
+              onClick={handleClose}
+              variant="outline"
             >
-              {t('common:buttons.close')}
+              {t("common:buttons.close")}
             </Button>
           </DialogFooter>
         </DialogContent>

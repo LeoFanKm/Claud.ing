@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useExecutionProcessesContext } from '@/contexts/ExecutionProcessesContext';
+import { useEffect, useMemo, useState } from "react";
+import { useExecutionProcessesContext } from "@/contexts/ExecutionProcessesContext";
 
 export interface DevserverPreviewState {
-  status: 'idle' | 'searching' | 'ready' | 'error';
+  status: "idle" | "searching" | "ready" | "error";
   url?: string;
   port?: number;
-  scheme: 'http' | 'https';
+  scheme: "http" | "https";
 }
 
 interface UseDevserverPreviewOptions {
@@ -14,14 +14,14 @@ interface UseDevserverPreviewOptions {
   lastKnownUrl?: {
     url: string;
     port?: number;
-    scheme: 'http' | 'https';
+    scheme: "http" | "https";
   };
 }
 
 export function useDevserverPreview(
   attemptId?: string | null | undefined,
   options: UseDevserverPreviewOptions = {
-    projectId: '',
+    projectId: "",
     projectHasDevScript: false,
   }
 ): DevserverPreviewState {
@@ -32,14 +32,14 @@ export function useDevserverPreview(
   } = useExecutionProcessesContext();
 
   const [state, setState] = useState<DevserverPreviewState>({
-    status: 'idle',
-    scheme: 'http',
+    status: "idle",
+    scheme: "http",
   });
 
   const selectedProcess = useMemo(() => {
     const devserverProcesses = executionProcesses.filter(
       (process) =>
-        process.run_reason === 'devserver' && process.status === 'running'
+        process.run_reason === "devserver" && process.status === "running"
     );
 
     if (devserverProcesses.length === 0) return null;
@@ -53,14 +53,14 @@ export function useDevserverPreview(
 
   useEffect(() => {
     if (processesError) {
-      setState((prev) => ({ ...prev, status: 'error' }));
+      setState((prev) => ({ ...prev, status: "error" }));
       return;
     }
 
     if (!selectedProcess) {
       setState((prev) => ({
-        status: projectHasDevScript ? 'searching' : 'idle',
-        scheme: prev.scheme ?? 'http',
+        status: projectHasDevScript ? "searching" : "idle",
+        scheme: prev.scheme ?? "http",
         url: undefined,
         port: undefined,
       }));
@@ -70,7 +70,7 @@ export function useDevserverPreview(
     if (lastKnownUrl) {
       setState((prev) => {
         if (
-          prev.status === 'ready' &&
+          prev.status === "ready" &&
           prev.url === lastKnownUrl.url &&
           prev.port === lastKnownUrl.port &&
           prev.scheme === lastKnownUrl.scheme
@@ -79,18 +79,18 @@ export function useDevserverPreview(
         }
 
         return {
-          status: 'ready',
+          status: "ready",
           url: lastKnownUrl.url,
           port: lastKnownUrl.port,
-          scheme: lastKnownUrl.scheme ?? 'http',
+          scheme: lastKnownUrl.scheme ?? "http",
         };
       });
       return;
     }
 
     setState((prev) => ({
-      status: 'searching',
-      scheme: prev.scheme ?? 'http',
+      status: "searching",
+      scheme: prev.scheme ?? "http",
       url: undefined,
       port: undefined,
     }));
@@ -98,8 +98,8 @@ export function useDevserverPreview(
 
   useEffect(() => {
     setState({
-      status: 'idle',
-      scheme: 'http',
+      status: "idle",
+      scheme: "http",
       url: undefined,
       port: undefined,
     });

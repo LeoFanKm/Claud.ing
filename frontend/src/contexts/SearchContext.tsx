@@ -1,13 +1,13 @@
 import {
   createContext,
+  type ReactNode,
+  useCallback,
   useContext,
-  useState,
   useEffect,
   useRef,
-  useCallback,
-  ReactNode,
-} from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+  useState,
+} from "react";
+import { useLocation, useParams } from "react-router-dom";
 
 interface SearchState {
   query: string;
@@ -25,7 +25,7 @@ interface SearchProviderProps {
 }
 
 export function SearchProvider({ children }: SearchProviderProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const location = useLocation();
   const { projectId } = useParams<{ projectId: string }>();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -35,17 +35,17 @@ export function SearchProvider({ children }: SearchProviderProps) {
 
   // Clear search when leaving tasks pages
   useEffect(() => {
-    if (!isTasksRoute && query !== '') {
-      setQuery('');
+    if (!isTasksRoute && query !== "") {
+      setQuery("");
     }
   }, [isTasksRoute, query]);
 
   // Clear search when project changes
   useEffect(() => {
-    setQuery('');
+    setQuery("");
   }, [projectId]);
 
-  const clear = () => setQuery('');
+  const clear = () => setQuery("");
 
   const focusInput = () => {
     if (inputRef.current && isTasksRoute) {
@@ -74,7 +74,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
 export function useSearch(): SearchState {
   const context = useContext(SearchContext);
   if (!context) {
-    throw new Error('useSearch must be used within a SearchProvider');
+    throw new Error("useSearch must be used within a SearchProvider");
   }
   return context;
 }

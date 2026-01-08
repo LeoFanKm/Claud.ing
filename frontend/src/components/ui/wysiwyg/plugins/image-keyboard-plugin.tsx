@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
-  COMMAND_PRIORITY_LOW,
   $getSelection,
   $isNodeSelection,
-} from 'lexical';
-import { $isImageNode } from '../nodes/image-node';
+  COMMAND_PRIORITY_LOW,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+} from "lexical";
+import { useEffect } from "react";
+import { $isImageNode } from "../nodes/image-node";
 
 export function ImageKeyboardPlugin() {
   const [editor] = useLexicalComposerContext();

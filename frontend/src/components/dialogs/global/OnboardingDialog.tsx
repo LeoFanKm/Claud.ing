@@ -1,4 +1,13 @@
-import { useState } from 'react';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { ChevronDown, Code, HandMetal, Sparkles } from "lucide-react";
+import { useState } from "react";
+import type { EditorConfig, ExecutorProfileId } from "shared/types";
+import { BaseCodingAgent, EditorType } from "shared/types";
+import { APP_NAME } from "@/constants/branding";
+import { AgentAvailabilityIndicator } from "@/components/AgentAvailabilityIndicator";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { EditorAvailabilityIndicator } from "@/components/EditorAvailabilityIndicator";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,35 +15,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Sparkles, Code, ChevronDown, HandMetal } from 'lucide-react';
-import { BaseCodingAgent, EditorType } from 'shared/types';
-import type { EditorConfig, ExecutorProfileId } from 'shared/types';
-import { useUserSystem } from '@/components/ConfigProvider';
-
-import { toPrettyCase } from '@/utils/string';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal, type NoProps } from '@/lib/modals';
-import { useEditorAvailability } from '@/hooks/useEditorAvailability';
-import { EditorAvailabilityIndicator } from '@/components/EditorAvailabilityIndicator';
-import { useAgentAvailability } from '@/hooks/useAgentAvailability';
-import { AgentAvailabilityIndicator } from '@/components/AgentAvailabilityIndicator';
+} from "@/components/ui/select";
+import { useAgentAvailability } from "@/hooks/useAgentAvailability";
+import { useEditorAvailability } from "@/hooks/useEditorAvailability";
+import { defineModal, type NoProps } from "@/lib/modals";
+import { toPrettyCase } from "@/utils/string";
 
 export type OnboardingResult = {
   profile: ExecutorProfileId;
@@ -52,7 +52,7 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
     }
   );
   const [editorType, setEditorType] = useState<EditorType>(EditorType.VS_CODE);
-  const [customCommand, setCustomCommand] = useState<string>('');
+  const [customCommand, setCustomCommand] = useState<string>("");
 
   const editorAvailability = useEditorAvailability(editorType);
   const agentAvailability = useAgentAvailability(profile.executor);
@@ -72,23 +72,23 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
 
   const isValid =
     editorType !== EditorType.CUSTOM ||
-    (editorType === EditorType.CUSTOM && customCommand.trim() !== '');
+    (editorType === EditorType.CUSTOM && customCommand.trim() !== "");
 
   return (
     <Dialog open={modal.visible} uncloseable={true}>
-      <DialogContent className="sm:max-w-[600px] space-y-4">
+      <DialogContent className="space-y-4 sm:max-w-[600px]">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <HandMetal className="h-6 w-6 text-primary text-primary-foreground" />
-            <DialogTitle>Welcome to Vibe Kanban</DialogTitle>
+            <DialogTitle>Welcome to {APP_NAME}</DialogTitle>
           </div>
-          <DialogDescription className="text-left pt-2">
+          <DialogDescription className="pt-2 text-left">
             Let's set up your coding preferences. You can always change these
             later in Settings.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <h2 className="text-xl flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-xl">
             <Sparkles className="h-4 w-4" />
             Choose Your Coding Agent
           </h2>
@@ -96,23 +96,26 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
             <Label htmlFor="profile">Default Agent</Label>
             <div className="flex gap-2">
               <Select
-                value={profile.executor}
                 onValueChange={(v) =>
                   setProfile({ executor: v as BaseCodingAgent, variant: null })
                 }
+                value={profile.executor}
               >
-                <SelectTrigger id="profile" className="flex-1">
+                <SelectTrigger className="flex-1" id="profile">
                   <SelectValue placeholder="Select your preferred coding agent" />
                 </SelectTrigger>
                 <SelectContent>
-                  {profiles &&
-                    (Object.keys(profiles) as BaseCodingAgent[])
-                      .sort()
-                      .map((agent) => (
-                        <SelectItem key={agent} value={agent}>
-                          {agent}
-                        </SelectItem>
-                      ))}
+                  {/* Use profiles keys if available, otherwise fallback to all BaseCodingAgent values for web mode */}
+                  {(profiles && Object.keys(profiles).length > 0
+                    ? (Object.keys(profiles) as BaseCodingAgent[])
+                    : Object.values(BaseCodingAgent)
+                  )
+                    .sort()
+                    .map((agent) => (
+                      <SelectItem key={agent} value={agent}>
+                        {agent}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
 
@@ -127,27 +130,27 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
+                          className="flex w-24 items-center justify-between px-2"
                           variant="outline"
-                          className="w-24 px-2 flex items-center justify-between"
                         >
-                          <span className="text-xs truncate flex-1 text-left">
-                            {profile.variant || 'DEFAULT'}
+                          <span className="flex-1 truncate text-left text-xs">
+                            {profile.variant || "DEFAULT"}
                           </span>
-                          <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
+                          <ChevronDown className="ml-1 h-3 w-3 flex-shrink-0" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         {Object.keys(selectedProfile).map((variant) => (
                           <DropdownMenuItem
+                            className={
+                              profile.variant === variant ? "bg-accent" : ""
+                            }
                             key={variant}
                             onClick={() =>
                               setProfile({
                                 ...profile,
-                                variant: variant,
+                                variant,
                               })
-                            }
-                            className={
-                              profile.variant === variant ? 'bg-accent' : ''
                             }
                           >
                             {variant}
@@ -156,15 +159,16 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   );
-                } else if (selectedProfile) {
+                }
+                if (selectedProfile) {
                   // Show disabled button when profile exists but has no variants
                   return (
                     <Button
-                      variant="outline"
-                      className="w-24 px-2 flex items-center justify-between"
+                      className="flex w-24 items-center justify-between px-2"
                       disabled
+                      variant="outline"
                     >
-                      <span className="text-xs truncate flex-1 text-left">
+                      <span className="flex-1 truncate text-left text-xs">
                         Default
                       </span>
                     </Button>
@@ -178,7 +182,7 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-xl flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-xl">
             <Code className="h-4 w-4" />
             Choose Your Code Editor
           </h2>
@@ -186,8 +190,8 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
           <div className="space-y-2">
             <Label htmlFor="editor">Preferred Editor</Label>
             <Select
-              value={editorType}
               onValueChange={(value: EditorType) => setEditorType(value)}
+              value={editorType}
             >
               <SelectTrigger id="editor">
                 <SelectValue placeholder="Select your preferred editor" />
@@ -206,7 +210,7 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
               <EditorAvailabilityIndicator availability={editorAvailability} />
             )}
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               This editor will be used to open task attempts and project files.
             </p>
 
@@ -215,11 +219,11 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
                 <Label htmlFor="custom-command">Custom Command</Label>
                 <Input
                   id="custom-command"
+                  onChange={(e) => setCustomCommand(e.target.value)}
                   placeholder="e.g., code, subl, vim"
                   value={customCommand}
-                  onChange={(e) => setCustomCommand(e.target.value)}
                 />
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Enter the command to run your custom editor. Use spaces for
                   arguments (e.g., "code --wait").
                 </p>
@@ -230,9 +234,9 @@ const OnboardingDialogImpl = NiceModal.create<NoProps>(() => {
 
         <DialogFooter>
           <Button
-            onClick={handleComplete}
-            disabled={!isValid}
             className="w-full"
+            disabled={!isValid}
+            onClick={handleComplete}
           >
             Continue
           </Button>

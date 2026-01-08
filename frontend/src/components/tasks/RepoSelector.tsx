@@ -1,14 +1,14 @@
-import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button.tsx';
-import { ChevronsUpDown, FolderGit } from 'lucide-react';
+import { ChevronsUpDown, FolderGit } from "lucide-react";
+import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { Repo } from "shared/types";
+import { Button } from "@/components/ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu.tsx';
-import type { Repo } from 'shared/types';
+} from "@/components/ui/dropdown-menu.tsx";
 
 type Props = {
   repos: Repo[];
@@ -24,14 +24,14 @@ function RepoSelector({
   selectedRepoId,
   onRepoSelect,
   placeholder,
-  className = '',
+  className = "",
   disabled = false,
 }: Props) {
-  const { t } = useTranslation(['tasks']);
+  const { t } = useTranslation(["tasks"]);
   const [open, setOpen] = useState(false);
 
   const effectivePlaceholder =
-    placeholder ?? t('repos.selector.placeholder', 'Select repository');
+    placeholder ?? t("repos.selector.placeholder", "Select repository");
 
   const selectedRepo = repos.find((r) => r.id === selectedRepoId);
 
@@ -44,15 +44,15 @@ function RepoSelector({
   );
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu onOpenChange={setOpen} open={open}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
-          size="sm"
           className={`w-full justify-between text-xs ${className}`}
           disabled={disabled}
+          size="sm"
+          variant="outline"
         >
-          <div className="flex items-center gap-1.5 w-full min-w-0">
+          <div className="flex w-full min-w-0 items-center gap-1.5">
             <FolderGit className="h-3 w-3 flex-shrink-0" />
             <span className="truncate">
               {selectedRepo?.display_name || effectivePlaceholder}
@@ -66,19 +66,19 @@ function RepoSelector({
 
       <DropdownMenuContent className="w-64">
         {repos.length === 0 ? (
-          <div className="p-2 text-sm text-muted-foreground text-center">
-            {t('repos.selector.empty', 'No repositories available')}
+          <div className="p-2 text-center text-muted-foreground text-sm">
+            {t("repos.selector.empty", "No repositories available")}
           </div>
         ) : (
           repos.map((repo) => {
             const isSelected = selectedRepoId === repo.id;
             return (
               <DropdownMenuItem
+                className={isSelected ? "bg-accent text-accent-foreground" : ""}
                 key={repo.id}
                 onSelect={() => handleRepoSelect(repo.id)}
-                className={isSelected ? 'bg-accent text-accent-foreground' : ''}
               >
-                <div className="flex items-center gap-2 w-full">
+                <div className="flex w-full items-center gap-2">
                   <FolderGit className="h-3.5 w-3.5 flex-shrink-0" />
                   <span className="truncate">{repo.display_name}</span>
                 </div>

@@ -1,0 +1,81 @@
+{
+  "hero": {
+    "badge": "v{{version}} — Claude Code統合に対応",
+    "title": "AI駆動のタスク管理",
+    "titlePrefix": "で加速する開発",
+    "subtitle": "Kanban by Claudingは、コーディングエージェントを並行実行してコンフリクトを回避し、diffツールでコードレビューを行えます。ターミナルログを監視する代わりに、計画と品質に集中できます。",
+    "cta": "無料で始める",
+    "learnMore": "詳しく見る",
+    "testimonial": {
+      "quote": "チームのプロジェクト管理方法が完全に変わりました。AIの提案は驚くほど正確です。",
+      "author": "田中 さくら",
+      "role": "TechCorp エンジニアリングリード"
+    }
+  },
+  "quickStart": {
+    "title": "クイックスタート",
+    "requirement": "Claude Codeサブスクリプションが必要です"
+  },
+  "features": {
+    "title": "パワフルな機能",
+    "subtitle": "最高を求める開発者のためのAIコーディングアシスタント",
+    "parallelExecution": {
+      "title": "並列エージェント実行",
+      "description": "複数のAIエージェントを同時に実行し、協調的な並列処理で複雑なタスクをより速く処理"
+    },
+    "isolatedWorkspaces": {
+      "title": "分離されたワークスペース",
+      "description": "各タスクは独自のサンドボックス環境で実行され、クリーンな分離と競合の防止を保証"
+    },
+    "codeReview": {
+      "title": "組み込みコードレビュー",
+      "description": "インテリジェントな提案、セキュリティスキャン、ベストプラクティスの適用による自動コードレビュー"
+    },
+    "mcpIntegration": {
+      "title": "MCP統合",
+      "description": "Model Context Protocolサーバーに接続して、拡張機能とカスタムツール統合を実現"
+    }
+  },
+  "agents": {
+    "title": "Claudeエージェントによるパワー",
+    "subtitle": "専門AIエージェントを活用してワークフローを自動化し、レポートを生成し、インテリジェントな推奨を提供"
+  },
+  "agentSupport": {
+    "title": "お気に入りのAIエージェントと連携",
+    "subtitle": "主要なAIコーディングアシスタントやエージェントとシームレスに統合"
+  },
+  "faq": {
+    "title": "よくある質問",
+    "items": {
+      "codeSecurity": {
+        "question": "コードは安全ですか？",
+        "answer": "はい、コードはローカルマシンから離れることはありません。Claude Codeは完全にデバイス上で実行され、サーバーにはタスクのメタデータ（タイトル、説明、ステータス）のみを保存します。ソースコードと機密データは常にプライベートに保たれます。"
+      },
+      "supportedAgents": {
+        "question": "どのAIエージェントがサポートされていますか？",
+        "answer": "現在、Claude Codeを主要なAIエージェントとしてサポートしています。Claude Codeはコードベースを分析し、複雑なタスクを分解し、インテリジェントな提案を提供できます。追加エージェントのサポートは将来のリリースで予定されています。"
+      },
+      "isFree": {
+        "question": "無料で使えますか？",
+        "answer": "カンバンボード機能は無料でご利用いただけます。ただし、タスク分解やインテリジェントな提案などのAI搭載機能にはClaude Codeサブスクリプションが必要で、Anthropicを通じて管理します。"
+      },
+      "parallelExecution": {
+        "question": "並列実行はどのように機能しますか？",
+        "answer": "Claude Codeは複数の独立したタスクを同時に実行できます。依存関係のないタスクがある場合、システムが自動的に識別し、並列で実行することで、全体の完了時間を大幅に短縮します。"
+      },
+      "vscodeSupport": {
+        "question": "VS Codeで使えますか？",
+        "answer": "はい！Claude Codeは公式拡張機能を通じてVS Codeとシームレスに統合されています。エディタから直接タスクを管理し、開発環境を離れることなくClaude Codeにコードベースで作業させることができます。"
+      },
+      "whatIsMcp": {
+        "question": "MCPとは何ですか？",
+        "answer": "MCP（Model Context Protocol）は、AIモデルが外部ツールやデータソースと安全に接続できるオープンプロトコルです。セキュリティ境界を維持しながら、Claude Codeが開発環境、データベース、その他のサービスと対話できるようにします。"
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© {{year}} Claud.ing. All rights reserved.",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー"
+  }
+}

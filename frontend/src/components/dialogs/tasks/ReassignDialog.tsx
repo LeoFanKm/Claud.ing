@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useMutation } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { OrganizationMemberWithProfile } from "shared/types";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,24 +12,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
-import { tasksApi } from '@/lib/api';
-import type { SharedTaskRecord } from '@/hooks/useProjectTasks';
-import { useAuth } from '@/hooks';
-import { useMutation } from '@tanstack/react-query';
-import { useProject } from '@/contexts/ProjectContext';
-import { useProjectRemoteMembers } from '@/hooks/useProjectRemoteMembers';
-import type { OrganizationMemberWithProfile } from 'shared/types';
+} from "@/components/ui/select";
+import { useProject } from "@/contexts/ProjectContext";
+import { useAuth } from "@/hooks";
+import { useProjectRemoteMembers } from "@/hooks/useProjectRemoteMembers";
+import type { SharedTaskRecord } from "@/hooks/useProjectTasks";
+import { tasksApi } from "@/lib/api";
+import { defineModal } from "@/lib/modals";
 
 export interface ReassignDialogProps {
   sharedTask: SharedTaskRecord;
@@ -34,7 +34,7 @@ export interface ReassignDialogProps {
 const buildMemberLabel = (member: OrganizationMemberWithProfile): string => {
   const fullName = [member.first_name, member.last_name]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
   if (fullName) {
     return fullName;
   }
@@ -73,23 +73,23 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
     };
 
     const getStatus = (err: unknown) =>
-      err && typeof err === 'object' && 'status' in err
+      err && typeof err === "object" && "status" in err
         ? (err as { status?: number }).status
         : undefined;
 
     const getReadableError = (err: unknown) => {
       const status = getStatus(err);
       if (status === 401 || status === 403) {
-        return 'Only the current assignee can reassign this task.';
+        return "Only the current assignee can reassign this task.";
       }
       if (status === 409) {
-        return 'The task assignment changed. Refresh and try again.';
+        return "The task assignment changed. Refresh and try again.";
       }
-      return 'Failed to reassign. Try again.';
+      return "Failed to reassign. Try again.";
     };
 
     const reassignMutation = useMutation({
-      mutationKey: ['tasks', 'reassign', sharedTask.id],
+      mutationKey: ["tasks", "reassign", sharedTask.id],
       mutationFn: async (newAssignee: string) =>
         tasksApi.reassign(sharedTask.id, {
           new_assignee_user_id: newAssignee,
@@ -109,7 +109,7 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
       }
 
       if (!selection) {
-        setSubmitError('Select an assignee before reassigning.');
+        setSubmitError("Select an assignee before reassigning.");
         return;
       }
 
@@ -123,11 +123,11 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
 
     const membersError = (() => {
       if (!projectId) {
-        return 'Unable to determine project context.';
+        return "Unable to determine project context.";
       }
       if (membersQuery.isError) {
         return (
-          membersQuery.error.message || 'Failed to load organization members.'
+          membersQuery.error.message || "Failed to load organization members."
         );
       }
       return null;
@@ -146,7 +146,6 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
 
     return (
       <Dialog
-        open={modal.visible}
         onOpenChange={(open) => {
           if (open) {
             setSelection(sharedTask.assignee_user_id ?? undefined);
@@ -156,12 +155,13 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
             handleClose();
           }
         }}
+        open={modal.visible}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reassign</DialogTitle>
             <DialogDescription>
-              Reassign this task to another organization member.{' '}
+              Reassign this task to another organization member.{" "}
             </DialogDescription>
           </DialogHeader>
 
@@ -180,17 +180,17 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
                 membersQuery.isPending ||
                 Boolean(membersError)
               }
-              value={selection}
               onValueChange={(value) => {
                 setSelection(value);
               }}
+              value={selection}
             >
               <SelectTrigger className="w-full">
                 <SelectValue
                   placeholder={
                     membersQuery.isPending
-                      ? 'Loading members...'
-                      : 'Select an assignee'
+                      ? "Loading members..."
+                      : "Select an assignee"
                   }
                 />
               </SelectTrigger>
@@ -205,7 +205,7 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
               </SelectContent>
             </Select>
             {membersQuery.isPending && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading members...
               </div>
@@ -216,20 +216,20 @@ const ReassignDialogImpl = NiceModal.create<ReassignDialogProps>(
 
           <DialogFooter className="mt-4">
             <Button
-              variant="outline"
-              onClick={handleClose}
               disabled={reassignMutation.isPending}
+              onClick={handleClose}
+              variant="outline"
             >
               Cancel
             </Button>
-            <Button onClick={handleConfirm} disabled={!canSubmit}>
+            <Button disabled={!canSubmit} onClick={handleConfirm}>
               {reassignMutation.isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Reassigning...
                 </span>
               ) : (
-                'Reassign'
+                "Reassign"
               )}
             </Button>
           </DialogFooter>

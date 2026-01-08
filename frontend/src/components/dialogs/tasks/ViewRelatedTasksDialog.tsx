@@ -1,19 +1,18 @@
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
-import { useTranslation } from 'react-i18next';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { PlusIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { Task, Workspace } from "shared/types";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { PlusIcon } from 'lucide-react';
-import { openTaskForm } from '@/lib/openTaskForm';
-import { useTaskRelationships } from '@/hooks/useTaskRelationships';
-import { DataTable, type ColumnDef } from '@/components/ui/table/data-table';
-import type { Task } from 'shared/types';
-import type { Workspace } from 'shared/types';
+} from "@/components/ui/dialog";
+import { type ColumnDef, DataTable } from "@/components/ui/table/data-table";
+import { useTaskRelationships } from "@/hooks/useTaskRelationships";
+import { defineModal } from "@/lib/modals";
+import { openTaskForm } from "@/lib/openTaskForm";
 
 export interface ViewRelatedTasksDialogProps {
   attemptId: string;
@@ -26,7 +25,7 @@ const ViewRelatedTasksDialogImpl =
   NiceModal.create<ViewRelatedTasksDialogProps>(
     ({ attemptId, projectId, attempt, onNavigateToTask }) => {
       const modal = useModal();
-      const { t } = useTranslation('tasks');
+      const { t } = useTranslation("tasks");
       const {
         data: relationships,
         isLoading,
@@ -45,29 +44,29 @@ const ViewRelatedTasksDialogImpl =
 
       const taskColumns: ColumnDef<Task>[] = [
         {
-          id: 'title',
-          header: t('viewRelatedTasksDialog.columns.title'),
+          id: "title",
+          header: t("viewRelatedTasksDialog.columns.title"),
           accessor: (task) => (
             <div className="truncate" title={task.title}>
-              {task.title || '—'}
+              {task.title || "—"}
             </div>
           ),
-          className: 'pr-4',
-          headerClassName: 'font-medium py-2 pr-4 w-1/2 bg-card',
+          className: "pr-4",
+          headerClassName: "font-medium py-2 pr-4 w-1/2 bg-card",
         },
         {
-          id: 'description',
-          header: t('viewRelatedTasksDialog.columns.description'),
+          id: "description",
+          header: t("viewRelatedTasksDialog.columns.description"),
           accessor: (task) => (
             <div
               className="line-clamp-1 text-muted-foreground"
-              title={task.description || ''}
+              title={task.description || ""}
             >
-              {task.description?.trim() ? task.description : '—'}
+              {task.description?.trim() ? task.description : "—"}
             </div>
           ),
-          className: 'pr-4',
-          headerClassName: 'font-medium py-2 pr-4 bg-card',
+          className: "pr-4",
+          headerClassName: "font-medium py-2 pr-4 bg-card",
         },
       ];
 
@@ -83,7 +82,7 @@ const ViewRelatedTasksDialogImpl =
       };
 
       const handleCreateSubtask = async () => {
-        if (!projectId || !attempt) return;
+        if (!(projectId && attempt)) return;
 
         // Close immediately - user intent is to create a subtask
         modal.hide();
@@ -93,7 +92,7 @@ const ViewRelatedTasksDialogImpl =
           await Promise.resolve();
 
           await openTaskForm({
-            mode: 'subtask',
+            mode: "subtask",
             projectId,
             parentTaskAttemptId: attempt.id,
             initialBaseBranch: attempt.branch,
@@ -105,61 +104,61 @@ const ViewRelatedTasksDialogImpl =
 
       return (
         <Dialog
-          open={modal.visible}
+          className="w-[92vw] max-w-3xl overflow-x-hidden p-0"
           onOpenChange={handleOpenChange}
-          className="max-w-3xl w-[92vw] p-0 overflow-x-hidden"
+          open={modal.visible}
         >
           <DialogContent
-            className="p-0 min-w-0"
+            className="min-w-0 p-0"
             onKeyDownCapture={(e) => {
-              if (e.key === 'Escape') {
+              if (e.key === "Escape") {
                 e.stopPropagation();
                 modal.hide();
               }
             }}
           >
-            <DialogHeader className="px-4 py-3 border-b">
-              <DialogTitle>{t('viewRelatedTasksDialog.title')}</DialogTitle>
+            <DialogHeader className="border-b px-4 py-3">
+              <DialogTitle>{t("viewRelatedTasksDialog.title")}</DialogTitle>
             </DialogHeader>
 
-            <div className="p-4 max-h-[70vh] overflow-auto">
+            <div className="max-h-[70vh] overflow-auto p-4">
               {isError && (
-                <div className="py-8 text-center space-y-3">
-                  <div className="text-sm text-destructive">
-                    {t('viewRelatedTasksDialog.error')}
+                <div className="space-y-3 py-8 text-center">
+                  <div className="text-destructive text-sm">
+                    {t("viewRelatedTasksDialog.error")}
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => refetch()}>
-                    {t('common:buttons.retry')}
+                  <Button onClick={() => refetch()} size="sm" variant="outline">
+                    {t("common:buttons.retry")}
                   </Button>
                 </div>
               )}
 
               {!isError && (
                 <DataTable
-                  data={relatedTasks}
                   columns={taskColumns}
-                  keyExtractor={(task) => task.id}
-                  onRowClick={(task) => handleClickTask(task.id)}
-                  isLoading={isLoading}
-                  emptyState={t('viewRelatedTasksDialog.empty')}
+                  data={relatedTasks}
+                  emptyState={t("viewRelatedTasksDialog.empty")}
                   headerContent={
-                    <div className="w-full flex text-left">
+                    <div className="flex w-full text-left">
                       <span className="flex-1">
-                        {t('viewRelatedTasksDialog.tasksCount', {
+                        {t("viewRelatedTasksDialog.tasksCount", {
                           count: relatedTasks.length,
                         })}
                       </span>
                       <span>
                         <Button
-                          variant="icon"
+                          disabled={!(projectId && attempt)}
                           onClick={handleCreateSubtask}
-                          disabled={!projectId || !attempt}
+                          variant="icon"
                         >
                           <PlusIcon size={16} />
                         </Button>
                       </span>
                     </div>
                   }
+                  isLoading={isLoading}
+                  keyExtractor={(task) => task.id}
+                  onRowClick={(task) => handleClickTask(task.id)}
                 />
               )}
             </div>

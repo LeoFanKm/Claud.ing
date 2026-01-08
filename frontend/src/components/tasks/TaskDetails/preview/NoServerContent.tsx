@@ -1,30 +1,30 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
-  Play,
   Edit3,
+  ExternalLink,
+  Play,
+  Save,
   Square,
   SquareTerminal,
-  Save,
   X,
-  ExternalLink,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ExecutionProcess, Project } from 'shared/types';
+} from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { ExecutionProcess, Project } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useProjectRepos } from "@/hooks";
+import { useProjectMutations } from "@/hooks/useProjectMutations";
+import { useTaskMutations } from "@/hooks/useTaskMutations";
+import {
+  COMPANION_INSTALL_TASK_DESCRIPTION,
+  COMPANION_INSTALL_TASK_TITLE,
+} from "@/utils/companionInstallTask";
 import {
   createScriptPlaceholderStrategy,
   ScriptPlaceholderContext,
-} from '@/utils/scriptPlaceholders';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { useTaskMutations } from '@/hooks/useTaskMutations';
-import { useProjectMutations } from '@/hooks/useProjectMutations';
-import { useProjectRepos } from '@/hooks';
-import {
-  COMPANION_INSTALL_TASK_TITLE,
-  COMPANION_INSTALL_TASK_DESCRIPTION,
-} from '@/utils/companionInstallTask';
+} from "@/utils/scriptPlaceholders";
 
 interface NoServerContentProps {
   projectHasDevScript: boolean;
@@ -43,8 +43,8 @@ export function NoServerContent({
   stopDevServer,
   project,
 }: NoServerContentProps) {
-  const { t } = useTranslation('tasks');
-  const [devScriptInput, setDevScriptInput] = useState('');
+  const { t } = useTranslation("tasks");
+  const [devScriptInput, setDevScriptInput] = useState("");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isEditingExistingScript, setIsEditingExistingScript] = useState(false);
   const { system, config } = useUserSystem();
@@ -60,22 +60,22 @@ export function NoServerContent({
         createScriptPlaceholderStrategy(system.environment.os_type)
       ).getPlaceholders()
     : {
-        setup: '#!/bin/bash\nnpm install\n# Add any setup commands here...',
-        dev: '#!/bin/bash\nnpm run dev\n# Add dev server start command here...',
+        setup: "#!/bin/bash\nnpm install\n# Add any setup commands here...",
+        dev: "#!/bin/bash\nnpm run dev\n# Add dev server start command here...",
         cleanup:
-          '#!/bin/bash\n# Add cleanup commands here...\n# This runs after coding agent execution',
+          "#!/bin/bash\n# Add cleanup commands here...\n# This runs after coding agent execution",
       };
 
   const handleSaveDevScript = async (startAfterSave?: boolean) => {
     setSaveError(null);
     if (!project) {
-      setSaveError(t('preview.devScript.errors.notLoaded'));
+      setSaveError(t("preview.devScript.errors.notLoaded"));
       return;
     }
 
     const script = devScriptInput.trim();
     if (!script) {
-      setSaveError(t('preview.devScript.errors.empty'));
+      setSaveError(t("preview.devScript.errors.empty"));
       return;
     }
 
@@ -97,7 +97,7 @@ export function NoServerContent({
           }
         },
         onError: (err) => {
-          setSaveError((err as Error)?.message || 'Failed to save dev script');
+          setSaveError((err as Error)?.message || "Failed to save dev script");
         },
       }
     );
@@ -113,16 +113,16 @@ export function NoServerContent({
 
   const handleCancelEdit = () => {
     setIsEditingExistingScript(false);
-    setDevScriptInput('');
+    setDevScriptInput("");
     setSaveError(null);
   };
 
   const handleInstallCompanion = () => {
-    if (!project || !config || projectRepos.length === 0) return;
+    if (!(project && config) || projectRepos.length === 0) return;
 
     const repos = projectRepos.map((repo) => ({
       repo_id: repo.id,
-      target_branch: 'main',
+      target_branch: "main",
     }));
 
     createAndStart.mutate({
@@ -141,74 +141,34 @@ export function NoServerContent({
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="text-center space-y-6 max-w-md mx-auto p-6">
+    <div className="flex flex-1 items-center justify-center">
+      <div className="mx-auto max-w-md space-y-6 p-6 text-center">
         <div className="flex items-center justify-center">
           <SquareTerminal className="h-8 w-8 text-muted-foreground" />
         </div>
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              {t('preview.noServer.title')}
+            <h3 className="mb-2 font-medium text-foreground text-lg">
+              {t("preview.noServer.title")}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {projectHasDevScript
-                ? t('preview.noServer.startPrompt')
-                : t('preview.noServer.setupPrompt')}
+                ? t("preview.noServer.startPrompt")
+                : t("preview.noServer.setupPrompt")}
             </p>
           </div>
 
-          {!isEditingExistingScript ? (
-            <div className="flex items-center justify-center gap-2">
-              <Button
-                variant={runningDevServer ? 'destructive' : 'default'}
-                size="sm"
-                onClick={() => {
-                  if (runningDevServer) {
-                    stopDevServer();
-                  } else {
-                    startDevServer();
-                  }
-                }}
-                disabled={isStartingDevServer || !projectHasDevScript}
-                className="gap-1"
-              >
-                {runningDevServer ? (
-                  <>
-                    <Square className="h-4 w-4" />
-                    {t('preview.toolbar.stopDevServer')}
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" />
-                    {t('preview.noServer.startButton')}
-                  </>
-                )}
-              </Button>
-
-              {!runningDevServer && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleEditExistingScript}
-                  className="gap-1"
-                >
-                  <Edit3 className="h-3 w-3" />
-                  {t('preview.noServer.editButton')}
-                </Button>
-              )}
-            </div>
-          ) : (
+          {isEditingExistingScript ? (
             <div className="text-left">
               <div className="space-y-4">
                 <Textarea
-                  id="devScript"
-                  placeholder={placeholders.dev}
-                  value={devScriptInput}
-                  onChange={(e) => setDevScriptInput(e.target.value)}
                   className="min-h-[120px] font-mono text-sm"
                   disabled={updateProject.isPending}
+                  id="devScript"
+                  onChange={(e) => setDevScriptInput(e.target.value)}
+                  placeholder={placeholders.dev}
+                  value={devScriptInput}
                 />
 
                 {saveError && (
@@ -217,82 +177,122 @@ export function NoServerContent({
                   </Alert>
                 )}
 
-                <div className="flex gap-2 justify-center">
+                <div className="flex justify-center gap-2">
                   {isEditingExistingScript ? (
                     <>
                       <Button
-                        size="sm"
-                        onClick={() => handleSaveDevScript(false)}
-                        disabled={updateProject.isPending}
                         className="gap-1"
+                        disabled={updateProject.isPending}
+                        onClick={() => handleSaveDevScript(false)}
+                        size="sm"
                       >
                         <Save className="h-3 w-3" />
-                        {t('preview.devScript.saveChanges')}
+                        {t("preview.devScript.saveChanges")}
                       </Button>
                       <Button
+                        className="gap-1"
+                        disabled={updateProject.isPending}
+                        onClick={handleCancelEdit}
                         size="sm"
                         variant="outline"
-                        onClick={handleCancelEdit}
-                        disabled={updateProject.isPending}
-                        className="gap-1"
                       >
                         <X className="h-3 w-3" />
-                        {t('preview.devScript.cancel')}
+                        {t("preview.devScript.cancel")}
                       </Button>
                     </>
                   ) : (
                     <>
                       <Button
-                        size="sm"
-                        onClick={() => handleSaveDevScript(true)}
-                        disabled={updateProject.isPending}
                         className="gap-1"
+                        disabled={updateProject.isPending}
+                        onClick={() => handleSaveDevScript(true)}
+                        size="sm"
                       >
                         <Play className="h-4 w-4" />
-                        {t('preview.devScript.saveAndStart')}
+                        {t("preview.devScript.saveAndStart")}
                       </Button>
                       <Button
+                        className="gap-1"
+                        disabled={updateProject.isPending}
+                        onClick={() => handleSaveDevScript(false)}
                         size="sm"
                         variant="outline"
-                        onClick={() => handleSaveDevScript(false)}
-                        disabled={updateProject.isPending}
-                        className="gap-1"
                       >
                         <Save className="h-3 w-3" />
-                        {t('preview.devScript.saveOnly')}
+                        {t("preview.devScript.saveOnly")}
                       </Button>
                     </>
                   )}
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                className="gap-1"
+                disabled={isStartingDevServer || !projectHasDevScript}
+                onClick={() => {
+                  if (runningDevServer) {
+                    stopDevServer();
+                  } else {
+                    startDevServer();
+                  }
+                }}
+                size="sm"
+                variant={runningDevServer ? "destructive" : "default"}
+              >
+                {runningDevServer ? (
+                  <>
+                    <Square className="h-4 w-4" />
+                    {t("preview.toolbar.stopDevServer")}
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" />
+                    {t("preview.noServer.startButton")}
+                  </>
+                )}
+              </Button>
+
+              {!runningDevServer && (
+                <Button
+                  className="gap-1"
+                  onClick={handleEditExistingScript}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Edit3 className="h-3 w-3" />
+                  {t("preview.noServer.editButton")}
+                </Button>
+              )}
+            </div>
           )}
 
-          <div className="space-y-4 pt-6 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              {t('preview.noServer.companionPrompt')}
+          <div className="space-y-4 border-border border-t pt-6">
+            <p className="text-muted-foreground text-sm">
+              {t("preview.noServer.companionPrompt")}
             </p>
             <div className="space-y-2">
               <Button
-                size="sm"
-                onClick={handleInstallCompanion}
-                disabled={!project || !config || createAndStart.isPending}
                 className="gap-1"
+                disabled={!(project && config) || createAndStart.isPending}
+                onClick={handleInstallCompanion}
+                size="sm"
                 variant="outline"
               >
                 {createAndStart.isPending
-                  ? 'Creating task…'
-                  : 'Install companion automatically'}
+                  ? "Creating task…"
+                  : "Install companion automatically"}
               </Button>
               <div>
                 <a
+                  className="inline-flex items-center gap-1 text-blue-600 text-sm hover:underline dark:text-blue-400"
                   href="https://github.com/BloopAI/vibe-kanban-web-companion"
-                  target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  target="_blank"
                 >
                   <ExternalLink className="h-3 w-3" />
-                  {t('preview.noServer.companionLink')}
+                  {t("preview.noServer.companionLink")}
                 </a>
               </div>
             </div>

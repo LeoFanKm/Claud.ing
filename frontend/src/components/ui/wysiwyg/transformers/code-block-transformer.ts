@@ -1,6 +1,6 @@
-import { MultilineElementTransformer } from '@lexical/markdown';
-import { $createCodeNode, $isCodeNode, CodeNode } from '@lexical/code';
-import { $createTextNode } from 'lexical';
+import { $createCodeNode, $isCodeNode, CodeNode } from "@lexical/code";
+import type { MultilineElementTransformer } from "@lexical/markdown";
+import { $createTextNode } from "lexical";
 
 /**
  * Code block transformer for markdown imports (paste operations).
@@ -9,7 +9,7 @@ import { $createTextNode } from 'lexical';
  * For typing detection, see CodeBlockShortcutPlugin.
  */
 export const CODE_BLOCK_TRANSFORMER: MultilineElementTransformer = {
-  type: 'multiline-element',
+  type: "multiline-element",
   dependencies: [CodeNode],
   regExpStart: /^```([\w-]*)$/,
   regExpEnd: {
@@ -38,7 +38,7 @@ export const CODE_BLOCK_TRANSFORMER: MultilineElementTransformer = {
     const codeNode = $createCodeNode(language);
 
     if (linesInBetween) {
-      const code = linesInBetween.join('\n');
+      const code = linesInBetween.join("\n");
       if (code) {
         codeNode.append($createTextNode(code));
       }
@@ -52,10 +52,10 @@ export const CODE_BLOCK_TRANSFORMER: MultilineElementTransformer = {
     }
     const textContent = node.getTextContent();
     return (
-      '```' +
-      (node.getLanguage() || '') +
-      (textContent ? '\n' + textContent : '') +
-      '\n```'
+      "```" +
+      (node.getLanguage() || "") +
+      (textContent ? "\n" + textContent : "") +
+      "\n```"
     );
   },
 };

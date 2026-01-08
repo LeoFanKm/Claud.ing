@@ -1,48 +1,48 @@
-import { useState } from 'react';
+import { Loader2, Plus, Trash2, UserPlus } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { MemberRole } from "shared/types";
+import { MemberRole as MemberRoleEnum } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import type {
+  CreateOrganizationResult,
+  InviteMemberResult,
+} from "@/components/dialogs";
+import { CreateOrganizationDialog } from "@/components/dialogs/org/CreateOrganizationDialog";
+import { InviteMemberDialog } from "@/components/dialogs/org/InviteMemberDialog";
+import { LoginRequiredPrompt } from "@/components/dialogs/shared/LoginRequiredPrompt";
+import { MemberListItem } from "@/components/org/MemberListItem";
+import { PendingInvitationItem } from "@/components/org/PendingInvitationItem";
+import { RemoteProjectItem } from "@/components/org/RemoteProjectItem";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, UserPlus, Plus, Trash2 } from 'lucide-react';
-import { useUserOrganizations } from '@/hooks/useUserOrganizations';
-import { useOrganizationSelection } from '@/hooks/useOrganizationSelection';
-import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
-import { useOrganizationInvitations } from '@/hooks/useOrganizationInvitations';
-import { useOrganizationMutations } from '@/hooks/useOrganizationMutations';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { LoginRequiredPrompt } from '@/components/dialogs/shared/LoginRequiredPrompt';
-import { CreateOrganizationDialog } from '@/components/dialogs/org/CreateOrganizationDialog';
-import { InviteMemberDialog } from '@/components/dialogs/org/InviteMemberDialog';
-import type {
-  InviteMemberResult,
-  CreateOrganizationResult,
-} from '@/components/dialogs';
-import { MemberListItem } from '@/components/org/MemberListItem';
-import { PendingInvitationItem } from '@/components/org/PendingInvitationItem';
-import { RemoteProjectItem } from '@/components/org/RemoteProjectItem';
-import type { MemberRole } from 'shared/types';
-import { MemberRole as MemberRoleEnum } from 'shared/types';
-import { useTranslation } from 'react-i18next';
-import { useProjects } from '@/hooks/useProjects';
-import { useOrganizationProjects } from '@/hooks/useOrganizationProjects';
-import { useProjectMutations } from '@/hooks/useProjectMutations';
+} from "@/components/ui/select";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { useOrganizationInvitations } from "@/hooks/useOrganizationInvitations";
+import { useOrganizationMembers } from "@/hooks/useOrganizationMembers";
+import { useOrganizationMutations } from "@/hooks/useOrganizationMutations";
+import { useOrganizationProjects } from "@/hooks/useOrganizationProjects";
+import { useOrganizationSelection } from "@/hooks/useOrganizationSelection";
+import { useProjectMutations } from "@/hooks/useProjectMutations";
+import { useProjects } from "@/hooks/useProjects";
+import { useUserOrganizations } from "@/hooks/useUserOrganizations";
 
 export function OrganizationSettings() {
-  const { t } = useTranslation('organization');
+  const { t } = useTranslation("organization");
   const { loginStatus } = useUserSystem();
   const { isSignedIn, isLoaded } = useAuth();
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +71,7 @@ export function OrganizationSettings() {
   const isAdmin = currentUserRole === MemberRoleEnum.ADMIN;
   const isPersonalOrg = selectedOrg?.is_personal ?? false;
   const currentUserId =
-    loginStatus?.status === 'loggedin' ? loginStatus.profile.user_id : null;
+    loginStatus?.status === "loggedin" ? loginStatus.profile.user_id : null;
 
   // Fetch members using query hook
   const { data: members = [], isLoading: loadingMembers } =
@@ -93,32 +93,32 @@ export function OrganizationSettings() {
     deleteOrganization,
   } = useOrganizationMutations({
     onRevokeSuccess: () => {
-      setSuccess('Invitation revoked successfully');
+      setSuccess("Invitation revoked successfully");
       setTimeout(() => setSuccess(null), 3000);
     },
     onRevokeError: (err) => {
       setError(
-        err instanceof Error ? err.message : 'Failed to revoke invitation'
+        err instanceof Error ? err.message : "Failed to revoke invitation"
       );
     },
     onRemoveSuccess: () => {
-      setSuccess('Member removed successfully');
+      setSuccess("Member removed successfully");
       setTimeout(() => setSuccess(null), 3000);
     },
     onRemoveError: (err) => {
-      setError(err instanceof Error ? err.message : 'Failed to remove member');
+      setError(err instanceof Error ? err.message : "Failed to remove member");
     },
     onRoleChangeSuccess: () => {
-      setSuccess('Member role updated successfully');
+      setSuccess("Member role updated successfully");
       setTimeout(() => setSuccess(null), 3000);
     },
     onRoleChangeError: (err) => {
       setError(
-        err instanceof Error ? err.message : 'Failed to update member role'
+        err instanceof Error ? err.message : "Failed to update member role"
       );
     },
     onDeleteSuccess: async () => {
-      setSuccess(t('settings.deleteSuccess'));
+      setSuccess(t("settings.deleteSuccess"));
       setTimeout(() => setSuccess(null), 3000);
       // Refetch organizations and switch to personal org
       await refetchOrgs();
@@ -132,7 +132,7 @@ export function OrganizationSettings() {
       }
     },
     onDeleteError: (err) => {
-      setError(err instanceof Error ? err.message : t('settings.deleteError'));
+      setError(err instanceof Error ? err.message : t("settings.deleteError"));
     },
   });
 
@@ -152,18 +152,18 @@ export function OrganizationSettings() {
   // Project mutations
   const { linkToExisting, unlinkProject } = useProjectMutations({
     onLinkSuccess: () => {
-      setSuccess('Project linked successfully');
+      setSuccess("Project linked successfully");
       setTimeout(() => setSuccess(null), 3000);
     },
     onLinkError: (err) => {
-      setError(err instanceof Error ? err.message : 'Failed to link project');
+      setError(err instanceof Error ? err.message : "Failed to link project");
     },
     onUnlinkSuccess: () => {
-      setSuccess('Project unlinked successfully');
+      setSuccess("Project unlinked successfully");
       setTimeout(() => setSuccess(null), 3000);
     },
     onUnlinkError: (err) => {
-      setError(err instanceof Error ? err.message : 'Failed to unlink project');
+      setError(err instanceof Error ? err.message : "Failed to unlink project");
     },
   });
 
@@ -172,10 +172,10 @@ export function OrganizationSettings() {
       const result: CreateOrganizationResult =
         await CreateOrganizationDialog.show();
 
-      if (result.action === 'created' && result.organizationId) {
+      if (result.action === "created" && result.organizationId) {
         // No need to refetch - the mutation hook handles cache invalidation
-        handleOrgSelect(result.organizationId ?? '');
-        setSuccess('Organization created successfully');
+        handleOrgSelect(result.organizationId ?? "");
+        setSuccess("Organization created successfully");
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
@@ -191,9 +191,9 @@ export function OrganizationSettings() {
         organizationId: selectedOrgId,
       });
 
-      if (result.action === 'invited') {
+      if (result.action === "invited") {
         // No need to refetch - the mutation hook handles cache invalidation
-        setSuccess('Member invited successfully');
+        setSuccess("Member invited successfully");
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
@@ -211,7 +211,7 @@ export function OrganizationSettings() {
   const handleRemoveMember = async (userId: string) => {
     if (!selectedOrgId) return;
 
-    const confirmed = window.confirm(t('confirmRemoveMember'));
+    const confirmed = window.confirm(t("confirmRemoveMember"));
     if (!confirmed) return;
 
     setError(null);
@@ -226,10 +226,10 @@ export function OrganizationSettings() {
   };
 
   const handleDeleteOrganization = async () => {
-    if (!selectedOrgId || !selectedOrg) return;
+    if (!(selectedOrgId && selectedOrg)) return;
 
     const confirmed = window.confirm(
-      t('settings.confirmDelete', { orgName: selectedOrg.name })
+      t("settings.confirmDelete", { orgName: selectedOrg.name })
     );
     if (!confirmed) return;
 
@@ -257,7 +257,7 @@ export function OrganizationSettings() {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">{t('settings.loadingOrganizations')}</span>
+        <span className="ml-2">{t("settings.loadingOrganizations")}</span>
       </div>
     );
   }
@@ -266,9 +266,9 @@ export function OrganizationSettings() {
     return (
       <div className="py-8">
         <LoginRequiredPrompt
-          title={t('loginRequired.title')}
-          description={t('loginRequired.description')}
-          actionLabel={t('loginRequired.action')}
+          actionLabel={t("loginRequired.action")}
+          description={t("loginRequired.description")}
+          title={t("loginRequired.title")}
         />
       </div>
     );
@@ -281,7 +281,7 @@ export function OrganizationSettings() {
           <AlertDescription>
             {orgsError instanceof Error
               ? orgsError.message
-              : t('settings.loadError')}
+              : t("settings.loadError")}
           </AlertDescription>
         </Alert>
       </div>
@@ -308,21 +308,21 @@ export function OrganizationSettings() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>{t('settings.title')}</CardTitle>
-              <CardDescription>{t('settings.description')}</CardDescription>
+              <CardTitle>{t("settings.title")}</CardTitle>
+              <CardDescription>{t("settings.description")}</CardDescription>
             </div>
             <Button onClick={handleCreateOrganization} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              {t('createDialog.createButton')}
+              <Plus className="mr-2 h-4 w-4" />
+              {t("createDialog.createButton")}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="org-selector">{t('settings.selectLabel')}</Label>
-            <Select value={selectedOrgId} onValueChange={handleOrgSelect}>
+            <Label htmlFor="org-selector">{t("settings.selectLabel")}</Label>
+            <Select onValueChange={handleOrgSelect} value={selectedOrgId}>
               <SelectTrigger id="org-selector">
-                <SelectValue placeholder={t('settings.selectPlaceholder')} />
+                <SelectValue placeholder={t("settings.selectPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {organizations.length > 0 ? (
@@ -332,14 +332,14 @@ export function OrganizationSettings() {
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="no-orgs" disabled>
-                    {t('settings.noOrganizations')}
+                  <SelectItem disabled value="no-orgs">
+                    {t("settings.noOrganizations")}
                   </SelectItem>
                 )}
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground">
-              {t('settings.selectHelper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.selectHelper")}
             </p>
           </div>
         </CardContent>
@@ -348,9 +348,9 @@ export function OrganizationSettings() {
       {selectedOrg && isAdmin && !isPersonalOrg && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('invitationList.title')}</CardTitle>
+            <CardTitle>{t("invitationList.title")}</CardTitle>
             <CardDescription>
-              {t('invitationList.description', {
+              {t("invitationList.description", {
                 orgName: selectedOrg.name,
               })}
             </CardDescription>
@@ -359,20 +359,20 @@ export function OrganizationSettings() {
             {loadingInvitations ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="ml-2">{t('invitationList.loading')}</span>
+                <span className="ml-2">{t("invitationList.loading")}</span>
               </div>
             ) : invitations.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {t('invitationList.none')}
+              <div className="py-8 text-center text-muted-foreground">
+                {t("invitationList.none")}
               </div>
             ) : (
               <div className="space-y-3">
                 {invitations.map((invitation) => (
                   <PendingInvitationItem
-                    key={invitation.id}
                     invitation={invitation}
-                    onRevoke={handleRevokeInvitation}
                     isRevoking={revokeInvitation.isPending}
+                    key={invitation.id}
+                    onRevoke={handleRevokeInvitation}
                   />
                 ))}
               </div>
@@ -386,17 +386,17 @@ export function OrganizationSettings() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>{t('memberList.title')}</CardTitle>
+                <CardTitle>{t("memberList.title")}</CardTitle>
                 <CardDescription>
-                  {t('memberList.description', {
+                  {t("memberList.description", {
                     orgName: selectedOrg.name,
                   })}
                 </CardDescription>
               </div>
               {isAdmin && !isPersonalOrg && (
                 <Button onClick={handleInviteMember} size="sm">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  {t('memberList.inviteButton')}
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  {t("memberList.inviteButton")}
                 </Button>
               )}
             </div>
@@ -405,24 +405,24 @@ export function OrganizationSettings() {
             {loadingMembers ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="ml-2">{t('memberList.loading')}</span>
+                <span className="ml-2">{t("memberList.loading")}</span>
               </div>
             ) : members.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {t('memberList.none')}
+              <div className="py-8 text-center text-muted-foreground">
+                {t("memberList.none")}
               </div>
             ) : (
               <div className="space-y-3">
                 {members.map((member) => (
                   <MemberListItem
-                    key={member.user_id}
-                    member={member}
                     currentUserId={currentUserId}
                     isAdmin={isAdmin}
-                    onRemove={handleRemoveMember}
-                    onRoleChange={handleRoleChange}
                     isRemoving={removeMember.isPending}
                     isRoleChanging={updateMemberRole.isPending}
+                    key={member.user_id}
+                    member={member}
+                    onRemove={handleRemoveMember}
+                    onRoleChange={handleRoleChange}
                   />
                 ))}
               </div>
@@ -434,20 +434,20 @@ export function OrganizationSettings() {
       {selectedOrg && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('sharedProjects.title')}</CardTitle>
+            <CardTitle>{t("sharedProjects.title")}</CardTitle>
             <CardDescription>
-              {t('sharedProjects.description', { orgName: selectedOrg.name })}
+              {t("sharedProjects.description", { orgName: selectedOrg.name })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loadingProjects || loadingRemoteProjects ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="ml-2">{t('sharedProjects.loading')}</span>
+                <span className="ml-2">{t("sharedProjects.loading")}</span>
               </div>
             ) : remoteProjects.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {t('sharedProjects.noProjects')}
+              <div className="py-8 text-center text-muted-foreground">
+                {t("sharedProjects.noProjects")}
               </div>
             ) : (
               <div className="space-y-3">
@@ -459,14 +459,14 @@ export function OrganizationSettings() {
 
                   return (
                     <RemoteProjectItem
-                      key={remoteProject.id}
-                      remoteProject={remoteProject}
-                      linkedLocalProject={linkedLocalProject}
                       availableLocalProjects={availableLocalProjects}
-                      onLink={handleLinkProject}
-                      onUnlink={handleUnlinkProject}
                       isLinking={linkToExisting.isPending}
                       isUnlinking={unlinkProject.isPending}
+                      key={remoteProject.id}
+                      linkedLocalProject={linkedLocalProject}
+                      onLink={handleLinkProject}
+                      onUnlink={handleUnlinkProject}
+                      remoteProject={remoteProject}
                     />
                   );
                 })}
@@ -480,33 +480,33 @@ export function OrganizationSettings() {
         <Card className="border-destructive">
           <CardHeader>
             <CardTitle className="text-destructive">
-              {t('settings.dangerZone')}
+              {t("settings.dangerZone")}
             </CardTitle>
             <CardDescription>
-              {t('settings.dangerZoneDescription')}
+              {t("settings.dangerZoneDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">
-                  {t('settings.deleteOrganization')}
+                  {t("settings.deleteOrganization")}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.deleteOrganizationDescription')}
+                <p className="text-muted-foreground text-sm">
+                  {t("settings.deleteOrganizationDescription")}
                 </p>
               </div>
               <Button
-                variant="destructive"
-                onClick={handleDeleteOrganization}
                 disabled={deleteOrganization.isPending}
+                onClick={handleDeleteOrganization}
+                variant="destructive"
               >
                 {deleteOrganization.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="mr-2 h-4 w-4" />
                 )}
-                {t('common:buttons.delete')}
+                {t("common:buttons.delete")}
               </Button>
             </div>
           </CardContent>

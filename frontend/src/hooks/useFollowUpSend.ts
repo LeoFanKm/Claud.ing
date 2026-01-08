@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
-import { sessionsApi } from '@/lib/api';
-import type { CreateFollowUpAttempt } from 'shared/types';
+import { useCallback, useState } from "react";
+import type { CreateFollowUpAttempt } from "shared/types";
+import { sessionsApi } from "@/lib/api";
 
 type Args = {
   sessionId?: string;
@@ -38,7 +38,7 @@ export function useFollowUpSend({
       extraMessage,
     ]
       .filter(Boolean)
-      .join('\n\n');
+      .join("\n\n");
     if (!finalPrompt) return;
     try {
       setIsSendingFollowUp(true);
@@ -58,7 +58,7 @@ export function useFollowUpSend({
     } catch (error: unknown) {
       const err = error as { message?: string };
       setFollowUpError(
-        `Failed to start follow-up execution: ${err.message ?? 'Unknown error'}`
+        `Failed to start follow-up execution: ${err.message ?? "Unknown error"}`
       );
     } finally {
       setIsSendingFollowUp(false);

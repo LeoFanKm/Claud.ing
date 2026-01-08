@@ -48,10 +48,10 @@ export function parseUnifiedDiff(diffText: string): ParsedFileDiff[] {
         if (currentHunk) currentFile.hunks.push(currentHunk);
         currentHunk = {
           header: line,
-          oldStart: parseInt(match[1], 10),
-          oldLines: match[2] ? parseInt(match[2], 10) : 1,
-          newStart: parseInt(match[3], 10),
-          newLines: match[4] ? parseInt(match[4], 10) : 1,
+          oldStart: Number.parseInt(match[1], 10),
+          oldLines: match[2] ? Number.parseInt(match[2], 10) : 1,
+          newStart: Number.parseInt(match[3], 10),
+          newLines: match[4] ? Number.parseInt(match[4], 10) : 1,
           lines: [],
         };
       }
@@ -74,17 +74,17 @@ export function parseUnifiedDiff(diffText: string): ParsedFileDiff[] {
 
 export function getFileDiff(
   parsedDiffs: ParsedFileDiff[],
-  filePath: string,
+  filePath: string
 ): ParsedFileDiff | undefined {
   return parsedDiffs.find(
-    (f) => f.newPath === filePath || f.oldPath === filePath,
+    (f) => f.newPath === filePath || f.oldPath === filePath
   );
 }
 
 export function hunkOverlapsRange(
   hunk: ParsedHunk,
   startLine: number,
-  endLine: number,
+  endLine: number
 ): boolean {
   const hunkEnd = hunk.newStart + hunk.newLines - 1;
   return hunk.newStart <= endLine && hunkEnd >= startLine;
@@ -94,13 +94,13 @@ export function filterHunksToRange(
   fileDiff: ParsedFileDiff,
   startLine: number,
   endLine: number,
-  contextLines: number = 3,
+  contextLines = 3
 ): string {
   const expandedStart = Math.max(1, startLine - contextLines);
   const expandedEnd = endLine + contextLines;
 
   const relevantHunks = fileDiff.hunks.filter((h) =>
-    hunkOverlapsRange(h, expandedStart, expandedEnd),
+    hunkOverlapsRange(h, expandedStart, expandedEnd)
   );
 
   if (relevantHunks.length === 0) {
@@ -188,14 +188,14 @@ export function synthesizeFragmentDiff(
   newFileContent: string,
   startLine: number,
   endLine: number,
-  contextLines: number = 3,
+  contextLines = 3
 ): string {
   const newFileLines = newFileContent.split(/\r?\n/);
   const expandedStart = Math.max(1, startLine - contextLines);
   const expandedEnd = Math.min(newFileLines.length, endLine + contextLines);
 
   const relevantHunks = fileDiff.hunks.filter((h) =>
-    hunkOverlapsRange(h, expandedStart, expandedEnd),
+    hunkOverlapsRange(h, expandedStart, expandedEnd)
   );
 
   const changeMap = new Map<
@@ -230,7 +230,7 @@ export function synthesizeFragmentDiff(
     if (pendingDeletions.length > 0) {
       const lastNewLine = Math.min(
         hunk.newStart + hunk.newLines,
-        expandedEnd + 1,
+        expandedEnd + 1
       );
       if (lastNewLine <= expandedEnd) {
         const existing = changeMap.get(lastNewLine);

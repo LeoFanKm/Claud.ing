@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { attemptsApi } from '@/lib/api';
-import { EditorSelectionDialog } from '@/components/dialogs/tasks/EditorSelectionDialog';
-import type { EditorType } from 'shared/types';
+import { useCallback } from "react";
+import type { EditorType } from "shared/types";
+import { EditorSelectionDialog } from "@/components/dialogs/tasks/EditorSelectionDialog";
+import { attemptsApi } from "@/lib/api";
 
 type OpenEditorOptions = {
   editorType?: EditorType;
@@ -26,10 +26,10 @@ export function useOpenInEditor(
 
         // If a URL is returned, open it in a new window/tab
         if (response.url) {
-          window.open(response.url, '_blank');
+          window.open(response.url, "_blank");
         }
       } catch (err) {
-        console.error('Failed to open editor:', err);
+        console.error("Failed to open editor:", err);
         if (!editorType) {
           if (onShowEditorDialog) {
             onShowEditorDialog();

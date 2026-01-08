@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type GitOperationsContextType = {
   error: string | null;
@@ -30,7 +31,7 @@ export const useGitOperationsError = () => {
   const ctx = useContext(GitOperationsContext);
   if (!ctx) {
     throw new Error(
-      'useGitOperationsError must be used within GitOperationsProvider'
+      "useGitOperationsError must be used within GitOperationsProvider"
     );
   }
   return ctx;

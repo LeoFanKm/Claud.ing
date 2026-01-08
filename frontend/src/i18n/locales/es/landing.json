@@ -1,0 +1,81 @@
+{
+  "hero": {
+    "badge": "v{{version}} — Ahora con integración de Claude Code",
+    "title": "Gestión de Tareas Impulsada por IA",
+    "titlePrefix": "Muévete más rápido con",
+    "subtitle": "Kanban by Clauding te permite ejecutar agentes de codificación en paralelo sin conflictos y realizar revisiones de código con nuestra herramienta diff. Ahora puedes enfocarte en la planificación y calidad en lugar de mirar los registros del terminal.",
+    "cta": "Comenzar Gratis",
+    "learnMore": "Saber Más",
+    "testimonial": {
+      "quote": "Esto cambió completamente la forma en que nuestro equipo gestiona proyectos. Las sugerencias de IA son increíblemente precisas.",
+      "author": "María García",
+      "role": "Líder de Ingeniería en TechCorp"
+    }
+  },
+  "quickStart": {
+    "title": "Inicio Rápido",
+    "requirement": "Requiere una suscripción a Claude Code"
+  },
+  "features": {
+    "title": "Funciones Potentes",
+    "subtitle": "Diseñado para desarrolladores que exigen lo mejor de su asistente de codificación con IA",
+    "parallelExecution": {
+      "title": "Ejecución Paralela de Agentes",
+      "description": "Ejecuta múltiples agentes de IA simultáneamente para abordar tareas complejas más rápido con procesamiento paralelo coordinado"
+    },
+    "isolatedWorkspaces": {
+      "title": "Espacios de Trabajo Aislados",
+      "description": "Cada tarea se ejecuta en su propio entorno sandbox, asegurando una separación limpia y previniendo conflictos"
+    },
+    "codeReview": {
+      "title": "Revisión de Código Integrada",
+      "description": "Revisión automática de código con sugerencias inteligentes, escaneo de seguridad y aplicación de mejores prácticas"
+    },
+    "mcpIntegration": {
+      "title": "Integración MCP",
+      "description": "Conéctate a servidores Model Context Protocol para capacidades extendidas e integraciones de herramientas personalizadas"
+    }
+  },
+  "agents": {
+    "title": "Potenciado por Agentes Claude",
+    "subtitle": "Aprovecha agentes de IA especializados para automatizar flujos de trabajo, generar informes y proporcionar recomendaciones inteligentes"
+  },
+  "agentSupport": {
+    "title": "Funciona con tus Agentes de IA Favoritos",
+    "subtitle": "Integración perfecta con los principales asistentes de codificación y agentes de IA"
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes",
+    "items": {
+      "codeSecurity": {
+        "question": "¿Mi código está seguro?",
+        "answer": "Sí, tu código nunca sale de tu máquina local. Claude Code se ejecuta completamente en tu dispositivo, y solo almacenamos metadatos de tareas (títulos, descripciones, estado) en nuestros servidores. Tu código fuente y datos sensibles permanecen privados."
+      },
+      "supportedAgents": {
+        "question": "¿Qué agentes de IA son compatibles?",
+        "answer": "Actualmente soportamos Claude Code como el agente de IA principal. Claude Code puede analizar tu base de código, desglosar tareas complejas y proporcionar sugerencias inteligentes. El soporte para agentes adicionales está planificado para futuras versiones."
+      },
+      "isFree": {
+        "question": "¿Es gratis?",
+        "answer": "Las funciones del tablero Kanban son gratuitas. Sin embargo, las funciones impulsadas por IA como el desglose de tareas y las sugerencias inteligentes requieren una suscripción a Claude Code, que gestionas a través de Anthropic."
+      },
+      "parallelExecution": {
+        "question": "¿Cómo funciona la ejecución paralela?",
+        "answer": "Claude Code puede ejecutar múltiples tareas independientes simultáneamente. Cuando tienes tareas sin dependencias, nuestro sistema las identifica automáticamente y las ejecuta en paralelo, reduciendo significativamente el tiempo total de finalización."
+      },
+      "vscodeSupport": {
+        "question": "¿Funciona con VS Code?",
+        "answer": "¡Sí! Claude Code se integra perfectamente con VS Code a través de la extensión oficial. Puedes gestionar tareas directamente desde tu editor y hacer que Claude Code trabaje en tu base de código sin salir de tu entorno de desarrollo."
+      },
+      "whatIsMcp": {
+        "question": "¿Qué es MCP?",
+        "answer": "MCP (Model Context Protocol) es un protocolo abierto que permite a los modelos de IA conectarse de forma segura con herramientas externas y fuentes de datos. Permite que Claude Code interactúe con tu entorno de desarrollo, bases de datos y otros servicios mientras mantiene los límites de seguridad."
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© {{year}} Claud.ing. Todos los derechos reservados.",
+    "terms": "Términos de Servicio",
+    "privacy": "Política de Privacidad"
+  }
+}

@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 type State = {
   expanded: Record<string, boolean>;
@@ -32,7 +32,7 @@ export function useExpandable(
   const toggleKey = useExpandableStore((s) => s.toggleKey);
 
   const set = (next?: boolean) => {
-    if (typeof next === 'boolean') setKey(key, next);
+    if (typeof next === "boolean") setKey(key, next);
     else toggleKey(key, defaultValue);
   };
 

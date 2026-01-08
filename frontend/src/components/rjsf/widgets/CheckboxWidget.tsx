@@ -1,5 +1,5 @@
-import { WidgetProps } from '@rjsf/utils';
-import { Checkbox } from '@/components/ui/checkbox';
+import type { WidgetProps } from "@rjsf/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const CheckboxWidget = (props: WidgetProps) => {
   const { id, value, disabled, readonly, onChange } = props;
@@ -13,10 +13,10 @@ export const CheckboxWidget = (props: WidgetProps) => {
   return (
     <div className="flex items-center space-x-2">
       <Checkbox
-        id={id}
         checked={checked}
-        onCheckedChange={handleChange}
         disabled={disabled || readonly}
+        id={id}
+        onCheckedChange={handleChange}
       />
     </div>
   );

@@ -1,13 +1,13 @@
 import {
   createContext,
+  type ReactNode,
   useContext,
-  ReactNode,
-  useMemo,
   useEffect,
-} from 'react';
-import { useLocation } from 'react-router-dom';
-import type { Project } from 'shared/types';
-import { useProjects } from '@/hooks/useProjects';
+  useMemo,
+} from "react";
+import { useLocation } from "react-router-dom";
+import type { Project } from "shared/types";
+import { useProjects } from "@/hooks/useProjects";
 
 interface ProjectContextValue {
   projectId: string | undefined;
@@ -51,7 +51,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
     if (project) {
       document.title = `${project.name} | vibe-kanban`;
     } else {
-      document.title = 'vibe-kanban';
+      document.title = "vibe-kanban";
     }
   }, [project]);
 
@@ -63,7 +63,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
 export function useProject(): ProjectContextValue {
   const context = useContext(ProjectContext);
   if (!context) {
-    throw new Error('useProject must be used within a ProjectProvider');
+    throw new Error("useProject must be used within a ProjectProvider");
   }
   return context;
 }

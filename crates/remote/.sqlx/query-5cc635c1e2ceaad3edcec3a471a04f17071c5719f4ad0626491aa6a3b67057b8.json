@@ -30,10 +30,7 @@
           "Custom": {
             "name": "member_role",
             "kind": {
-              "Enum": [
-                "admin",
-                "member"
-              ]
+              "Enum": ["admin", "member"]
             }
           }
         }
@@ -45,12 +42,7 @@
           "Custom": {
             "name": "invitation_status",
             "kind": {
-              "Enum": [
-                "pending",
-                "accepted",
-                "declined",
-                "expired"
-              ]
+              "Enum": ["pending", "accepted", "declined", "expired"]
             }
           }
         }
@@ -77,9 +69,7 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid"
-      ]
+      "Left": ["Uuid"]
     },
     "nullable": [
       false,

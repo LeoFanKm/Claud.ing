@@ -1,14 +1,14 @@
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
-import { useTranslation } from 'react-i18next';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useTranslation } from "react-i18next";
+import ProcessesTab from "@/components/tasks/TaskDetails/ProcessesTab";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import ProcessesTab from '@/components/tasks/TaskDetails/ProcessesTab';
-import { ProcessSelectionProvider } from '@/contexts/ProcessSelectionContext';
+} from "@/components/ui/dialog";
+import { ProcessSelectionProvider } from "@/contexts/ProcessSelectionContext";
+import { defineModal } from "@/lib/modals";
 
 export interface ViewProcessesDialogProps {
   attemptId: string;
@@ -17,7 +17,7 @@ export interface ViewProcessesDialogProps {
 
 const ViewProcessesDialogImpl = NiceModal.create<ViewProcessesDialogProps>(
   ({ attemptId, initialProcessId }) => {
-    const { t } = useTranslation('tasks');
+    const { t } = useTranslation("tasks");
     const modal = useModal();
 
     const handleOpenChange = (open: boolean) => {
@@ -28,23 +28,23 @@ const ViewProcessesDialogImpl = NiceModal.create<ViewProcessesDialogProps>(
 
     return (
       <Dialog
-        open={modal.visible}
+        className="w-[92vw] max-w-5xl overflow-x-hidden p-0"
         onOpenChange={handleOpenChange}
-        className="max-w-5xl w-[92vw] p-0 overflow-x-hidden"
+        open={modal.visible}
       >
         <DialogContent
-          className="p-0 min-w-0"
+          className="min-w-0 p-0"
           onKeyDownCapture={(e) => {
-            if (e.key === 'Escape') {
+            if (e.key === "Escape") {
               e.stopPropagation();
               modal.hide();
             }
           }}
         >
-          <DialogHeader className="px-4 py-3 border-b">
-            <DialogTitle>{t('viewProcessesDialog.title')}</DialogTitle>
+          <DialogHeader className="border-b px-4 py-3">
+            <DialogTitle>{t("viewProcessesDialog.title")}</DialogTitle>
           </DialogHeader>
-          <div className="h-[75vh] flex flex-col min-h-0 min-w-0">
+          <div className="flex h-[75vh] min-h-0 min-w-0 flex-col">
             <ProcessSelectionProvider initialProcessId={initialProcessId}>
               <ProcessesTab attemptId={attemptId} />
             </ProcessSelectionProvider>

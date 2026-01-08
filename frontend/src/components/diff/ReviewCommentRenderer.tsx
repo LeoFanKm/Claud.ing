@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import WYSIWYGEditor from '@/components/ui/wysiwyg';
-import { useReview, type ReviewComment } from '@/contexts/ReviewProvider';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import WYSIWYGEditor from "@/components/ui/wysiwyg";
+import { type ReviewComment, useReview } from "@/contexts/ReviewProvider";
 
 interface ReviewCommentRendererProps {
   comment: ReviewComment;
@@ -41,23 +41,23 @@ export function ReviewCommentRenderer({
     return (
       <div className="border-y bg-background p-4">
         <WYSIWYGEditor
-          value={editText}
-          onChange={setEditText}
-          placeholder="Edit comment... (type @ to search files)"
-          className="w-full bg-background text-foreground text-sm font-mono min-h-[60px]"
-          projectId={projectId}
-          onCmdEnter={handleSave}
           autoFocus
+          className="min-h-[60px] w-full bg-background font-mono text-foreground text-sm"
+          onChange={setEditText}
+          onCmdEnter={handleSave}
+          placeholder="Edit comment... (type @ to search files)"
+          projectId={projectId}
+          value={editText}
         />
         <div className="mt-2 flex gap-2">
-          <Button size="xs" onClick={handleSave} disabled={!editText.trim()}>
+          <Button disabled={!editText.trim()} onClick={handleSave} size="xs">
             Save changes
           </Button>
           <Button
+            className="text-secondary-foreground"
+            onClick={handleCancel}
             size="xs"
             variant="ghost"
-            onClick={handleCancel}
-            className="text-secondary-foreground"
           >
             Cancel
           </Button>
@@ -69,11 +69,11 @@ export function ReviewCommentRenderer({
   return (
     <div className="border-y bg-background p-4">
       <WYSIWYGEditor
-        value={comment.text}
-        disabled={true}
         className="text-sm"
-        onEdit={handleEdit}
+        disabled={true}
         onDelete={handleDelete}
+        onEdit={handleEdit}
+        value={comment.text}
       />
     </div>
   );

@@ -1,17 +1,17 @@
-import { useMemo } from 'react';
 import {
-  DiffView,
-  DiffModeEnum,
   DiffLineType,
+  DiffModeEnum,
+  DiffView,
   parseInstance,
-} from '@git-diff-view/react';
-import { SquarePen } from 'lucide-react';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { getHighLightLanguageFromPath } from '@/utils/extToLanguage';
-import { getActualTheme } from '@/utils/theme';
-import '@/styles/diff-style-overrides.css';
-import '@/styles/edit-diff-overrides.css';
-import { cn } from '@/lib/utils';
+} from "@git-diff-view/react";
+import { SquarePen } from "lucide-react";
+import { useMemo } from "react";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { getHighLightLanguageFromPath } from "@/utils/extToLanguage";
+import { getActualTheme } from "@/utils/theme";
+import "@/styles/diff-style-overrides.css";
+import "@/styles/edit-diff-overrides.css";
+import { cn } from "@/lib/utils";
 
 type Props = {
   path: string;
@@ -19,7 +19,7 @@ type Props = {
   hasLineNumbers: boolean;
   expansionKey: string;
   defaultExpanded?: boolean;
-  statusAppearance?: 'default' | 'denied' | 'timed_out';
+  statusAppearance?: "default" | "denied" | "timed_out";
   forceExpanded?: boolean;
 };
 
@@ -46,7 +46,7 @@ function processUnifiedDiff(unifiedDiff: string, hasLineNumbers: boolean) {
     }
     isValidDiff = parsed.hunks.length > 0;
   } catch (err) {
-    console.error('Failed to parse diff hunks:', err);
+    console.error("Failed to parse diff hunks:", err);
     isValidDiff = false;
   }
 
@@ -59,7 +59,7 @@ function processUnifiedDiff(unifiedDiff: string, hasLineNumbers: boolean) {
   };
 }
 
-import { useExpandable } from '@/stores/useExpandableStore';
+import { useExpandable } from "@/stores/useExpandableStore";
 
 function EditDiffRenderer({
   path,
@@ -67,7 +67,7 @@ function EditDiffRenderer({
   hasLineNumbers,
   expansionKey,
   defaultExpanded = false,
-  statusAppearance = 'default',
+  statusAppearance = "default",
   forceExpanded = false,
 }: Props) {
   const { config } = useUserSystem();
@@ -80,10 +80,10 @@ function EditDiffRenderer({
     [unifiedDiff, hasLineNumbers]
   );
 
-  const hideLineNumbersClass = hideLineNumbers ? ' edit-diff-hide-nums' : '';
+  const hideLineNumbersClass = hideLineNumbers ? " edit-diff-hide-nums" : "";
 
   const diffData = useMemo(() => {
-    const lang = getHighLightLanguageFromPath(path) || 'plaintext';
+    const lang = getHighLightLanguageFromPath(path) || "plaintext";
     return {
       hunks,
       oldFile: { fileName: path, fileLang: lang },
@@ -92,9 +92,9 @@ function EditDiffRenderer({
   }, [hunks, path]);
 
   const headerClass = cn(
-    'flex items-center gap-1.5 text-secondary-foreground',
-    statusAppearance === 'denied' && 'text-red-700 dark:text-red-300',
-    statusAppearance === 'timed_out' && 'text-amber-700 dark:text-amber-200'
+    "flex items-center gap-1.5 text-secondary-foreground",
+    statusAppearance === "denied" && "text-red-700 dark:text-red-300",
+    statusAppearance === "timed_out" && "text-amber-700 dark:text-amber-200"
   );
 
   return (
@@ -102,35 +102,35 @@ function EditDiffRenderer({
       <div className={headerClass}>
         <SquarePen className="h-3 w-3" />
         <p
+          className="flex-1 cursor-pointer overflow-x-auto font-mono text-sm"
           onClick={() => setExpanded()}
-          className="text-sm font-mono overflow-x-auto flex-1 cursor-pointer"
         >
-          {path}{' '}
-          <span style={{ color: 'hsl(var(--console-success))' }}>
+          {path}{" "}
+          <span style={{ color: "hsl(var(--console-success))" }}>
             +{additions}
-          </span>{' '}
-          <span style={{ color: 'hsl(var(--console-error))' }}>
+          </span>{" "}
+          <span style={{ color: "hsl(var(--console-error))" }}>
             -{deletions}
           </span>
         </p>
       </div>
 
       {effectiveExpanded && (
-        <div className={'mt-2 border ' + hideLineNumbersClass}>
+        <div className={"mt-2 border" + hideLineNumbersClass}>
           {isValidDiff ? (
             <DiffView
               data={diffData}
-              diffViewWrap={false}
-              diffViewTheme={theme}
+              diffViewFontSize={12}
               diffViewHighlight
               diffViewMode={DiffModeEnum.Unified}
-              diffViewFontSize={12}
+              diffViewTheme={theme}
+              diffViewWrap={false}
             />
           ) : (
             <>
               <pre
-                className="px-4 pb-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap"
-                style={{ color: 'hsl(var(--muted-foreground) / 0.9)' }}
+                className="overflow-x-auto whitespace-pre-wrap px-4 pb-4 font-mono text-xs"
+                style={{ color: "hsl(var(--muted-foreground) / 0.9)" }}
               >
                 {unifiedDiff}
               </pre>

@@ -1,10 +1,10 @@
-import type { ReviewResult } from "./types/review";
 import {
+  clearTokens,
   getAccessToken,
   getRefreshToken,
   storeTokens,
-  clearTokens,
 } from "./auth";
+import type { ReviewResult } from "./types/review";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -111,7 +111,7 @@ export async function getInvitation(token: string): Promise<Invitation> {
 export async function initOAuth(
   provider: OAuthProvider,
   returnTo: string,
-  appChallenge: string,
+  appChallenge: string
 ): Promise<HandoffInitResponse> {
   const res = await fetch(`${API_BASE}/v1/oauth/web/init`, {
     method: "POST",
@@ -131,7 +131,7 @@ export async function initOAuth(
 export async function redeemOAuth(
   handoffId: string,
   appCode: string,
-  appVerifier: string,
+  appVerifier: string
 ): Promise<HandoffRedeemResponse> {
   const res = await fetch(`${API_BASE}/v1/oauth/web/redeem`, {
     method: "POST",
@@ -150,7 +150,7 @@ export async function redeemOAuth(
 
 export async function acceptInvitation(
   token: string,
-  accessToken: string,
+  accessToken: string
 ): Promise<AcceptInvitationResponse> {
   const res = await fetch(`${API_BASE}/v1/invitations/${token}/accept`, {
     method: "POST",
@@ -178,7 +178,7 @@ export async function getReview(reviewId: string): Promise<ReviewResult> {
 
 export async function getFileContent(
   reviewId: string,
-  fileHash: string,
+  fileHash: string
 ): Promise<string> {
   const res = await fetch(`${API_BASE}/v1/review/${reviewId}/file/${fileHash}`);
   if (!res.ok) {
@@ -204,7 +204,7 @@ export interface ReviewMetadata {
 }
 
 export async function getReviewMetadata(
-  reviewId: string,
+  reviewId: string
 ): Promise<ReviewMetadata> {
   const res = await fetch(`${API_BASE}/v1/review/${reviewId}/metadata`);
   if (!res.ok) {
@@ -215,7 +215,7 @@ export async function getReviewMetadata(
 
 // Token refresh
 export async function refreshTokens(
-  refreshToken: string,
+  refreshToken: string
 ): Promise<{ access_token: string; refresh_token: string }> {
   const res = await fetch(`${API_BASE}/v1/tokens/refresh`, {
     method: "POST",
@@ -271,7 +271,7 @@ async function handleTokenRefresh(): Promise<string> {
 
 export async function authenticatedFetch(
   url: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ): Promise<Response> {
   const accessToken = await getValidAccessToken();
 
@@ -328,7 +328,7 @@ export async function listOrganizations(): Promise<OrganizationWithRole[]> {
 }
 
 export async function createOrganization(
-  data: CreateOrganizationRequest,
+  data: CreateOrganizationRequest
 ): Promise<OrganizationWithRole> {
   const res = await authenticatedFetch(`${API_BASE}/v1/organizations`, {
     method: "POST",
@@ -337,14 +337,16 @@ export async function createOrganization(
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || `Failed to create organization (${res.status})`);
+    throw new Error(
+      error.message || `Failed to create organization (${res.status})`
+    );
   }
   const result = await res.json();
   return result.organization;
 }
 
 export async function getOrganization(
-  orgId: string,
+  orgId: string
 ): Promise<GetOrganizationResponse> {
   const res = await authenticatedFetch(`${API_BASE}/v1/organizations/${orgId}`);
   if (!res.ok) {
@@ -355,36 +357,46 @@ export async function getOrganization(
 
 export async function updateOrganization(
   orgId: string,
-  name: string,
+  name: string
 ): Promise<Organization> {
-  const res = await authenticatedFetch(`${API_BASE}/v1/organizations/${orgId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
-  });
+  const res = await authenticatedFetch(
+    `${API_BASE}/v1/organizations/${orgId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    }
+  );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || `Failed to update organization (${res.status})`);
+    throw new Error(
+      error.message || `Failed to update organization (${res.status})`
+    );
   }
   return res.json();
 }
 
 export async function deleteOrganization(orgId: string): Promise<void> {
-  const res = await authenticatedFetch(`${API_BASE}/v1/organizations/${orgId}`, {
-    method: "DELETE",
-  });
+  const res = await authenticatedFetch(
+    `${API_BASE}/v1/organizations/${orgId}`,
+    {
+      method: "DELETE",
+    }
+  );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || `Failed to delete organization (${res.status})`);
+    throw new Error(
+      error.message || `Failed to delete organization (${res.status})`
+    );
   }
 }
 
 // Organization Members APIs
 export async function listMembers(
-  orgId: string,
+  orgId: string
 ): Promise<OrganizationMemberWithProfile[]> {
   const res = await authenticatedFetch(
-    `${API_BASE}/v1/organizations/${orgId}/members`,
+    `${API_BASE}/v1/organizations/${orgId}/members`
   );
   if (!res.ok) {
     throw new Error(`Failed to fetch members (${res.status})`);
@@ -395,11 +407,11 @@ export async function listMembers(
 
 export async function removeMember(
   orgId: string,
-  userId: string,
+  userId: string
 ): Promise<void> {
   const res = await authenticatedFetch(
     `${API_BASE}/v1/organizations/${orgId}/members/${userId}`,
-    { method: "DELETE" },
+    { method: "DELETE" }
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
@@ -410,7 +422,7 @@ export async function removeMember(
 export async function updateMemberRole(
   orgId: string,
   userId: string,
-  role: MemberRole,
+  role: MemberRole
 ): Promise<void> {
   const res = await authenticatedFetch(
     `${API_BASE}/v1/organizations/${orgId}/members/${userId}/role`,
@@ -418,20 +430,22 @@ export async function updateMemberRole(
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
-    },
+    }
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || `Failed to update member role (${res.status})`);
+    throw new Error(
+      error.message || `Failed to update member role (${res.status})`
+    );
   }
 }
 
 // Invitation APIs
 export async function listInvitations(
-  orgId: string,
+  orgId: string
 ): Promise<OrganizationInvitation[]> {
   const res = await authenticatedFetch(
-    `${API_BASE}/v1/organizations/${orgId}/invitations`,
+    `${API_BASE}/v1/organizations/${orgId}/invitations`
   );
   if (!res.ok) {
     throw new Error(`Failed to fetch invitations (${res.status})`);
@@ -443,7 +457,7 @@ export async function listInvitations(
 export async function createInvitation(
   orgId: string,
   email: string,
-  role: MemberRole,
+  role: MemberRole
 ): Promise<OrganizationInvitation> {
   const res = await authenticatedFetch(
     `${API_BASE}/v1/organizations/${orgId}/invitations`,
@@ -451,11 +465,13 @@ export async function createInvitation(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, role }),
-    },
+    }
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || `Failed to create invitation (${res.status})`);
+    throw new Error(
+      error.message || `Failed to create invitation (${res.status})`
+    );
   }
   const data = await res.json();
   return data.invitation;
@@ -463,7 +479,7 @@ export async function createInvitation(
 
 export async function revokeInvitation(
   orgId: string,
-  invitationId: string,
+  invitationId: string
 ): Promise<void> {
   const res = await authenticatedFetch(
     `${API_BASE}/v1/organizations/${orgId}/invitations/revoke`,
@@ -471,11 +487,13 @@ export async function revokeInvitation(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ invitation_id: invitationId }),
-    },
+    }
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || `Failed to revoke invitation (${res.status})`);
+    throw new Error(
+      error.message || `Failed to revoke invitation (${res.status})`
+    );
   }
 }
 
@@ -509,10 +527,10 @@ export type GitHubAppInstallUrlResponse = {
 
 // GitHub App Integration APIs
 export async function getGitHubAppInstallUrl(
-  orgId: string,
+  orgId: string
 ): Promise<GitHubAppInstallUrlResponse> {
   const res = await authenticatedFetch(
-    `${API_BASE}/v1/organizations/${orgId}/github-app/install-url`,
+    `${API_BASE}/v1/organizations/${orgId}/github-app/install-url`
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
@@ -521,13 +539,17 @@ export async function getGitHubAppInstallUrl(
   return res.json();
 }
 
-export async function getGitHubAppStatus(orgId: string): Promise<GitHubAppStatus> {
+export async function getGitHubAppStatus(
+  orgId: string
+): Promise<GitHubAppStatus> {
   const res = await authenticatedFetch(
-    `${API_BASE}/v1/organizations/${orgId}/github-app/status`,
+    `${API_BASE}/v1/organizations/${orgId}/github-app/status`
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.error || `Failed to get GitHub App status (${res.status})`);
+    throw new Error(
+      error.error || `Failed to get GitHub App status (${res.status})`
+    );
   }
   return res.json();
 }
@@ -535,18 +557,20 @@ export async function getGitHubAppStatus(orgId: string): Promise<GitHubAppStatus
 export async function disconnectGitHubApp(orgId: string): Promise<void> {
   const res = await authenticatedFetch(
     `${API_BASE}/v1/organizations/${orgId}/github-app`,
-    { method: "DELETE" },
+    { method: "DELETE" }
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.error || `Failed to disconnect GitHub App (${res.status})`);
+    throw new Error(
+      error.error || `Failed to disconnect GitHub App (${res.status})`
+    );
   }
 }
 
 export async function updateRepositoryReviewEnabled(
   orgId: string,
   repoId: string,
-  enabled: boolean,
+  enabled: boolean
 ): Promise<GitHubAppRepository> {
   const res = await authenticatedFetch(
     `${API_BASE}/v1/organizations/${orgId}/github-app/repositories/${repoId}/review-enabled`,
@@ -554,31 +578,35 @@ export async function updateRepositoryReviewEnabled(
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enabled }),
-    },
+    }
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.error || `Failed to update repository (${res.status})`);
+    throw new Error(
+      error.error || `Failed to update repository (${res.status})`
+    );
   }
   return res.json();
 }
 
 export async function fetchGitHubAppRepositories(
-  orgId: string,
+  orgId: string
 ): Promise<GitHubAppRepository[]> {
   const res = await authenticatedFetch(
-    `${API_BASE}/v1/organizations/${orgId}/github-app/repositories`,
+    `${API_BASE}/v1/organizations/${orgId}/github-app/repositories`
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.error || `Failed to fetch repositories (${res.status})`);
+    throw new Error(
+      error.error || `Failed to fetch repositories (${res.status})`
+    );
   }
   return res.json();
 }
 
 export async function bulkUpdateRepositoryReviewEnabled(
   orgId: string,
-  enabled: boolean,
+  enabled: boolean
 ): Promise<{ updated_count: number }> {
   const res = await authenticatedFetch(
     `${API_BASE}/v1/organizations/${orgId}/github-app/repositories/review-enabled`,
@@ -586,11 +614,13 @@ export async function bulkUpdateRepositoryReviewEnabled(
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enabled }),
-    },
+    }
   );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.error || `Failed to update repositories (${res.status})`);
+    throw new Error(
+      error.error || `Failed to update repositories (${res.status})`
+    );
   }
   return res.json();
 }

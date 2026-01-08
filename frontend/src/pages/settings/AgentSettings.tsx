@@ -1,50 +1,49 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual } from "lodash";
+import { ChevronDown, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type {
+  BaseCodingAgent,
+  ExecutorConfigs,
+  ExecutorProfileId,
+} from "shared/types";
+import { AgentAvailabilityIndicator } from "@/components/AgentAvailabilityIndicator";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { CreateConfigurationDialog } from "@/components/dialogs/settings/CreateConfigurationDialog";
+import { DeleteConfigurationDialog } from "@/components/dialogs/settings/DeleteConfigurationDialog";
+import { ExecutorConfigForm } from "@/components/ExecutorConfigForm";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { JSONEditor } from "@/components/ui/json-editor";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
-import { JSONEditor } from '@/components/ui/json-editor';
-import { ChevronDown, Loader2 } from 'lucide-react';
-
-import { ExecutorConfigForm } from '@/components/ExecutorConfigForm';
-import { useProfiles } from '@/hooks/useProfiles';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { CreateConfigurationDialog } from '@/components/dialogs/settings/CreateConfigurationDialog';
-import { DeleteConfigurationDialog } from '@/components/dialogs/settings/DeleteConfigurationDialog';
-import { useAgentAvailability } from '@/hooks/useAgentAvailability';
-import { AgentAvailabilityIndicator } from '@/components/AgentAvailabilityIndicator';
-import type {
-  BaseCodingAgent,
-  ExecutorConfigs,
-  ExecutorProfileId,
-} from 'shared/types';
+} from "@/components/ui/select";
+import { useAgentAvailability } from "@/hooks/useAgentAvailability";
+import { useProfiles } from "@/hooks/useProfiles";
 
 type ExecutorsMap = Record<string, Record<string, Record<string, unknown>>>;
 
 export function AgentSettings() {
-  const { t } = useTranslation(['settings', 'common']);
+  const { t } = useTranslation(["settings", "common"]);
   // Use profiles hook for server state
   const {
     profilesContent: serverProfilesContent,
@@ -59,16 +58,16 @@ export function AgentSettings() {
     useUserSystem();
 
   // Local editor state (draft that may differ from server)
-  const [localProfilesContent, setLocalProfilesContent] = useState('');
+  const [localProfilesContent, setLocalProfilesContent] = useState("");
   const [profilesSuccess, setProfilesSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Form-based editor state
   const [useFormEditor, setUseFormEditor] = useState(true);
   const [selectedExecutorType, setSelectedExecutorType] =
-    useState<BaseCodingAgent>('CLAUDE_CODE' as BaseCodingAgent);
+    useState<BaseCodingAgent>("CLAUDE_CODE" as BaseCodingAgent);
   const [selectedConfiguration, setSelectedConfiguration] =
-    useState<string>('DEFAULT');
+    useState<string>("DEFAULT");
   const [localParsedProfiles, setLocalParsedProfiles] =
     useState<ExecutorConfigs | null>(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -93,7 +92,7 @@ export function AgentSettings() {
         const parsed = JSON.parse(serverProfilesContent);
         setLocalParsedProfiles(parsed);
       } catch (err) {
-        console.error('Failed to parse profiles JSON:', err);
+        console.error("Failed to parse profiles JSON:", err);
         setLocalParsedProfiles(null);
       }
     }
@@ -125,7 +124,7 @@ export function AgentSettings() {
 
   // Save executor profile
   const handleSaveExecutorProfile = async () => {
-    if (!executorDraft || !config) return;
+    if (!(executorDraft && config)) return;
 
     setExecutorSaving(true);
     setExecutorError(null);
@@ -136,8 +135,8 @@ export function AgentSettings() {
       setTimeout(() => setExecutorSuccess(false), 3000);
       reloadSystem();
     } catch (err) {
-      setExecutorError(t('settings.general.save.error'));
-      console.error('Error saving executor profile:', err);
+      setExecutorError(t("settings.general.save.error"));
+      console.error("Error saving executor profile:", err);
     } finally {
       setExecutorSaving(false);
     }
@@ -165,7 +164,7 @@ export function AgentSettings() {
         ),
       });
 
-      if (result.action === 'created' && result.configName) {
+      if (result.action === "created" && result.configName) {
         createConfiguration(
           selectedExecutorType,
           result.configName,
@@ -183,7 +182,7 @@ export function AgentSettings() {
     configName: string,
     baseConfig?: string | null
   ) => {
-    if (!localParsedProfiles || !localParsedProfiles.executors) return;
+    if (!(localParsedProfiles && localParsedProfiles.executors)) return;
 
     const executorsMap =
       localParsedProfiles.executors as unknown as ExecutorsMap;
@@ -217,7 +216,7 @@ export function AgentSettings() {
         executorType: selectedExecutorType,
       });
 
-      if (result === 'deleted') {
+      if (result === "deleted") {
         await handleDeleteConfiguration(configName);
       }
     } catch (error) {
@@ -285,7 +284,7 @@ export function AgentSettings() {
         const nextConfigs = Object.keys(
           executorsMap[selectedExecutorType] || {}
         );
-        const nextSelected = nextConfigs[0] || 'DEFAULT';
+        const nextSelected = nextConfigs[0] || "DEFAULT";
         setSelectedConfiguration(nextSelected);
 
         // Show success
@@ -295,11 +294,11 @@ export function AgentSettings() {
         // Refresh global system so deleted configs are removed elsewhere
         reloadSystem();
       } catch (saveError: unknown) {
-        console.error('Failed to save deletion to backend:', saveError);
-        setSaveError(t('settings.agents.errors.deleteFailed'));
+        console.error("Failed to save deletion to backend:", saveError);
+        setSaveError(t("settings.agents.errors.deleteFailed"));
       }
     } catch (error) {
-      console.error('Error deleting configuration:', error);
+      console.error("Error deleting configuration:", error);
     }
   };
 
@@ -342,8 +341,8 @@ export function AgentSettings() {
       // Refresh global system so new profiles are available elsewhere
       reloadSystem();
     } catch (err: unknown) {
-      console.error('Failed to save profiles:', err);
-      setSaveError(t('settings.agents.errors.saveFailed'));
+      console.error("Failed to save profiles:", err);
+      setSaveError(t("settings.agents.errors.saveFailed"));
     }
   };
 
@@ -352,7 +351,7 @@ export function AgentSettings() {
     configuration: string,
     formData: unknown
   ) => {
-    if (!localParsedProfiles || !localParsedProfiles.executors) return;
+    if (!(localParsedProfiles && localParsedProfiles.executors)) return;
 
     const executorsMap =
       localParsedProfiles.executors as unknown as ExecutorsMap;
@@ -374,7 +373,7 @@ export function AgentSettings() {
   };
 
   const handleExecutorConfigSave = async (formData: unknown) => {
-    if (!localParsedProfiles || !localParsedProfiles.executors) return;
+    if (!(localParsedProfiles && localParsedProfiles.executors)) return;
 
     // Clear any previous errors
     setSaveError(null);
@@ -411,8 +410,8 @@ export function AgentSettings() {
       // Refresh global system so new profiles are available elsewhere
       reloadSystem();
     } catch (err: unknown) {
-      console.error('Failed to save profiles:', err);
-      setSaveError(t('settings.agents.errors.saveConfigFailed'));
+      console.error("Failed to save profiles:", err);
+      setSaveError(t("settings.agents.errors.saveConfigFailed"));
     }
   };
 
@@ -420,7 +419,7 @@ export function AgentSettings() {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">{t('settings.agents.loading')}</span>
+        <span className="ml-2">{t("settings.agents.loading")}</span>
       </div>
     );
   }
@@ -440,7 +439,7 @@ export function AgentSettings() {
       {profilesSuccess && (
         <Alert variant="success">
           <AlertDescription className="font-medium">
-            {t('settings.agents.save.success')}
+            {t("settings.agents.save.success")}
           </AlertDescription>
         </Alert>
       )}
@@ -460,26 +459,26 @@ export function AgentSettings() {
       {executorSuccess && (
         <Alert variant="success">
           <AlertDescription className="font-medium">
-            {t('settings.general.save.success')}
+            {t("settings.general.save.success")}
           </AlertDescription>
         </Alert>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.general.taskExecution.title')}</CardTitle>
+          <CardTitle>{t("settings.general.taskExecution.title")}</CardTitle>
           <CardDescription>
-            {t('settings.general.taskExecution.description')}
+            {t("settings.general.taskExecution.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="executor">
-              {t('settings.general.taskExecution.executor.label')}
+              {t("settings.general.taskExecution.executor.label")}
             </Label>
             <div className="grid grid-cols-2 gap-2">
               <Select
-                value={executorDraft?.executor ?? ''}
+                disabled={!profiles}
                 onValueChange={(value: string) => {
                   const variants = profiles?.[value];
                   const keepCurrentVariant =
@@ -493,12 +492,12 @@ export function AgentSettings() {
                   };
                   updateExecutorDraft(newProfile);
                 }}
-                disabled={!profiles}
+                value={executorDraft?.executor ?? ""}
               >
                 <SelectTrigger id="executor">
                   <SelectValue
                     placeholder={t(
-                      'settings.general.taskExecution.executor.placeholder'
+                      "settings.general.taskExecution.executor.placeholder"
                     )}
                   />
                 </SelectTrigger>
@@ -518,7 +517,7 @@ export function AgentSettings() {
               {(() => {
                 const currentProfileVariant = executorDraft;
                 const selectedProfile =
-                  profiles?.[currentProfileVariant?.executor || ''];
+                  profiles?.[currentProfileVariant?.executor || ""];
                 const hasVariants =
                   selectedProfile && Object.keys(selectedProfile).length > 0;
 
@@ -527,20 +526,25 @@ export function AgentSettings() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
+                          className="flex h-10 w-full items-center justify-between px-2"
                           variant="outline"
-                          className="w-full h-10 px-2 flex items-center justify-between"
                         >
-                          <span className="text-sm truncate flex-1 text-left">
+                          <span className="flex-1 truncate text-left text-sm">
                             {currentProfileVariant?.variant ||
-                              t('settings.general.taskExecution.defaultLabel')}
+                              t("settings.general.taskExecution.defaultLabel")}
                           </span>
-                          <ChevronDown className="h-4 w-4 ml-1 flex-shrink-0" />
+                          <ChevronDown className="ml-1 h-4 w-4 flex-shrink-0" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         {Object.entries(selectedProfile).map(
                           ([variantLabel]) => (
                             <DropdownMenuItem
+                              className={
+                                currentProfileVariant?.variant === variantLabel
+                                  ? "bg-accent"
+                                  : ""
+                              }
                               key={variantLabel}
                               onClick={() => {
                                 const newProfile: ExecutorProfileId = {
@@ -549,11 +553,6 @@ export function AgentSettings() {
                                 };
                                 updateExecutorDraft(newProfile);
                               }}
-                              className={
-                                currentProfileVariant?.variant === variantLabel
-                                  ? 'bg-accent'
-                                  : ''
-                              }
                             >
                               {variantLabel}
                             </DropdownMenuItem>
@@ -562,16 +561,17 @@ export function AgentSettings() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   );
-                } else if (selectedProfile) {
+                }
+                if (selectedProfile) {
                   // Show disabled button when profile exists but has no variants
                   return (
                     <Button
-                      variant="outline"
-                      className="w-full h-10 px-2 flex items-center justify-between"
+                      className="flex h-10 w-full items-center justify-between px-2"
                       disabled
+                      variant="outline"
                     >
-                      <span className="text-sm truncate flex-1 text-left">
-                        {t('settings.general.taskExecution.defaultLabel')}
+                      <span className="flex-1 truncate text-left text-sm">
+                        {t("settings.general.taskExecution.defaultLabel")}
                       </span>
                     </Button>
                   );
@@ -580,19 +580,19 @@ export function AgentSettings() {
               })()}
             </div>
             <AgentAvailabilityIndicator availability={agentAvailability} />
-            <p className="text-sm text-muted-foreground">
-              {t('settings.general.taskExecution.executor.helper')}
+            <p className="text-muted-foreground text-sm">
+              {t("settings.general.taskExecution.executor.helper")}
             </p>
           </div>
           <div className="flex justify-end">
             <Button
-              onClick={handleSaveExecutorProfile}
               disabled={!executorDirty || executorSaving}
+              onClick={handleSaveExecutorProfile}
             >
               {executorSaving && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {t('common:buttons.save')}
+              {t("common:buttons.save")}
             </Button>
           </div>
         </CardContent>
@@ -600,20 +600,20 @@ export function AgentSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('settings.agents.title')}</CardTitle>
-          <CardDescription>{t('settings.agents.description')}</CardDescription>
+          <CardTitle>{t("settings.agents.title")}</CardTitle>
+          <CardDescription>{t("settings.agents.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Editor type toggle */}
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="use-form-editor"
               checked={!useFormEditor}
-              onCheckedChange={(checked) => setUseFormEditor(!checked)}
               disabled={profilesLoading || !localParsedProfiles}
+              id="use-form-editor"
+              onCheckedChange={(checked) => setUseFormEditor(!checked)}
             />
             <Label htmlFor="use-form-editor">
-              {t('settings.agents.editor.formLabel')}
+              {t("settings.agents.editor.formLabel")}
             </Label>
           </div>
 
@@ -625,20 +625,20 @@ export function AgentSettings() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="executor-type">
-                    {t('settings.agents.editor.agentLabel')}
+                    {t("settings.agents.editor.agentLabel")}
                   </Label>
                   <Select
-                    value={selectedExecutorType}
                     onValueChange={(value) => {
                       setSelectedExecutorType(value as BaseCodingAgent);
                       // Reset configuration selection when executor type changes
-                      setSelectedConfiguration('DEFAULT');
+                      setSelectedConfiguration("DEFAULT");
                     }}
+                    value={selectedExecutorType}
                   >
                     <SelectTrigger id="executor-type">
                       <SelectValue
                         placeholder={t(
-                          'settings.agents.editor.agentPlaceholder'
+                          "settings.agents.editor.agentPlaceholder"
                         )}
                       />
                     </SelectTrigger>
@@ -656,26 +656,26 @@ export function AgentSettings() {
 
                 <div className="space-y-2">
                   <Label htmlFor="configuration">
-                    {t('settings.agents.editor.configLabel')}
+                    {t("settings.agents.editor.configLabel")}
                   </Label>
                   <div className="flex gap-2">
                     <Select
-                      value={selectedConfiguration}
+                      disabled={
+                        !localParsedProfiles.executors[selectedExecutorType]
+                      }
                       onValueChange={(value) => {
-                        if (value === '__create__') {
+                        if (value === "__create__") {
                           openCreateDialog();
                         } else {
                           setSelectedConfiguration(value);
                         }
                       }}
-                      disabled={
-                        !localParsedProfiles.executors[selectedExecutorType]
-                      }
+                      value={selectedConfiguration}
                     >
                       <SelectTrigger id="configuration">
                         <SelectValue
                           placeholder={t(
-                            'settings.agents.editor.configPlaceholder'
+                            "settings.agents.editor.configPlaceholder"
                           )}
                         />
                       </SelectTrigger>
@@ -689,15 +689,12 @@ export function AgentSettings() {
                           </SelectItem>
                         ))}
                         <SelectItem value="__create__">
-                          {t('settings.agents.editor.createNew')}
+                          {t("settings.agents.editor.createNew")}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
-                      variant="destructive"
-                      size="sm"
                       className="h-10"
-                      onClick={() => openDeleteDialog(selectedConfiguration)}
                       disabled={
                         profilesSaving ||
                         !localParsedProfiles.executors[selectedExecutorType] ||
@@ -706,18 +703,21 @@ export function AgentSettings() {
                             {}
                         ).length <= 1
                       }
+                      onClick={() => openDeleteDialog(selectedConfiguration)}
+                      size="sm"
                       title={
                         Object.keys(
                           localParsedProfiles.executors[selectedExecutorType] ||
                             {}
                         ).length <= 1
-                          ? t('settings.agents.editor.deleteTitle')
-                          : t('settings.agents.editor.deleteButton', {
+                          ? t("settings.agents.editor.deleteTitle")
+                          : t("settings.agents.editor.deleteButton", {
                               name: selectedConfiguration,
                             })
                       }
+                      variant="destructive"
                     >
-                      {t('settings.agents.editor.deleteText')}
+                      {t("settings.agents.editor.deleteText")}
                     </Button>
                   </div>
                 </div>
@@ -731,14 +731,11 @@ export function AgentSettings() {
                     selectedConfiguration
                   ]?.[selectedExecutorType] && (
                     <ExecutorConfigForm
-                      key={`${selectedExecutorType}-${selectedConfiguration}`}
+                      disabled={profilesSaving}
                       executor={selectedExecutorType}
-                      value={
-                        (executorsMap[selectedExecutorType][
-                          selectedConfiguration
-                        ][selectedExecutorType] as Record<string, unknown>) ||
-                        {}
-                      }
+                      isDirty={isDirty}
+                      isSaving={profilesSaving}
+                      key={`${selectedExecutorType}-${selectedConfiguration}`}
                       onChange={(formData) =>
                         handleExecutorConfigChange(
                           selectedExecutorType,
@@ -747,9 +744,12 @@ export function AgentSettings() {
                         )
                       }
                       onSave={handleExecutorConfigSave}
-                      disabled={profilesSaving}
-                      isSaving={profilesSaving}
-                      isDirty={isDirty}
+                      value={
+                        (executorsMap[selectedExecutorType][
+                          selectedConfiguration
+                        ][selectedExecutorType] as Record<string, unknown>) ||
+                        {}
+                      }
                     />
                   )
                 );
@@ -760,28 +760,28 @@ export function AgentSettings() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="profiles-editor">
-                  {t('settings.agents.editor.jsonLabel')}
+                  {t("settings.agents.editor.jsonLabel")}
                 </Label>
                 <JSONEditor
+                  disabled={profilesLoading}
                   id="profiles-editor"
-                  placeholder={t('settings.agents.editor.jsonPlaceholder')}
+                  minHeight={300}
+                  onChange={handleProfilesChange}
+                  placeholder={t("settings.agents.editor.jsonPlaceholder")}
                   value={
                     profilesLoading
-                      ? t('settings.agents.editor.jsonLoading')
+                      ? t("settings.agents.editor.jsonLoading")
                       : localProfilesContent
                   }
-                  onChange={handleProfilesChange}
-                  disabled={profilesLoading}
-                  minHeight={300}
                 />
               </div>
 
               {!profilesError && profilesPath && (
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     <span className="font-medium">
-                      {t('settings.agents.editor.pathLabel')}
-                    </span>{' '}
+                      {t("settings.agents.editor.pathLabel")}
+                    </span>{" "}
                     <span className="font-mono text-xs">{profilesPath}</span>
                   </p>
                 </div>
@@ -792,16 +792,16 @@ export function AgentSettings() {
       </Card>
 
       {!useFormEditor && (
-        <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-sm border-t py-4">
+        <div className="sticky bottom-0 z-10 border-t bg-background/80 py-4 backdrop-blur-sm">
           <div className="flex justify-end">
             <Button
-              onClick={handleSaveProfiles}
               disabled={!isDirty || profilesSaving || !!profilesError}
+              onClick={handleSaveProfiles}
             >
               {profilesSaving && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {t('settings.agents.save.button')}
+              {t("settings.agents.save.button")}
             </Button>
           </div>
         </div>

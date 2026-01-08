@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import WYSIWYGEditor from '@/components/ui/wysiwyg';
-import { BaseAgentCapability } from 'shared/types';
-import type { WorkspaceWithSession } from '@/types/attempt';
-import { useUserSystem } from '@/components/ConfigProvider';
-import { useRetryUi } from '@/contexts/RetryUiContext';
-import { useAttemptExecution } from '@/hooks/useAttemptExecution';
-import { RetryEditorInline } from './RetryEditorInline';
+import { useState } from "react";
+import { BaseAgentCapability } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import WYSIWYGEditor from "@/components/ui/wysiwyg";
+import { useRetryUi } from "@/contexts/RetryUiContext";
+import { useAttemptExecution } from "@/hooks/useAttemptExecution";
+import type { WorkspaceWithSession } from "@/types/attempt";
+import { RetryEditorInline } from "./RetryEditorInline";
 
 const UserMessage = ({
   content,
@@ -30,7 +30,7 @@ const UserMessage = ({
   );
 
   const startRetry = () => {
-    if (!executionProcessId || !taskAttempt) return;
+    if (!(executionProcessId && taskAttempt)) return;
     setIsEditing(true);
     setActiveRetryProcessId(executionProcessId);
   };
@@ -53,7 +53,7 @@ const UserMessage = ({
   const canRetry = executionProcessId && canFork && !isAttemptRunning;
 
   return (
-    <div className={`py-2 ${greyed ? 'opacity-50 pointer-events-none' : ''}`}>
+    <div className={`py-2 ${greyed ? "pointer-events-none opacity-50" : ""}`}>
       <div className="bg-background px-4 py-2 text-sm">
         <div className="py-3">
           {showRetryEditor && taskAttempt ? (
@@ -65,11 +65,11 @@ const UserMessage = ({
             />
           ) : (
             <WYSIWYGEditor
-              value={content}
+              className="flex flex-col gap-1 whitespace-pre-wrap break-words font-light"
               disabled
-              className="whitespace-pre-wrap break-words flex flex-col gap-1 font-light"
-              taskAttemptId={taskAttempt?.id}
               onEdit={canRetry ? startRetry : undefined}
+              taskAttemptId={taskAttempt?.id}
+              value={content}
             />
           )}
         </div>

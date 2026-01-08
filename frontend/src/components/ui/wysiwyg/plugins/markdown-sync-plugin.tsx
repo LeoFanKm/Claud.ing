@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
-  $convertToMarkdownString,
   $convertFromMarkdownString,
+  $convertToMarkdownString,
   type Transformer,
-} from '@lexical/markdown';
-import { $getRoot, type EditorState } from 'lexical';
+} from "@lexical/markdown";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getRoot, type EditorState } from "lexical";
+import { useEffect, useRef } from "react";
 
 type MarkdownSyncPluginProps = {
   value: string;
@@ -41,7 +41,7 @@ export function MarkdownSyncPlugin({
 
     try {
       editor.update(() => {
-        if (value.trim() === '') {
+        if (value.trim() === "") {
           $getRoot().clear();
         } else {
           $convertFromMarkdownString(value, transformers);
@@ -49,7 +49,7 @@ export function MarkdownSyncPlugin({
       });
       lastSerializedRef.current = value;
     } catch (err) {
-      console.error('Failed to parse markdown', err);
+      console.error("Failed to parse markdown", err);
     }
   }, [editor, value, transformers]);
 

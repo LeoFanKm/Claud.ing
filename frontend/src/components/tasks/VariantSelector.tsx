@@ -1,14 +1,14 @@
-import { memo, forwardRef, useEffect, useState } from 'react';
-import { ChevronDown, Settings2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChevronDown, Settings2 } from "lucide-react";
+import { forwardRef, memo, useEffect, useState } from "react";
+import type { ExecutorConfig } from "shared/types";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import type { ExecutorConfig } from 'shared/types';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 type Props = {
   currentProfile: ExecutorConfig | null;
@@ -37,16 +37,16 @@ const VariantSelectorInner = forwardRef<HTMLButtonElement, Props>(
     if (!hasVariants) {
       return (
         <Button
-          ref={ref}
-          variant="outline"
-          size="sm"
           className={cn(
-            'h-10 w-24 px-2 flex items-center justify-between',
+            "flex h-10 w-24 items-center justify-between px-2",
             className
           )}
           disabled
+          ref={ref}
+          size="sm"
+          variant="outline"
         >
-          <span className="text-xs truncate flex-1 text-left">Default</span>
+          <span className="flex-1 truncate text-left text-xs">Default</span>
         </Button>
       );
     }
@@ -55,29 +55,29 @@ const VariantSelectorInner = forwardRef<HTMLButtonElement, Props>(
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            ref={ref}
-            variant="secondary"
-            size="sm"
             className={cn(
-              'px-2 flex items-center justify-between transition-all',
-              isAnimating && 'scale-105 bg-accent',
+              "flex items-center justify-between px-2 transition-all",
+              isAnimating && "scale-105 bg-accent",
               className
             )}
             disabled={disabled}
+            ref={ref}
+            size="sm"
+            variant="secondary"
           >
-            <Settings2 className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span className="text-xs truncate flex-1 text-left">
-              {selectedVariant || 'DEFAULT'}
+            <Settings2 className="mr-1 h-3 w-3 flex-shrink-0" />
+            <span className="flex-1 truncate text-left text-xs">
+              {selectedVariant || "DEFAULT"}
             </span>
-            <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
+            <ChevronDown className="ml-1 h-3 w-3 flex-shrink-0" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {Object.entries(currentProfile).map(([variantLabel]) => (
             <DropdownMenuItem
+              className={selectedVariant === variantLabel ? "bg-accent" : ""}
               key={variantLabel}
               onClick={() => onChange(variantLabel)}
-              className={selectedVariant === variantLabel ? 'bg-accent' : ''}
             >
               {variantLabel}
             </DropdownMenuItem>
@@ -88,5 +88,5 @@ const VariantSelectorInner = forwardRef<HTMLButtonElement, Props>(
   }
 );
 
-VariantSelectorInner.displayName = 'VariantSelector';
+VariantSelectorInner.displayName = "VariantSelector";
 export const VariantSelector = memo(VariantSelectorInner);

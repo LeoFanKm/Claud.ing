@@ -1,0 +1,81 @@
+{
+  "hero": {
+    "badge": "v{{version}} — 现已支持 Claude Code 集成",
+    "title": "AI 驱动的任务管理",
+    "titlePrefix": "使用",
+    "subtitle": "Kanban by Clauding 让您可以并行运行编码代理而不会冲突，并通过我们的 diff 工具进行代码审查。现在您可以专注于规划和质量，而不是盯着终端日志。",
+    "cta": "免费开始使用",
+    "learnMore": "了解更多",
+    "testimonial": {
+      "quote": "这完全改变了我们团队管理项目的方式。AI 建议非常精准。",
+      "author": "陈思雨",
+      "role": "TechCorp 工程主管"
+    }
+  },
+  "quickStart": {
+    "title": "快速开始",
+    "requirement": "需要 Claude Code 订阅"
+  },
+  "features": {
+    "title": "强大功能",
+    "subtitle": "为追求卓越的开发者打造的 AI 编程助手",
+    "parallelExecution": {
+      "title": "并行代理执行",
+      "description": "同时运行多个 AI 代理，通过协调的并行处理更快地完成复杂任务"
+    },
+    "isolatedWorkspaces": {
+      "title": "隔离工作区",
+      "description": "每个任务都在独立的沙盒环境中运行，确保清晰的隔离并防止冲突"
+    },
+    "codeReview": {
+      "title": "内置代码审查",
+      "description": "自动代码审查，提供智能建议、安全扫描和最佳实践检查"
+    },
+    "mcpIntegration": {
+      "title": "MCP 集成",
+      "description": "连接到模型上下文协议服务器，获取扩展功能和自定义工具集成"
+    }
+  },
+  "agents": {
+    "title": "由 Claude 智能体驱动",
+    "subtitle": "利用专业 AI 智能体自动化工作流程、生成报告并提供智能建议"
+  },
+  "agentSupport": {
+    "title": "与您喜爱的 AI 代理无缝协作",
+    "subtitle": "与领先的 AI 编码助手和代理无缝集成"
+  },
+  "faq": {
+    "title": "常见问题",
+    "items": {
+      "codeSecurity": {
+        "question": "我的代码安全吗？",
+        "answer": "是的，您的代码永远不会离开您的本地机器。Claude Code 完全在您的设备上运行，我们只在服务器上存储任务元数据（标题、描述、状态）。您的源代码和敏感数据始终保持私密。"
+      },
+      "supportedAgents": {
+        "question": "支持哪些 AI 代理？",
+        "answer": "我们目前支持 Claude Code 作为主要 AI 代理。Claude Code 可以分析您的代码库、分解复杂任务并提供智能建议。未来版本将计划支持更多代理。"
+      },
+      "isFree": {
+        "question": "使用免费吗？",
+        "answer": "看板功能是免费使用的。但是，任务分解和智能建议等 AI 驱动功能需要 Claude Code 订阅，您可以通过 Anthropic 管理订阅。"
+      },
+      "parallelExecution": {
+        "question": "并行执行是如何工作的？",
+        "answer": "Claude Code 可以同时执行多个独立任务。当您有没有依赖关系的任务时，我们的系统会自动识别并并行运行它们，显著减少整体完成时间。"
+      },
+      "vscodeSupport": {
+        "question": "支持 VS Code 吗？",
+        "answer": "是的！Claude Code 通过官方扩展与 VS Code 无缝集成。您可以直接从编辑器管理任务，让 Claude Code 在您的代码库上工作，无需离开开发环境。"
+      },
+      "whatIsMcp": {
+        "question": "什么是 MCP？",
+        "answer": "MCP（模型上下文协议）是一个开放协议，使 AI 模型能够安全地连接外部工具和数据源。它允许 Claude Code 与您的开发环境、数据库和其他服务交互，同时保持安全边界。"
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© {{year}} Claud.ing. 保留所有权利。",
+    "terms": "服务条款",
+    "privacy": "隐私政策"
+  }
+}

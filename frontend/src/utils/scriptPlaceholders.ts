@@ -59,7 +59,7 @@ class ScriptPlaceholderContext {
 export function createScriptPlaceholderStrategy(
   osType: string
 ): ScriptPlaceholderStrategy {
-  if (osType.toLowerCase().includes('windows')) {
+  if (osType.toLowerCase().includes("windows")) {
     return new WindowsScriptPlaceholderStrategy();
   }
   return new UnixScriptPlaceholderStrategy();

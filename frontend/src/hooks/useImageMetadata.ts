@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import type { ImageMetadata } from 'shared/types';
-import type { LocalImageMetadata } from '@/components/ui/wysiwyg/context/task-attempt-context';
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import type { ImageMetadata } from "shared/types";
+import type { LocalImageMetadata } from "@/components/ui/wysiwyg/context/task-attempt-context";
 
 export function useImageMetadata(
   taskAttemptId: string | undefined,
@@ -9,7 +9,7 @@ export function useImageMetadata(
   taskId?: string | undefined,
   localImages?: LocalImageMetadata[]
 ) {
-  const isVibeImage = src.startsWith('.vibe-images/');
+  const isVibeImage = src.startsWith(".vibe-images/");
 
   // Synchronous lookup for local images
   const localImage = useMemo(
@@ -38,7 +38,7 @@ export function useImageMetadata(
   const shouldFetch = isVibeImage && hasContext && !localImage;
 
   const query = useQuery({
-    queryKey: ['imageMetadata', taskAttemptId, taskId, src],
+    queryKey: ["imageMetadata", taskAttemptId, taskId, src],
     queryFn: async (): Promise<ImageMetadata | null> => {
       // Pure API logic - no local image handling
       if (taskAttemptId) {
@@ -58,7 +58,7 @@ export function useImageMetadata(
       return null;
     },
     enabled: shouldFetch,
-    staleTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
   });
 
   // Return local data if available, otherwise query result

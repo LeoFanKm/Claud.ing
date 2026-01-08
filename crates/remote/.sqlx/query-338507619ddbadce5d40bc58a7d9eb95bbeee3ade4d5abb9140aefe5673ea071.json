@@ -50,13 +50,7 @@
           "Custom": {
             "name": "task_status",
             "kind": {
-              "Enum": [
-                "todo",
-                "inprogress",
-                "inreview",
-                "done",
-                "cancelled"
-              ]
+              "Enum": ["todo", "inprogress", "inreview", "done", "cancelled"]
             }
           }
         }
@@ -91,13 +85,7 @@
           "Custom": {
             "name": "task_status",
             "kind": {
-              "Enum": [
-                "todo",
-                "inprogress",
-                "inreview",
-                "done",
-                "cancelled"
-              ]
+              "Enum": ["todo", "inprogress", "inreview", "done", "cancelled"]
             }
           }
         },

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { ConflictBanner } from '@/components/tasks/ConflictBanner';
-import { useOpenInEditor } from '@/hooks/useOpenInEditor';
-import { useAttemptConflicts } from '@/hooks/useAttemptConflicts';
-import type { RepoBranchStatus } from 'shared/types';
+import { useEffect, useRef, useState } from "react";
+import type { RepoBranchStatus } from "shared/types";
+import { ConflictBanner } from "@/components/tasks/ConflictBanner";
+import { useAttemptConflicts } from "@/hooks/useAttemptConflicts";
+import { useOpenInEditor } from "@/hooks/useOpenInEditor";
 
 type Props = {
   workspaceId?: string;
@@ -45,16 +45,10 @@ export function FollowUpConflictSection({
     <>
       <ConflictBanner
         attemptBranch={attemptBranch}
-        baseBranch={repoWithConflicts.target_branch_name ?? ''}
+        baseBranch={repoWithConflicts.target_branch_name ?? ""}
         conflictedFiles={repoWithConflicts.conflicted_files || []}
-        op={op}
-        onResolve={onResolve}
+        enableAbort={enableAbort && !aborting}
         enableResolve={enableResolve && !aborting}
-        onOpenEditor={() => {
-          if (!workspaceId) return;
-          const first = repoWithConflicts.conflicted_files?.[0];
-          openInEditor(first ? { filePath: first } : undefined);
-        }}
         onAbort={async () => {
           if (!workspaceId) return;
           if (!enableAbort || abortingRef.current) return;
@@ -62,17 +56,23 @@ export function FollowUpConflictSection({
             setAborting(true);
             await abortConflicts();
           } catch (e) {
-            console.error('Failed to abort conflicts', e);
+            console.error("Failed to abort conflicts", e);
           } finally {
             setAborting(false);
           }
         }}
-        enableAbort={enableAbort && !aborting}
+        onOpenEditor={() => {
+          if (!workspaceId) return;
+          const first = repoWithConflicts.conflicted_files?.[0];
+          openInEditor(first ? { filePath: first } : undefined);
+        }}
+        onResolve={onResolve}
+        op={op}
       />
       {/* Conflict instructions preview (non-editable) */}
       {conflictResolutionInstructions && enableResolve && (
-        <div className="text-sm mb-4">
-          <div className="text-xs font-medium text-warning-foreground dark:text-warning mb-1">
+        <div className="mb-4 text-sm">
+          <div className="mb-1 font-medium text-warning-foreground text-xs dark:text-warning">
             Conflict resolution instructions
           </div>
           <div className="whitespace-pre-wrap">

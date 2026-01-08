@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from "react";
 
 /**
  * Returns a debounced version of the callback that delays invocation

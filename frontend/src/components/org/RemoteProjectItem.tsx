@@ -1,15 +1,15 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Unlink } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { Project, RemoteProject } from "shared/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Unlink } from 'lucide-react';
-import type { Project, RemoteProject } from 'shared/types';
-import { useTranslation } from 'react-i18next';
+} from "@/components/ui/select";
 
 interface RemoteProjectItemProps {
   remoteProject: RemoteProject;
@@ -30,7 +30,7 @@ export function RemoteProjectItem({
   isLinking,
   isUnlinking,
 }: RemoteProjectItemProps) {
-  const { t } = useTranslation('organization');
+  const { t } = useTranslation("organization");
   const handleUnlinkClick = () => {
     if (!linkedLocalProject) return;
 
@@ -47,48 +47,48 @@ export function RemoteProjectItem({
   };
 
   return (
-    <div className="flex items-center justify-between p-3 border rounded-lg">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="flex-1 min-w-0">
+    <div className="flex items-center justify-between rounded-lg border p-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="min-w-0 flex-1">
           <div className="font-medium text-sm">{remoteProject.name}</div>
           {linkedLocalProject ? (
-            <div className="text-xs text-muted-foreground">
-              {t('sharedProjects.linkedTo', {
+            <div className="text-muted-foreground text-xs">
+              {t("sharedProjects.linkedTo", {
                 projectName: linkedLocalProject.name,
               })}
             </div>
           ) : (
-            <div className="text-xs text-muted-foreground">
-              {t('sharedProjects.notLinked')}
+            <div className="text-muted-foreground text-xs">
+              {t("sharedProjects.notLinked")}
             </div>
           )}
         </div>
         {linkedLocalProject && (
-          <Badge variant="default">{t('sharedProjects.linked')}</Badge>
+          <Badge variant="default">{t("sharedProjects.linked")}</Badge>
         )}
       </div>
       <div className="flex items-center gap-2">
         {linkedLocalProject ? (
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleUnlinkClick}
             disabled={isUnlinking}
+            onClick={handleUnlinkClick}
+            size="sm"
+            variant="ghost"
           >
             <Unlink className="h-4 w-4 text-destructive" />
           </Button>
         ) : (
           <Select
-            onValueChange={handleLinkSelect}
             disabled={isLinking || availableLocalProjects.length === 0}
+            onValueChange={handleLinkSelect}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t('sharedProjects.linkProject')} />
+              <SelectValue placeholder={t("sharedProjects.linkProject")} />
             </SelectTrigger>
             <SelectContent>
               {availableLocalProjects.length === 0 ? (
-                <SelectItem value="no-projects" disabled>
-                  {t('sharedProjects.noAvailableProjects')}
+                <SelectItem disabled value="no-projects">
+                  {t("sharedProjects.noAvailableProjects")}
                 </SelectItem>
               ) : (
                 availableLocalProjects.map((project) => (

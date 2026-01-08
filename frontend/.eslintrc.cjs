@@ -1,4 +1,5 @@
-const i18nCheck = process.env.LINT_I18N === 'true';
+"use strict";
+const i18nCheck = process.env.LINT_I18N === "true";
 
 module.exports = {
   root: true,
@@ -7,121 +8,127 @@ module.exports = {
     es2020: true,
   },
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:i18next/recommended',
-    'plugin:eslint-comments/recommended',
-    'prettier',
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:i18next/recommended",
+    "plugin:eslint-comments/recommended",
+    "prettier",
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
-  parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh', '@typescript-eslint', 'unused-imports', 'i18next', 'eslint-comments', 'check-file'],
+  ignorePatterns: ["dist", ".eslintrc.cjs"],
+  parser: "@typescript-eslint/parser",
+  plugins: [
+    "react-refresh",
+    "@typescript-eslint",
+    "unused-imports",
+    "i18next",
+    "eslint-comments",
+    "check-file",
+  ],
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: './tsconfig.json',
+    ecmaVersion: "latest",
+    sourceType: "module",
+    project: "./tsconfig.json",
   },
   rules: {
-    'eslint-comments/no-use': ['error', { allow: [] }],
-    'react-refresh/only-export-components': 'off',
-    'unused-imports/no-unused-imports': 'error',
-    'unused-imports/no-unused-vars': [
-      'error',
+    "eslint-comments/no-use": ["error", { allow: [] }],
+    "react-refresh/only-export-components": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "error",
       {
-        vars: 'all',
-        args: 'after-used',
+        vars: "all",
+        args: "after-used",
         ignoreRestSiblings: false,
       },
     ],
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/switch-exhaustiveness-check': 'error',
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/switch-exhaustiveness-check": "error",
     // Enforce typesafe modal pattern
-    'no-restricted-imports': [
-      'error',
+    "no-restricted-imports": [
+      "error",
       {
         paths: [
           {
-            name: '@ebay/nice-modal-react',
-            importNames: ['default'],
+            name: "@ebay/nice-modal-react",
+            importNames: ["default"],
             message:
-              'Import NiceModal only in lib/modals.ts or dialog component files. Use DialogName.show(props) instead.',
+              "Import NiceModal only in lib/modals.ts or dialog component files. Use DialogName.show(props) instead.",
           },
           {
-            name: '@/lib/modals',
-            importNames: ['showModal', 'hideModal', 'removeModal'],
+            name: "@/lib/modals",
+            importNames: ["showModal", "hideModal", "removeModal"],
             message:
-              'Do not import showModal/hideModal/removeModal. Use DialogName.show(props) and DialogName.hide() instead.',
+              "Do not import showModal/hideModal/removeModal. Use DialogName.show(props) and DialogName.hide() instead.",
           },
         ],
       },
     ],
-    'no-restricted-syntax': [
-      'error',
+    "no-restricted-syntax": [
+      "error",
       {
         selector:
           'CallExpression[callee.object.name="NiceModal"][callee.property.name="show"]',
         message:
-          'Do not use NiceModal.show() directly. Use DialogName.show(props) instead.',
+          "Do not use NiceModal.show() directly. Use DialogName.show(props) instead.",
       },
       {
         selector:
           'CallExpression[callee.object.name="NiceModal"][callee.property.name="register"]',
         message:
-          'Do not use NiceModal.register(). Dialogs are registered automatically.',
+          "Do not use NiceModal.register(). Dialogs are registered automatically.",
       },
       {
         selector: 'CallExpression[callee.name="showModal"]',
-        message:
-          'Do not use showModal(). Use DialogName.show(props) instead.',
+        message: "Do not use showModal(). Use DialogName.show(props) instead.",
       },
       {
         selector: 'CallExpression[callee.name="hideModal"]',
-        message: 'Do not use hideModal(). Use DialogName.hide() instead.',
+        message: "Do not use hideModal(). Use DialogName.hide() instead.",
       },
       {
         selector: 'CallExpression[callee.name="removeModal"]',
-        message: 'Do not use removeModal(). Use DialogName.remove() instead.',
+        message: "Do not use removeModal(). Use DialogName.remove() instead.",
       },
     ],
     // i18n rule - only active when LINT_I18N=true
-    'i18next/no-literal-string': i18nCheck
+    "i18next/no-literal-string": i18nCheck
       ? [
-          'warn',
+          "warn",
           {
             markupOnly: true,
             ignoreAttribute: [
-              'data-testid',
-              'to',
-              'href',
-              'id',
-              'key',
-              'type',
-              'role',
-              'className',
-              'style',
-              'aria-describedby',
+              "data-testid",
+              "to",
+              "href",
+              "id",
+              "key",
+              "type",
+              "role",
+              "className",
+              "style",
+              "aria-describedby",
             ],
-            'jsx-components': {
-              exclude: ['code'],
+            "jsx-components": {
+              exclude: ["code"],
             },
           },
         ]
-      : 'off',
+      : "off",
     // File naming conventions
-    'check-file/filename-naming-convention': [
-      'error',
+    "check-file/filename-naming-convention": [
+      "error",
       {
         // React components (tsx) should be PascalCase
-        'src/**/*.tsx': 'PASCAL_CASE',
+        "src/**/*.tsx": "PASCAL_CASE",
         // Hooks should be camelCase starting with 'use'
-        'src/**/use*.ts': 'CAMEL_CASE',
+        "src/**/use*.ts": "CAMEL_CASE",
         // Utils should be camelCase
-        'src/utils/**/*.ts': 'CAMEL_CASE',
+        "src/utils/**/*.ts": "CAMEL_CASE",
         // Lib/config/constants should be camelCase
-        'src/lib/**/*.ts': 'CAMEL_CASE',
-        'src/config/**/*.ts': 'CAMEL_CASE',
-        'src/constants/**/*.ts': 'CAMEL_CASE',
+        "src/lib/**/*.ts": "CAMEL_CASE",
+        "src/config/**/*.ts": "CAMEL_CASE",
+        "src/constants/**/*.ts": "CAMEL_CASE",
       },
       {
         ignoreMiddleExtensions: true,
@@ -131,19 +138,19 @@ module.exports = {
   overrides: [
     {
       // Entry point exception - main.tsx can stay lowercase
-      files: ['src/main.tsx', 'src/vite-env.d.ts'],
+      files: ["src/main.tsx", "src/vite-env.d.ts"],
       rules: {
-        'check-file/filename-naming-convention': 'off',
+        "check-file/filename-naming-convention": "off",
       },
     },
     {
       // Shadcn UI components are an exception - keep kebab-case
-      files: ['src/components/ui/**/*.{ts,tsx}'],
+      files: ["src/components/ui/**/*.{ts,tsx}"],
       rules: {
-        'check-file/filename-naming-convention': [
-          'error',
+        "check-file/filename-naming-convention": [
+          "error",
           {
-            'src/components/ui/**/*.{ts,tsx}': 'KEBAB_CASE',
+            "src/components/ui/**/*.{ts,tsx}": "KEBAB_CASE",
           },
           {
             ignoreMiddleExtensions: true,
@@ -152,27 +159,31 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}'],
+      files: ["**/*.test.{ts,tsx}", "**/*.stories.{ts,tsx}"],
       rules: {
-        'i18next/no-literal-string': 'off',
+        "i18next/no-literal-string": "off",
       },
     },
     {
       // Disable type-aware linting for config files
-      files: ['*.config.{ts,js,cjs,mjs}', '.eslintrc.cjs'],
+      files: ["*.config.{ts,js,cjs,mjs}", ".eslintrc.cjs"],
       parserOptions: {
         project: null,
       },
       rules: {
-        '@typescript-eslint/switch-exhaustiveness-check': 'off',
+        "@typescript-eslint/switch-exhaustiveness-check": "off",
       },
     },
     {
       // Allow NiceModal usage in lib/modals.ts, App.tsx (for Provider), and dialog component files
-      files: ['src/lib/modals.ts', 'src/App.tsx', 'src/components/dialogs/**/*.{ts,tsx}'],
+      files: [
+        "src/lib/modals.ts",
+        "src/App.tsx",
+        "src/components/dialogs/**/*.{ts,tsx}",
+      ],
       rules: {
-        'no-restricted-imports': 'off',
-        'no-restricted-syntax': 'off',
+        "no-restricted-imports": "off",
+        "no-restricted-syntax": "off",
       },
     },
   ],

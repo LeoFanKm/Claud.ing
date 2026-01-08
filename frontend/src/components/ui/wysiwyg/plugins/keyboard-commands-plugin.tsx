@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-  KEY_MODIFIER_COMMAND,
-  KEY_ENTER_COMMAND,
-  COMMAND_PRIORITY_NORMAL,
   COMMAND_PRIORITY_HIGH,
-} from 'lexical';
+  COMMAND_PRIORITY_NORMAL,
+  KEY_ENTER_COMMAND,
+  KEY_MODIFIER_COMMAND,
+} from "lexical";
+import { useEffect } from "react";
 
 type Props = {
   onCmdEnter?: () => void;
@@ -16,13 +16,13 @@ export function KeyboardCommandsPlugin({ onCmdEnter, onShiftCmdEnter }: Props) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    if (!onCmdEnter && !onShiftCmdEnter) return;
+    if (!(onCmdEnter || onShiftCmdEnter)) return;
 
     // Handle the modifier command to trigger the callbacks
     const unregisterModifier = editor.registerCommand(
       KEY_MODIFIER_COMMAND,
       (event: KeyboardEvent) => {
-        if (!(event.metaKey || event.ctrlKey) || event.key !== 'Enter') {
+        if (!(event.metaKey || event.ctrlKey) || event.key !== "Enter") {
           return false;
         }
 

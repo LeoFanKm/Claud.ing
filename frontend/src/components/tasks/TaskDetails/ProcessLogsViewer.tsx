@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { AlertCircle } from 'lucide-react';
-import { useLogStream } from '@/hooks/useLogStream';
-import RawLogText from '@/components/common/RawLogText';
-import type { PatchType } from 'shared/types';
+import { AlertCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
+import type { PatchType } from "shared/types";
+import RawLogText from "@/components/common/RawLogText";
+import { useLogStream } from "@/hooks/useLogStream";
 
-type LogEntry = Extract<PatchType, { type: 'STDOUT' } | { type: 'STDERR' }>;
+type LogEntry = Extract<PatchType, { type: "STDOUT" } | { type: "STDERR" }>;
 
 interface ProcessLogsViewerProps {
   processId: string;
@@ -30,7 +30,7 @@ export function ProcessLogsViewerContent({
       requestAnimationFrame(() => {
         virtuosoRef.current?.scrollToIndex({
           index: logs.length - 1,
-          align: 'end',
+          align: "end",
         });
       });
     }
@@ -49,7 +49,7 @@ export function ProcessLogsViewerContent({
       requestAnimationFrame(() => {
         virtuosoRef.current?.scrollToIndex({
           index: logs.length - 1,
-          align: 'end',
+          align: "end",
         });
       });
     }
@@ -58,10 +58,10 @@ export function ProcessLogsViewerContent({
   const formatLogLine = (entry: LogEntry, index: number) => {
     return (
       <RawLogText
-        key={index}
+        channel={entry.type === "STDERR" ? "stderr" : "stdout"}
+        className="px-4 py-1 text-sm"
         content={entry.content}
-        channel={entry.type === 'STDERR' ? 'stderr' : 'stdout'}
-        className="text-sm px-4 py-1"
+        key={index}
       />
     );
   };
@@ -74,22 +74,22 @@ export function ProcessLogsViewerContent({
         </div>
       ) : error ? (
         <div className="p-4 text-center text-destructive text-sm">
-          <AlertCircle className="h-4 w-4 inline mr-2" />
+          <AlertCircle className="mr-2 inline h-4 w-4" />
           {error}
         </div>
       ) : (
         <Virtuoso<LogEntry>
-          ref={virtuosoRef}
+          atBottomStateChange={setAtBottom}
           className="flex-1 rounded-lg"
           data={logs}
+          followOutput={atBottom ? "smooth" : false}
+          // Keep pinned while user is at bottom; release when they scroll up
+          increaseViewportBy={{ top: 0, bottom: 600 }}
           itemContent={(index, entry) =>
             formatLogLine(entry as LogEntry, index)
           }
-          // Keep pinned while user is at bottom; release when they scroll up
-          atBottomStateChange={setAtBottom}
-          followOutput={atBottom ? 'smooth' : false}
           // Optional: a bit more overscan helps during bursts
-          increaseViewportBy={{ top: 0, bottom: 600 }}
+          ref={virtuosoRef}
         />
       )}
     </div>
@@ -100,5 +100,5 @@ export default function ProcessLogsViewer({
   processId,
 }: ProcessLogsViewerProps) {
   const { logs, error } = useLogStream(processId);
-  return <ProcessLogsViewerContent logs={logs} error={error} />;
+  return <ProcessLogsViewerContent error={error} logs={logs} />;
 }

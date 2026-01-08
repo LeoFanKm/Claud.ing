@@ -1,18 +1,18 @@
-import { RegistryFieldsType, RegistryWidgetsType } from '@rjsf/utils';
+import type { RegistryFieldsType, RegistryWidgetsType } from "@rjsf/utils";
+import { KeyValueField } from "./fields";
 import {
-  TextWidget,
-  SelectWidget,
-  CheckboxWidget,
-  TextareaWidget,
-} from './widgets';
-import {
-  ArrayFieldTemplate,
   ArrayFieldItemTemplate,
+  ArrayFieldTemplate,
   FieldTemplate,
-  ObjectFieldTemplate,
   FormTemplate,
-} from './templates';
-import { KeyValueField } from './fields';
+  ObjectFieldTemplate,
+} from "./templates";
+import {
+  CheckboxWidget,
+  SelectWidget,
+  TextareaWidget,
+  TextWidget,
+} from "./widgets";
 
 export const customWidgets: RegistryWidgetsType = {
   TextWidget,

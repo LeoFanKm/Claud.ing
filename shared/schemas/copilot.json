@@ -4,51 +4,30 @@
     "append_prompt": {
       "title": "Append Prompt",
       "description": "Extra text appended to the prompt",
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": ["string", "null"],
       "format": "textarea",
       "default": null
     },
     "model": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "allow_all_tools": {
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "type": ["boolean", "null"]
     },
     "allow_tool": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "deny_tool": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "add_dir": {
-      "type": [
-        "array",
-        "null"
-      ],
+      "type": ["array", "null"],
       "items": {
         "type": "string"
       }
     },
     "disable_mcp_server": {
-      "type": [
-        "array",
-        "null"
-      ],
+      "type": ["array", "null"],
       "items": {
         "type": "string"
       }
@@ -56,18 +35,12 @@
     "base_command_override": {
       "title": "Base Command Override",
       "description": "Override the base command with a custom command",
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "additional_params": {
       "title": "Additional Parameters",
       "description": "Additional parameters to append to the base command",
-      "type": [
-        "array",
-        "null"
-      ],
+      "type": ["array", "null"],
       "items": {
         "type": "string"
       }
@@ -75,10 +48,7 @@
     "env": {
       "title": "Environment Variables",
       "description": "Environment variables to set when running the executor",
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "additionalProperties": {
         "type": "string"
       }

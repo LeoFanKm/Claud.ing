@@ -1,24 +1,24 @@
-import { useTranslation } from 'react-i18next';
-import { ExternalLink, GitPullRequest } from 'lucide-react';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { ExternalLink, GitPullRequest } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { Merge, TaskWithAttemptStatus, Workspace } from "shared/types";
+import GitOperations from "@/components/tasks/Toolbar/GitOperations";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Loader } from '@/components/ui/loader';
-import GitOperations from '@/components/tasks/Toolbar/GitOperations';
-import { useTaskAttempt } from '@/hooks/useTaskAttempt';
-import { useBranchStatus, useAttemptExecution } from '@/hooks';
-import { useAttemptRepo } from '@/hooks/useAttemptRepo';
-import { ExecutionProcessesProvider } from '@/contexts/ExecutionProcessesContext';
+} from "@/components/ui/dialog";
+import { Loader } from "@/components/ui/loader";
+import { ExecutionProcessesProvider } from "@/contexts/ExecutionProcessesContext";
 import {
   GitOperationsProvider,
   useGitOperationsError,
-} from '@/contexts/GitOperationsContext';
-import type { Merge, TaskWithAttemptStatus, Workspace } from 'shared/types';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
+} from "@/contexts/GitOperationsContext";
+import { useAttemptExecution, useBranchStatus } from "@/hooks";
+import { useAttemptRepo } from "@/hooks/useAttemptRepo";
+import { useTaskAttempt } from "@/hooks/useTaskAttempt";
+import { defineModal } from "@/lib/modals";
 
 export interface GitActionsDialogProps {
   attemptId: string;
@@ -34,7 +34,7 @@ function GitActionsDialogContent({
   attempt,
   task,
 }: GitActionsDialogContentProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const { data: branchStatus } = useBranchStatus(attempt.id);
   const { isAttemptRunning } = useAttemptExecution(attempt.id);
   const { error: gitError } = useGitOperationsError();
@@ -46,27 +46,27 @@ function GitActionsDialogContent({
   };
 
   const mergedPR = getSelectedRepoStatus()?.merges?.find(
-    (m: Merge) => m.type === 'pr' && m.pr_info?.status === 'merged'
+    (m: Merge) => m.type === "pr" && m.pr_info?.status === "merged"
   );
 
   return (
     <div className="space-y-4">
-      {mergedPR && mergedPR.type === 'pr' && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      {mergedPR && mergedPR.type === "pr" && (
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
           <span>
-            {t('git.actions.prMerged', {
-              number: mergedPR.pr_info.number || '',
+            {t("git.actions.prMerged", {
+              number: mergedPR.pr_info.number || "",
             })}
           </span>
           {mergedPR.pr_info.url && (
             <a
-              href={mergedPR.pr_info.url}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-primary hover:underline"
+              href={mergedPR.pr_info.url}
+              rel="noopener noreferrer"
+              target="_blank"
             >
               <GitPullRequest className="h-3.5 w-3.5" />
-              {t('git.pr.number', {
+              {t("git.pr.number", {
                 number: Number(mergedPR.pr_info.number),
               })}
               <ExternalLink className="h-3.5 w-3.5" />
@@ -75,17 +75,17 @@ function GitActionsDialogContent({
         </div>
       )}
       {gitError && (
-        <div className="p-3 border border-destructive rounded text-destructive text-sm">
+        <div className="rounded border border-destructive p-3 text-destructive text-sm">
           {gitError}
         </div>
       )}
       <GitOperations
-        selectedAttempt={attempt}
-        task={task}
         branchStatus={branchStatus ?? null}
         isAttemptRunning={isAttemptRunning}
-        selectedBranch={getSelectedRepoStatus()?.target_branch_name ?? null}
         layout="vertical"
+        selectedAttempt={attempt}
+        selectedBranch={getSelectedRepoStatus()?.target_branch_name ?? null}
+        task={task}
       />
     </div>
   );
@@ -94,7 +94,7 @@ function GitActionsDialogContent({
 const GitActionsDialogImpl = NiceModal.create<GitActionsDialogProps>(
   ({ attemptId, task }) => {
     const modal = useModal();
-    const { t } = useTranslation('tasks');
+    const { t } = useTranslation("tasks");
 
     const { data: attempt } = useTaskAttempt(attemptId);
 
@@ -104,13 +104,13 @@ const GitActionsDialogImpl = NiceModal.create<GitActionsDialogProps>(
       }
     };
 
-    const isLoading = !attempt || !task;
+    const isLoading = !(attempt && task);
 
     return (
-      <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
+      <Dialog onOpenChange={handleOpenChange} open={modal.visible}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{t('git.actions.title')}</DialogTitle>
+            <DialogTitle>{t("git.actions.title")}</DialogTitle>
           </DialogHeader>
 
           {isLoading ? (
@@ -120,8 +120,8 @@ const GitActionsDialogImpl = NiceModal.create<GitActionsDialogProps>(
           ) : (
             <GitOperationsProvider attemptId={attempt.id}>
               <ExecutionProcessesProvider
-                key={attempt.id}
                 attemptId={attempt.id}
+                key={attempt.id}
               >
                 <GitActionsDialogContent attempt={attempt} task={task} />
               </ExecutionProcessesProvider>

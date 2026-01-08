@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { GitBranch } from "shared/types";
+import BranchSelector from "@/components/tasks/BranchSelector";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,12 +12,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import BranchSelector from '@/components/tasks/BranchSelector';
-import type { GitBranch } from 'shared/types';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
+} from "@/components/ui/dialog";
+import { defineModal } from "@/lib/modals";
 
 export interface RebaseDialogProps {
   branches: GitBranch[];
@@ -23,7 +23,7 @@ export interface RebaseDialogProps {
 }
 
 export type RebaseDialogResult = {
-  action: 'confirmed' | 'canceled';
+  action: "confirmed" | "canceled";
   branchName?: string;
   upstreamBranch?: string;
 };
@@ -36,12 +36,12 @@ const RebaseDialogImpl = NiceModal.create<RebaseDialogProps>(
     initialUpstreamBranch,
   }) => {
     const modal = useModal();
-    const { t } = useTranslation(['tasks', 'common']);
+    const { t } = useTranslation(["tasks", "common"]);
     const [selectedBranch, setSelectedBranch] = useState<string>(
-      initialTargetBranch ?? ''
+      initialTargetBranch ?? ""
     );
     const [selectedUpstream, setSelectedUpstream] = useState<string>(
-      initialUpstreamBranch ?? ''
+      initialUpstreamBranch ?? ""
     );
 
     useEffect(() => {
@@ -61,7 +61,7 @@ const RebaseDialogImpl = NiceModal.create<RebaseDialogProps>(
     const handleConfirm = () => {
       if (selectedBranch) {
         modal.resolve({
-          action: 'confirmed',
+          action: "confirmed",
           branchName: selectedBranch,
           upstreamBranch: selectedUpstream,
         } as RebaseDialogResult);
@@ -70,7 +70,7 @@ const RebaseDialogImpl = NiceModal.create<RebaseDialogProps>(
     };
 
     const handleCancel = () => {
-      modal.resolve({ action: 'canceled' } as RebaseDialogResult);
+      modal.resolve({ action: "canceled" } as RebaseDialogResult);
       modal.hide();
     };
 
@@ -81,53 +81,53 @@ const RebaseDialogImpl = NiceModal.create<RebaseDialogProps>(
     };
 
     return (
-      <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
+      <Dialog onOpenChange={handleOpenChange} open={modal.visible}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('rebase.dialog.title')}</DialogTitle>
+            <DialogTitle>{t("rebase.dialog.title")}</DialogTitle>
             <DialogDescription>
-              {t('rebase.dialog.description')}
+              {t("rebase.dialog.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="target-branch" className="text-sm font-medium">
-                {t('rebase.dialog.targetLabel')}
+              <label className="font-medium text-sm" htmlFor="target-branch">
+                {t("rebase.dialog.targetLabel")}
               </label>
               <BranchSelector
                 branches={branches}
-                selectedBranch={selectedBranch}
-                onBranchSelect={setSelectedBranch}
-                placeholder={t('rebase.dialog.targetPlaceholder')}
                 excludeCurrentBranch={false}
+                onBranchSelect={setSelectedBranch}
+                placeholder={t("rebase.dialog.targetPlaceholder")}
+                selectedBranch={selectedBranch}
               />
             </div>
             <div className="space-y-2">
               <button
-                type="button"
+                className="flex w-full items-center gap-2 text-left text-muted-foreground text-sm transition-colors hover:text-foreground"
                 onClick={() => setShowAdvanced((prev) => !prev)}
-                className="flex w-full items-center gap-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
+                type="button"
               >
                 <ChevronRight
-                  className={`h-3 w-3 transition-transform ${showAdvanced ? 'rotate-90' : ''}`}
+                  className={`h-3 w-3 transition-transform ${showAdvanced ? "rotate-90" : ""}`}
                 />
-                <span>{t('rebase.dialog.advanced')}</span>
+                <span>{t("rebase.dialog.advanced")}</span>
               </button>
               {showAdvanced && (
                 <div className="space-y-2">
                   <label
+                    className="font-medium text-sm"
                     htmlFor="upstream-branch"
-                    className="text-sm font-medium"
                   >
-                    {t('rebase.dialog.upstreamLabel')}
+                    {t("rebase.dialog.upstreamLabel")}
                   </label>
                   <BranchSelector
                     branches={branches}
-                    selectedBranch={selectedUpstream}
-                    onBranchSelect={setSelectedUpstream}
-                    placeholder={t('rebase.dialog.upstreamPlaceholder')}
                     excludeCurrentBranch={false}
+                    onBranchSelect={setSelectedUpstream}
+                    placeholder={t("rebase.dialog.upstreamPlaceholder")}
+                    selectedBranch={selectedUpstream}
                   />
                 </div>
               )}
@@ -136,19 +136,19 @@ const RebaseDialogImpl = NiceModal.create<RebaseDialogProps>(
 
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={handleCancel}
               disabled={isRebasing}
+              onClick={handleCancel}
+              variant="outline"
             >
-              {t('common:buttons.cancel')}
+              {t("common:buttons.cancel")}
             </Button>
             <Button
-              onClick={handleConfirm}
               disabled={isRebasing || !selectedBranch}
+              onClick={handleConfirm}
             >
               {isRebasing
-                ? t('rebase.common.inProgress')
-                : t('rebase.common.action')}
+                ? t("rebase.common.inProgress")
+                : t("rebase.common.action")}
             </Button>
           </DialogFooter>
         </DialogContent>

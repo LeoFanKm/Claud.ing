@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import { attemptsApi } from '@/lib/api';
-import type { Workspace } from 'shared/types';
+import { useQuery } from "@tanstack/react-query";
+import type { Workspace } from "shared/types";
+import { attemptsApi } from "@/lib/api";
 
 export const attemptKeys = {
-  byId: (attemptId: string | undefined) => ['attempt', attemptId] as const,
+  byId: (attemptId: string | undefined) => ["attempt", attemptId] as const,
 };
 
 type Options = {

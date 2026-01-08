@@ -1,4 +1,4 @@
-export { TextWidget } from './TextWidget';
-export { SelectWidget } from './SelectWidget';
-export { CheckboxWidget } from './CheckboxWidget';
-export { TextareaWidget } from './TextareaWidget';
+export { CheckboxWidget } from "./CheckboxWidget";
+export { SelectWidget } from "./SelectWidget";
+export { TextareaWidget } from "./TextareaWidget";
+export { TextWidget } from "./TextWidget";

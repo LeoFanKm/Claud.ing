@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useState } from "react";
+import type { TaskWithAttemptStatus } from "shared/types";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,13 +10,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
-import { tasksApi } from '@/lib/api';
-import type { TaskWithAttemptStatus } from 'shared/types';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { defineModal } from '@/lib/modals';
+} from "@/components/ui/dialog";
+import { tasksApi } from "@/lib/api";
+import { defineModal } from "@/lib/modals";
 
 export interface DeleteTaskConfirmationDialogProps {
   task: TaskWithAttemptStatus;
@@ -35,7 +35,7 @@ const DeleteTaskConfirmationDialogImpl =
         modal.hide();
       } catch (err: unknown) {
         const errorMessage =
-          err instanceof Error ? err.message : 'Failed to delete task';
+          err instanceof Error ? err.message : "Failed to delete task";
         setError(errorMessage);
       } finally {
         setIsDeleting(false);
@@ -49,44 +49,44 @@ const DeleteTaskConfirmationDialogImpl =
 
     return (
       <Dialog
-        open={modal.visible}
         onOpenChange={(open) => !open && handleCancelDelete()}
+        open={modal.visible}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Task</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete{' '}
+              Are you sure you want to delete{" "}
               <span className="font-semibold">"{task.title}"</span>?
             </DialogDescription>
           </DialogHeader>
 
-          <Alert variant="destructive" className="mb-4">
+          <Alert className="mb-4" variant="destructive">
             <strong>Warning:</strong> This action will permanently delete the
             task and cannot be undone.
           </Alert>
 
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert className="mb-4" variant="destructive">
               {error}
             </Alert>
           )}
 
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={handleCancelDelete}
-              disabled={isDeleting}
               autoFocus
+              disabled={isDeleting}
+              onClick={handleCancelDelete}
+              variant="outline"
             >
               Cancel
             </Button>
             <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
               disabled={isDeleting}
+              onClick={handleConfirmDelete}
+              variant="destructive"
             >
-              {isDeleting ? 'Deleting...' : 'Delete Task'}
+              {isDeleting ? "Deleting..." : "Delete Task"}
             </Button>
           </DialogFooter>
         </DialogContent>

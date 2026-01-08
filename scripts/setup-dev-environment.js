@@ -29,7 +29,7 @@ async function findFreePort(startPort = 3000) {
   let port = startPort;
   while (!(await isPortAvailable(port))) {
     port++;
-    if (port > 65535) {
+    if (port > 65_535) {
       throw new Error("No available ports found");
     }
   }
@@ -70,7 +70,7 @@ async function verifyPorts(ports) {
   const frontendAvailable = await isPortAvailable(ports.frontend);
   const backendAvailable = await isPortAvailable(ports.backend);
 
-  if (process.argv[2] === "get" && (!frontendAvailable || !backendAvailable)) {
+  if (process.argv[2] === "get" && !(frontendAvailable && backendAvailable)) {
     console.log(
       `Port availability check failed: frontend:${ports.frontend}=${frontendAvailable}, backend:${ports.backend}=${backendAvailable}`
     );
@@ -85,7 +85,7 @@ async function verifyPorts(ports) {
 async function allocatePorts() {
   // If PORT env is set, use it for frontend and PORT+1 for backend
   if (process.env.PORT) {
-    const frontendPort = parseInt(process.env.PORT, 10);
+    const frontendPort = Number.parseInt(process.env.PORT, 10);
     const backendPort = frontendPort + 1;
 
     const ports = {
@@ -115,12 +115,11 @@ async function allocatePorts() {
         console.log(`Backend: ${existingPorts.backend}`);
       }
       return existingPorts;
-    } else {
-      if (process.argv[2] === "get") {
-        console.log(
-          "Existing ports are no longer available, finding new ones..."
-        );
-      }
+    }
+    if (process.argv[2] === "get") {
+      console.log(
+        "Existing ports are no longer available, finding new ones..."
+      );
     }
   }
 

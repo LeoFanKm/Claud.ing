@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { MemberRole } from "shared/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,23 +11,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { useOrganizationMutations } from '@/hooks/useOrganizationMutations';
-import { MemberRole } from 'shared/types';
-import { useTranslation } from 'react-i18next';
-import { defineModal } from '@/lib/modals';
+} from "@/components/ui/select";
+import { useOrganizationMutations } from "@/hooks/useOrganizationMutations";
+import { defineModal } from "@/lib/modals";
 
 export type InviteMemberResult = {
-  action: 'invited' | 'canceled';
+  action: "invited" | "canceled";
 };
 
 export interface InviteMemberDialogProps {
@@ -36,19 +36,19 @@ const InviteMemberDialogImpl = NiceModal.create<InviteMemberDialogProps>(
   (props) => {
     const modal = useModal();
     const { organizationId } = props;
-    const { t } = useTranslation('organization');
-    const [email, setEmail] = useState('');
+    const { t } = useTranslation("organization");
+    const [email, setEmail] = useState("");
     const [role, setRole] = useState<MemberRole>(MemberRole.MEMBER);
     const [error, setError] = useState<string | null>(null);
 
     const { createInvitation } = useOrganizationMutations({
       onInviteSuccess: () => {
-        modal.resolve({ action: 'invited' } as InviteMemberResult);
+        modal.resolve({ action: "invited" } as InviteMemberResult);
         modal.hide();
       },
       onInviteError: (err) => {
         setError(
-          err instanceof Error ? err.message : 'Failed to send invitation'
+          err instanceof Error ? err.message : "Failed to send invitation"
         );
       },
     });
@@ -56,7 +56,7 @@ const InviteMemberDialogImpl = NiceModal.create<InviteMemberDialogProps>(
     useEffect(() => {
       // Reset form when dialog opens
       if (modal.visible) {
-        setEmail('');
+        setEmail("");
         setRole(MemberRole.MEMBER);
         setError(null);
       }
@@ -64,12 +64,12 @@ const InviteMemberDialogImpl = NiceModal.create<InviteMemberDialogProps>(
 
     const validateEmail = (value: string): string | null => {
       const trimmedValue = value.trim();
-      if (!trimmedValue) return 'Email is required';
+      if (!trimmedValue) return "Email is required";
 
       // Basic email validation regex
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(trimmedValue)) {
-        return 'Please enter a valid email address';
+        return "Please enter a valid email address";
       }
 
       return null;
@@ -83,7 +83,7 @@ const InviteMemberDialogImpl = NiceModal.create<InviteMemberDialogProps>(
       }
 
       if (!organizationId) {
-        setError('No organization selected');
+        setError("No organization selected");
         return;
       }
 
@@ -92,13 +92,13 @@ const InviteMemberDialogImpl = NiceModal.create<InviteMemberDialogProps>(
         orgId: organizationId,
         data: {
           email: email.trim(),
-          role: role,
+          role,
         },
       });
     };
 
     const handleCancel = () => {
-      modal.resolve({ action: 'canceled' } as InviteMemberResult);
+      modal.resolve({ action: "canceled" } as InviteMemberResult);
       modal.hide();
     };
 
@@ -109,57 +109,57 @@ const InviteMemberDialogImpl = NiceModal.create<InviteMemberDialogProps>(
     };
 
     return (
-      <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
+      <Dialog onOpenChange={handleOpenChange} open={modal.visible}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('inviteDialog.title')}</DialogTitle>
+            <DialogTitle>{t("inviteDialog.title")}</DialogTitle>
             <DialogDescription>
-              {t('inviteDialog.description')}
+              {t("inviteDialog.description")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="invite-email">
-                {t('inviteDialog.emailLabel')}
+                {t("inviteDialog.emailLabel")}
               </Label>
               <Input
+                autoFocus
+                disabled={createInvitation.isPending}
                 id="invite-email"
-                type="email"
-                value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   setError(null);
                 }}
-                placeholder={t('inviteDialog.emailPlaceholder')}
-                autoFocus
-                disabled={createInvitation.isPending}
+                placeholder={t("inviteDialog.emailPlaceholder")}
+                type="email"
+                value={email}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="invite-role">{t('inviteDialog.roleLabel')}</Label>
+              <Label htmlFor="invite-role">{t("inviteDialog.roleLabel")}</Label>
               <Select
-                value={role}
-                onValueChange={(value) => setRole(value as MemberRole)}
                 disabled={createInvitation.isPending}
+                onValueChange={(value) => setRole(value as MemberRole)}
+                value={role}
               >
                 <SelectTrigger id="invite-role">
                   <SelectValue
-                    placeholder={t('inviteDialog.rolePlaceholder')}
+                    placeholder={t("inviteDialog.rolePlaceholder")}
                   />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={MemberRole.MEMBER}>
-                    {t('roles.member')}
+                    {t("roles.member")}
                   </SelectItem>
                   <SelectItem value={MemberRole.ADMIN}>
-                    {t('roles.admin')}
+                    {t("roles.admin")}
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                {t('inviteDialog.roleHelper')}
+              <p className="text-muted-foreground text-xs">
+                {t("inviteDialog.roleHelper")}
               </p>
             </div>
 
@@ -172,19 +172,19 @@ const InviteMemberDialogImpl = NiceModal.create<InviteMemberDialogProps>(
 
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={handleCancel}
               disabled={createInvitation.isPending}
+              onClick={handleCancel}
+              variant="outline"
             >
-              {t('common:buttons.cancel')}
+              {t("common:buttons.cancel")}
             </Button>
             <Button
-              onClick={handleInvite}
               disabled={!email.trim() || createInvitation.isPending}
+              onClick={handleInvite}
             >
               {createInvitation.isPending
-                ? t('inviteDialog.sending')
-                : t('inviteDialog.sendButton')}
+                ? t("inviteDialog.sending")
+                : t("inviteDialog.sendButton")}
             </Button>
           </DialogFooter>
         </DialogContent>

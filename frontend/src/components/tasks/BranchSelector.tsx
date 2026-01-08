@@ -1,23 +1,23 @@
-import { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button.tsx';
-import { ArrowDown, GitBranch as GitBranchIcon, Search } from 'lucide-react';
+import { ArrowDown, GitBranch as GitBranchIcon, Search } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
+import type { GitBranch } from "shared/types";
+import { Button } from "@/components/ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu.tsx';
+} from "@/components/ui/dropdown-menu.tsx";
+import { Input } from "@/components/ui/input.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip.tsx';
-import { Input } from '@/components/ui/input.tsx';
-import type { GitBranch } from 'shared/types';
+} from "@/components/ui/tooltip.tsx";
 
 type Props = {
   branches: GitBranch[];
@@ -48,35 +48,35 @@ const BranchRow = memo(function BranchRow({
   onSelect,
   disabledTooltip,
 }: RowProps) {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(["common"]);
   const classes =
-    (isSelected ? 'bg-accent text-accent-foreground ' : '') +
-    (isDisabled ? 'opacity-50 cursor-not-allowed ' : '') +
-    (!isSelected && isHighlighted ? 'bg-accent/70 ring-2 ring-accent ' : '') +
-    'transition-none';
+    (isSelected ? "bg-accent text-accent-foreground " : "") +
+    (isDisabled ? "opacity-50 cursor-not-allowed " : "") +
+    (!isSelected && isHighlighted ? "bg-accent/70 ring-2 ring-accent " : "") +
+    "transition-none";
 
-  const nameClass = branch.is_current ? 'font-medium' : '';
+  const nameClass = branch.is_current ? "font-medium" : "";
 
   const item = (
     <DropdownMenuItem
+      className={classes.trim()}
+      disabled={isDisabled}
       onMouseEnter={onHover}
       onSelect={onSelect}
-      disabled={isDisabled}
-      className={classes.trim()}
     >
-      <div className="flex items-center justify-between w-full gap-2">
-        <span className={`${nameClass} truncate flex-1 min-w-0`}>
+      <div className="flex w-full items-center justify-between gap-2">
+        <span className={`${nameClass} min-w-0 flex-1 truncate`}>
           {branch.name}
         </span>
-        <div className="flex gap-1 flex-shrink-0">
+        <div className="flex flex-shrink-0 gap-1">
           {branch.is_current && (
-            <span className="text-xs bg-background px-1 rounded">
-              {t('branchSelector.badges.current')}
+            <span className="rounded bg-background px-1 text-xs">
+              {t("branchSelector.badges.current")}
             </span>
           )}
           {branch.is_remote && (
-            <span className="text-xs bg-background px-1 rounded">
-              {t('branchSelector.badges.remote')}
+            <span className="rounded bg-background px-1 text-xs">
+              {t("branchSelector.badges.remote")}
             </span>
           )}
         </div>
@@ -105,19 +105,19 @@ function BranchSelector({
   selectedBranch,
   onBranchSelect,
   placeholder,
-  className = '',
+  className = "",
   excludeCurrentBranch = false,
   disabledTooltip,
 }: Props) {
-  const { t } = useTranslation(['common']);
-  const [branchSearchTerm, setBranchSearchTerm] = useState('');
+  const { t } = useTranslation(["common"]);
+  const [branchSearchTerm, setBranchSearchTerm] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
-  const effectivePlaceholder = placeholder ?? t('branchSelector.placeholder');
-  const defaultDisabledTooltip = t('branchSelector.currentDisabled');
+  const effectivePlaceholder = placeholder ?? t("branchSelector.placeholder");
+  const defaultDisabledTooltip = t("branchSelector.currentDisabled");
 
   const filteredBranches = useMemo(() => {
     let filtered = branches;
@@ -132,7 +132,7 @@ function BranchSelector({
   const handleBranchSelect = useCallback(
     (branchName: string) => {
       onBranchSelect(branchName);
-      setBranchSearchTerm('');
+      setBranchSearchTerm("");
       setHighlightedIndex(null);
       setOpen(false);
     },
@@ -171,7 +171,7 @@ function BranchSelector({
           setHighlightedIndex(next);
           virtuosoRef.current?.scrollIntoView({
             index: next,
-            behavior: 'auto',
+            behavior: "auto",
           });
           return;
         }
@@ -196,22 +196,22 @@ function BranchSelector({
 
   return (
     <DropdownMenu
-      open={open}
       onOpenChange={(next) => {
         setOpen(next);
         if (!next) {
-          setBranchSearchTerm('');
+          setBranchSearchTerm("");
           setHighlightedIndex(null);
         }
       }}
+      open={open}
     >
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
-          size="sm"
           className={`w-full justify-between text-xs ${className}`}
+          size="sm"
+          variant="outline"
         >
-          <div className="flex items-center gap-1.5 w-full min-w-0">
+          <div className="flex w-full min-w-0 items-center gap-1.5">
             <GitBranchIcon className="h-3 w-3 flex-shrink-0" />
             <span className="truncate">
               {selectedBranch || effectivePlaceholder}
@@ -225,54 +225,51 @@ function BranchSelector({
         <DropdownMenuContent className="w-80">
           <div className="p-2">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
               <Input
-                ref={searchInputRef}
-                placeholder={t('branchSelector.searchPlaceholder')}
-                value={branchSearchTerm}
+                className="pl-8"
                 onChange={(e) => setBranchSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
                   switch (e.key) {
-                    case 'ArrowDown':
+                    case "ArrowDown":
                       e.preventDefault();
                       e.stopPropagation();
                       moveHighlight(1);
                       return;
-                    case 'ArrowUp':
+                    case "ArrowUp":
                       e.preventDefault();
                       e.stopPropagation();
                       moveHighlight(-1);
                       return;
-                    case 'Enter':
+                    case "Enter":
                       e.preventDefault();
                       e.stopPropagation();
                       attemptSelect();
                       return;
-                    case 'Escape':
+                    case "Escape":
                       e.preventDefault();
                       e.stopPropagation();
                       setOpen(false);
                       return;
-                    case 'Tab':
+                    case "Tab":
                       return;
                     default:
                       e.stopPropagation();
                   }
                 }}
-                className="pl-8"
+                placeholder={t("branchSelector.searchPlaceholder")}
+                ref={searchInputRef}
+                value={branchSearchTerm}
               />
             </div>
           </div>
           <DropdownMenuSeparator />
           {filteredBranches.length === 0 ? (
-            <div className="p-2 text-sm text-muted-foreground text-center">
-              {t('branchSelector.empty')}
+            <div className="p-2 text-center text-muted-foreground text-sm">
+              {t("branchSelector.empty")}
             </div>
           ) : (
             <Virtuoso
-              ref={virtuosoRef}
-              style={{ height: '16rem' }}
-              totalCount={filteredBranches.length}
               computeItemKey={(idx) => filteredBranches[idx]?.name ?? idx}
               itemContent={(idx) => {
                 const branch = filteredBranches[idx];
@@ -283,19 +280,22 @@ function BranchSelector({
                 return (
                   <BranchRow
                     branch={branch}
-                    isSelected={isSelected}
-                    isDisabled={isDisabled}
-                    isHighlighted={isHighlighted}
-                    onHover={() => setHighlightedIndex(idx)}
-                    onSelect={() => handleBranchSelect(branch.name)}
                     disabledTooltip={
                       isDisabled
                         ? (disabledTooltip ?? defaultDisabledTooltip)
                         : undefined
                     }
+                    isDisabled={isDisabled}
+                    isHighlighted={isHighlighted}
+                    isSelected={isSelected}
+                    onHover={() => setHighlightedIndex(idx)}
+                    onSelect={() => handleBranchSelect(branch.name)}
                   />
                 );
               }}
+              ref={virtuosoRef}
+              style={{ height: "16rem" }}
+              totalCount={filteredBranches.length}
             />
           )}
         </DropdownMenuContent>

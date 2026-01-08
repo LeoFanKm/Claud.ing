@@ -1,12 +1,12 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import InvitationPage from "./pages/InvitationPage";
-import InvitationCompletePage from "./pages/InvitationCompletePage";
-import ReviewPage from "./pages/ReviewPage";
-import AccountPage from "./pages/AccountPage";
 import AccountCompletePage from "./pages/AccountCompletePage";
-import OrganizationPage from "./pages/OrganizationPage";
+import AccountPage from "./pages/AccountPage";
+import HomePage from "./pages/HomePage";
+import InvitationCompletePage from "./pages/InvitationCompletePage";
+import InvitationPage from "./pages/InvitationPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import OrganizationPage from "./pages/OrganizationPage";
+import ReviewPage from "./pages/ReviewPage";
 
 const router = createBrowserRouter([
   {

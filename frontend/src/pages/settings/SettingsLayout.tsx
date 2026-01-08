@@ -1,39 +1,39 @@
-import { NavLink, Outlet } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Settings, Cpu, Server, X, FolderOpen, Building2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
-import { useHotkeysContext } from 'react-hotkeys-hook';
-import { useKeyExit } from '@/keyboard/hooks';
-import { Scope } from '@/keyboard/registry';
-import { usePreviousPath } from '@/hooks/usePreviousPath';
+import { Building2, Cpu, FolderOpen, Server, Settings, X } from "lucide-react";
+import { useEffect } from "react";
+import { useHotkeysContext } from "react-hotkeys-hook";
+import { useTranslation } from "react-i18next";
+import { NavLink, Outlet } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { usePreviousPath } from "@/hooks/usePreviousPath";
+import { useKeyExit } from "@/keyboard/hooks";
+import { Scope } from "@/keyboard/registry";
+import { cn } from "@/lib/utils";
 
 const settingsNavigation = [
   {
-    path: 'general',
+    path: "general",
     icon: Settings,
   },
   {
-    path: 'projects',
+    path: "projects",
     icon: FolderOpen,
   },
   {
-    path: 'organizations',
+    path: "organizations",
     icon: Building2,
   },
   {
-    path: 'agents',
+    path: "agents",
     icon: Cpu,
   },
   {
-    path: 'mcp',
+    path: "mcp",
     icon: Server,
   },
 ];
 
 export function SettingsLayout() {
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation("settings");
   const { enableScope, disableScope } = useHotkeysContext();
   const goToPreviousPath = usePreviousPath();
 
@@ -52,43 +52,43 @@ export function SettingsLayout() {
     <div className="h-full overflow-auto">
       <div className="container mx-auto px-4 py-8">
         {/* Header with title and close button */}
-        <div className="flex items-center justify-between sticky top-0 bg-background z-10 py-4 -mx-4 px-4">
-          <h1 className="text-2xl font-semibold">
-            {t('settings.layout.nav.title')}
+        <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between bg-background px-4 py-4">
+          <h1 className="font-semibold text-2xl">
+            {t("settings.layout.nav.title")}
           </h1>
           <Button
-            variant="ghost"
+            className="flex h-8 items-center gap-1.5 rounded-none border border-foreground/20 px-2 transition-all hover:border-foreground/30 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             onClick={goToPreviousPath}
-            className="h-8 px-2 rounded-none border border-foreground/20 hover:border-foreground/30 transition-all hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex items-center gap-1.5"
+            variant="ghost"
           >
             <X className="h-4 w-4" />
-            <span className="text-xs font-medium">ESC</span>
+            <span className="font-medium text-xs">ESC</span>
           </Button>
         </div>
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col gap-8 lg:flex-row">
           {/* Sidebar Navigation */}
-          <aside className="w-full lg:w-64 lg:shrink-0 lg:sticky lg:top-24 lg:h-fit lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+          <aside className="w-full lg:sticky lg:top-24 lg:h-fit lg:max-h-[calc(100vh-8rem)] lg:w-64 lg:shrink-0 lg:overflow-y-auto">
             <div className="space-y-1">
               <nav className="space-y-1">
                 {settingsNavigation.map((item) => {
                   const Icon = item.icon;
                   return (
                     <NavLink
-                      key={item.path}
-                      to={item.path}
-                      end
                       className={({ isActive }) =>
                         cn(
-                          'flex items-start gap-3 px-3 py-2 text-sm transition-colors',
-                          'hover:text-accent-foreground',
+                          "flex items-start gap-3 px-3 py-2 text-sm transition-colors",
+                          "hover:text-accent-foreground",
                           isActive
-                            ? 'text-primary-foreground'
-                            : 'text-secondary-foreground'
+                            ? "text-primary-foreground"
+                            : "text-secondary-foreground"
                         )
                       }
+                      end
+                      key={item.path}
+                      to={item.path}
                     >
-                      <Icon className="h-4 w-4 mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
+                      <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div className="min-w-0 flex-1">
                         <div className="font-medium">
                           {t(`settings.layout.nav.${item.path}`)}
                         </div>
@@ -102,7 +102,7 @@ export function SettingsLayout() {
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 min-w-0">
+          <main className="min-w-0 flex-1">
             <Outlet />
           </main>
         </div>

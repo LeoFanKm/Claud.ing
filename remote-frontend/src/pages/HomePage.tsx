@@ -1,18 +1,18 @@
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="text-center max-w-md">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <div className="max-w-md text-center">
+        <h1 className="mb-2 font-semibold text-2xl text-gray-900">
           Please return to the Vibe Kanban app
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="mb-6 text-gray-600">
           Or checkout the docs to get started
         </p>
         <a
+          className="inline-block rounded-lg bg-gray-900 px-6 py-3 font-medium text-white transition-colors hover:bg-gray-800"
           href="https://www.vibekanban.com/docs/getting-started"
-          target="_blank"
           rel="noopener noreferrer"
-          className="inline-block px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+          target="_blank"
         >
           View Documentation
         </a>

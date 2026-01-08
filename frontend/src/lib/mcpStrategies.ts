@@ -1,9 +1,9 @@
-import type { McpConfig, JsonValue } from 'shared/types';
+import type { JsonValue, McpConfig } from "shared/types";
 
 type JsonObject = Record<string, JsonValue>;
 
 function isJsonObject(v: unknown): v is JsonObject {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 export class McpConfigStrategyGeneral {
@@ -35,18 +35,18 @@ export class McpConfigStrategyGeneral {
     for (const key of mcp_config.servers_path) {
       if (!isJsonObject(current)) {
         throw new Error(
-          `Expected object at path: ${mcp_config.servers_path.join('.')}`
+          `Expected object at path: ${mcp_config.servers_path.join(".")}`
         );
       }
       current = current[key];
       if (current === undefined) {
         throw new Error(
-          `Missing required field at path: ${mcp_config.servers_path.join('.')}`
+          `Missing required field at path: ${mcp_config.servers_path.join(".")}`
         );
       }
     }
     if (!isJsonObject(current)) {
-      throw new Error('Servers configuration must be an object');
+      throw new Error("Servers configuration must be an object");
     }
   }
   static extractServersForApi(
@@ -57,18 +57,18 @@ export class McpConfigStrategyGeneral {
     for (const key of mcp_config.servers_path) {
       if (!isJsonObject(current)) {
         throw new Error(
-          `Expected object at path: ${mcp_config.servers_path.join('.')}`
+          `Expected object at path: ${mcp_config.servers_path.join(".")}`
         );
       }
       current = current[key];
       if (current === undefined) {
         throw new Error(
-          `Missing required field at path: ${mcp_config.servers_path.join('.')}`
+          `Missing required field at path: ${mcp_config.servers_path.join(".")}`
         );
       }
     }
     if (!isJsonObject(current)) {
-      throw new Error('Servers configuration must be an object');
+      throw new Error("Servers configuration must be an object");
     }
     return current;
   }
@@ -79,7 +79,7 @@ export class McpConfigStrategyGeneral {
     serverKey: string
   ): JsonObject {
     const preconfVal = mcp_config.preconfigured;
-    if (!isJsonObject(preconfVal) || !(serverKey in preconfVal)) {
+    if (!(isJsonObject(preconfVal) && serverKey in preconfVal)) {
       throw new Error(`Unknown preconfigured server '${serverKey}'`);
     }
 

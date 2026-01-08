@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { repoApi } from '@/lib/api';
-import type { GitBranch } from 'shared/types';
+import { useQuery } from "@tanstack/react-query";
+import type { GitBranch } from "shared/types";
+import { repoApi } from "@/lib/api";
 
 export const repoBranchKeys = {
-  all: ['repoBranches'] as const,
-  byRepo: (repoId: string | undefined) => ['repoBranches', repoId] as const,
+  all: ["repoBranches"] as const,
+  byRepo: (repoId: string | undefined) => ["repoBranches", repoId] as const,
 };
 
 type Options = {

@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { attemptsApi, executionProcessesApi } from '@/lib/api';
-import { useAttemptExecution } from '@/hooks/useAttemptExecution';
-import type { ExecutionProcess } from 'shared/types';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import type { ExecutionProcess } from "shared/types";
+import { useAttemptExecution } from "@/hooks/useAttemptExecution";
+import { attemptsApi, executionProcessesApi } from "@/lib/api";
 
 interface UseDevServerOptions {
   onStartSuccess?: () => void;
@@ -22,14 +22,14 @@ export function useDevServer(
   const runningDevServer = useMemo<ExecutionProcess | undefined>(() => {
     return attemptData.processes.find(
       (process) =>
-        process.run_reason === 'devserver' && process.status === 'running'
+        process.run_reason === "devserver" && process.status === "running"
     );
   }, [attemptData.processes]);
 
   // Find latest dev server process (for logs viewing)
   const latestDevServerProcess = useMemo<ExecutionProcess | undefined>(() => {
     return [...attemptData.processes]
-      .filter((process) => process.run_reason === 'devserver')
+      .filter((process) => process.run_reason === "devserver")
       .sort(
         (a, b) =>
           new Date(b.started_at).getTime() - new Date(a.started_at).getTime()
@@ -38,26 +38,26 @@ export function useDevServer(
 
   // Start mutation
   const startMutation = useMutation({
-    mutationKey: ['startDevServer', attemptId],
+    mutationKey: ["startDevServer", attemptId],
     mutationFn: async () => {
       if (!attemptId) return;
       await attemptsApi.startDevServer(attemptId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['executionProcesses', attemptId],
+        queryKey: ["executionProcesses", attemptId],
       });
       options?.onStartSuccess?.();
     },
     onError: (err) => {
-      console.error('Failed to start dev server:', err);
+      console.error("Failed to start dev server:", err);
       options?.onStartError?.(err);
     },
   });
 
   // Stop mutation
   const stopMutation = useMutation({
-    mutationKey: ['stopDevServer', runningDevServer?.id],
+    mutationKey: ["stopDevServer", runningDevServer?.id],
     mutationFn: async () => {
       if (!runningDevServer) return;
       await executionProcessesApi.stopExecutionProcess(runningDevServer.id);
@@ -65,18 +65,18 @@ export function useDevServer(
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ['executionProcesses', attemptId],
+          queryKey: ["executionProcesses", attemptId],
         }),
         runningDevServer
           ? queryClient.invalidateQueries({
-              queryKey: ['processDetails', runningDevServer.id],
+              queryKey: ["processDetails", runningDevServer.id],
             })
           : Promise.resolve(),
       ]);
       options?.onStopSuccess?.();
     },
     onError: (err) => {
-      console.error('Failed to stop dev server:', err);
+      console.error("Failed to stop dev server:", err);
       options?.onStopError?.(err);
     },
   });

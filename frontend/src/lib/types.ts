@@ -1,8 +1,8 @@
-import {
+import type {
   ExecutionProcess,
-  NormalizedEntry,
   ExecutionProcessStatus,
-} from 'shared/types';
+  NormalizedEntry,
+} from "shared/types";
 
 export type AttemptData = {
   processes: ExecutionProcess[];

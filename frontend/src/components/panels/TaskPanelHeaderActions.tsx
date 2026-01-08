@@ -1,8 +1,8 @@
-import { Button } from '../ui/button';
-import { X } from 'lucide-react';
-import type { TaskWithAttemptStatus } from 'shared/types';
-import { ActionsDropdown } from '../ui/actions-dropdown';
-import type { SharedTaskRecord } from '@/hooks/useProjectTasks';
+import { X } from "lucide-react";
+import type { TaskWithAttemptStatus } from "shared/types";
+import type { SharedTaskRecord } from "@/hooks/useProjectTasks";
+import { ActionsDropdown } from "../ui/actions-dropdown";
+import { Button } from "../ui/button";
 
 type Task = TaskWithAttemptStatus;
 
@@ -19,8 +19,8 @@ export const TaskPanelHeaderActions = ({
 }: TaskPanelHeaderActionsProps) => {
   return (
     <>
-      <ActionsDropdown task={task} sharedTask={sharedTask} />
-      <Button variant="icon" aria-label="Close" onClick={onClose}>
+      <ActionsDropdown sharedTask={sharedTask} task={task} />
+      <Button aria-label="Close" onClick={onClose} variant="icon">
         <X size={16} />
       </Button>
     </>

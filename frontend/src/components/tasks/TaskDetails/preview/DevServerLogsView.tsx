@@ -1,9 +1,9 @@
-import { useTranslation } from 'react-i18next';
-import { Terminal, ChevronDown } from 'lucide-react';
+import { ChevronDown, Terminal } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { ExecutionProcess } from "shared/types";
 import ProcessLogsViewer, {
   ProcessLogsViewerContent,
-} from '../ProcessLogsViewer';
-import { ExecutionProcess } from 'shared/types';
+} from "../ProcessLogsViewer";
 
 interface DevServerLogsViewProps {
   latestDevServerProcess: ExecutionProcess | undefined;
@@ -11,7 +11,7 @@ interface DevServerLogsViewProps {
   onToggle: () => void;
   height?: string;
   showToggleText?: boolean;
-  logs?: Array<{ type: 'STDOUT' | 'STDERR'; content: string }>;
+  logs?: Array<{ type: "STDOUT" | "STDERR"; content: string }>;
   error?: string | null;
 }
 
@@ -19,12 +19,12 @@ export function DevServerLogsView({
   latestDevServerProcess,
   showLogs,
   onToggle,
-  height = 'h-60',
+  height = "h-60",
   showToggleText = true,
   logs,
   error,
 }: DevServerLogsViewProps) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
 
   if (!latestDevServerProcess) {
     return null;
@@ -33,30 +33,30 @@ export function DevServerLogsView({
   return (
     <details
       className="group border-t bg-background"
-      open={showLogs}
       onToggle={(e) => {
         if (e.currentTarget.open !== showLogs) {
           onToggle();
         }
       }}
+      open={showLogs}
     >
-      <summary className="list-none cursor-pointer">
-        <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/50">
+      <summary className="cursor-pointer list-none">
+        <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2">
           <div className="flex items-center gap-2">
             <Terminal className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-foreground">
-              {t('preview.logs.title')}
+            <span className="font-medium text-foreground text-sm">
+              {t("preview.logs.title")}
             </span>
           </div>
           <div className="flex items-center text-sm">
             <ChevronDown
-              className={`h-4 w-4 mr-1 ${showToggleText ? 'transition-transform' : ''} ${showLogs ? '' : 'rotate-180'}`}
+              className={`mr-1 h-4 w-4 ${showToggleText ? "transition-transform" : ""} ${showLogs ? "" : "rotate-180"}`}
             />
             {showToggleText
               ? showLogs
-                ? t('preview.logs.hide')
-                : t('preview.logs.show')
-              : t('preview.logs.hide')}
+                ? t("preview.logs.hide")
+                : t("preview.logs.show")
+              : t("preview.logs.hide")}
           </div>
         </div>
       </summary>
@@ -64,7 +64,7 @@ export function DevServerLogsView({
       {showLogs && (
         <div className={height}>
           {logs ? (
-            <ProcessLogsViewerContent logs={logs} error={error ?? null} />
+            <ProcessLogsViewerContent error={error ?? null} logs={logs} />
           ) : (
             <ProcessLogsViewer processId={latestDevServerProcess.id} />
           )}

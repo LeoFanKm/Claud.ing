@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { cn } from '@/lib/utils';
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-interface AutoExpandingTextareaProps extends React.ComponentProps<'textarea'> {
+interface AutoExpandingTextareaProps extends React.ComponentProps<"textarea"> {
   maxRows?: number;
   disableInternalScroll?: boolean;
 }
@@ -25,7 +25,7 @@ const AutoExpandingTextarea = React.forwardRef<
       if (!textarea) return;
 
       // Reset height to auto to get the natural height
-      textarea.style.height = 'auto';
+      textarea.style.height = "auto";
 
       if (disableInternalScroll) {
         // When parent handles scroll, expand to full content height
@@ -33,9 +33,9 @@ const AutoExpandingTextarea = React.forwardRef<
       } else {
         // Calculate line height
         const style = window.getComputedStyle(textarea);
-        const lineHeight = parseInt(style.lineHeight) || 20;
-        const paddingTop = parseInt(style.paddingTop) || 0;
-        const paddingBottom = parseInt(style.paddingBottom) || 0;
+        const lineHeight = Number.parseInt(style.lineHeight) || 20;
+        const paddingTop = Number.parseInt(style.paddingTop) || 0;
+        const paddingBottom = Number.parseInt(style.paddingBottom) || 0;
 
         // Calculate max height based on maxRows
         const maxHeight = lineHeight * maxRows + paddingTop + paddingBottom;
@@ -66,18 +66,18 @@ const AutoExpandingTextarea = React.forwardRef<
     return (
       <textarea
         className={cn(
-          'bg-muted p-0 min-h-[80px] w-full text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none overflow-x-hidden whitespace-pre-wrap break-words',
-          disableInternalScroll ? 'overflow-hidden' : 'overflow-y-auto',
+          "min-h-[80px] w-full resize-none overflow-x-hidden whitespace-pre-wrap break-words bg-muted p-0 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50",
+          disableInternalScroll ? "overflow-hidden" : "overflow-y-auto",
           className
         )}
-        ref={textareaRef}
         onInput={handleInput}
+        ref={textareaRef}
         {...props}
       />
     );
   }
 );
 
-AutoExpandingTextarea.displayName = 'AutoExpandingTextarea';
+AutoExpandingTextarea.displayName = "AutoExpandingTextarea";
 
 export { AutoExpandingTextarea };

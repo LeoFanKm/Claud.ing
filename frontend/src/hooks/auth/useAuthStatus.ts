@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { oauthApi } from '@/lib/api';
-import { useEffect } from 'react';
-import { useAuth } from '@/hooks';
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks";
+import { oauthApi } from "@/lib/api";
 
 interface UseAuthStatusOptions {
   enabled: boolean;
@@ -9,7 +9,7 @@ interface UseAuthStatusOptions {
 
 export function useAuthStatus(options: UseAuthStatusOptions) {
   const query = useQuery({
-    queryKey: ['auth', 'status'],
+    queryKey: ["auth", "status"],
     queryFn: () => oauthApi.status(),
     enabled: options.enabled,
     refetchInterval: options.enabled ? 1000 : false,

@@ -1,11 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { attemptsApi } from '@/lib/api';
-import type { TaskRelationships } from 'shared/types';
+import { useQuery } from "@tanstack/react-query";
+import type { TaskRelationships } from "shared/types";
+import { attemptsApi } from "@/lib/api";
 
 export const taskRelationshipsKeys = {
-  all: ['taskRelationships'] as const,
+  all: ["taskRelationships"] as const,
   byAttempt: (attemptId: string | undefined) =>
-    ['taskRelationships', attemptId] as const,
+    ["taskRelationships", attemptId] as const,
 };
 
 type Options = {

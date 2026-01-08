@@ -1,26 +1,26 @@
-import { Columns, FileText, Pilcrow, WrapText } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { cn } from '@/lib/utils';
-import {
-  useDiffViewMode,
-  useDiffViewStore,
-  useIgnoreWhitespaceDiff,
-  useWrapTextDiff,
-} from '@/stores/useDiffViewStore';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Columns, FileText, Pilcrow, WrapText } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import {
+  useDiffViewMode,
+  useDiffViewStore,
+  useIgnoreWhitespaceDiff,
+  useWrapTextDiff,
+} from "@/stores/useDiffViewStore";
 
 type Props = {
   className?: string;
 };
 
 export default function DiffViewSwitch({ className }: Props) {
-  const { t } = useTranslation('tasks');
+  const { t } = useTranslation("tasks");
   const mode = useDiffViewMode();
   const setMode = useDiffViewStore((s) => s.setMode);
   const ignoreWhitespace = useIgnoreWhitespaceDiff();
@@ -28,94 +28,94 @@ export default function DiffViewSwitch({ className }: Props) {
   const wrapText = useWrapTextDiff();
   const setWrapText = useDiffViewStore((s) => s.setWrapText);
 
-  const whitespaceValue = ignoreWhitespace ? ['ignoreWhitespace'] : [];
-  const wrapTextValue = wrapText ? ['wrapText'] : [];
+  const whitespaceValue = ignoreWhitespace ? ["ignoreWhitespace"] : [];
+  const wrapTextValue = wrapText ? ["wrapText"] : [];
 
   return (
     <TooltipProvider>
-      <div className={cn('inline-flex gap-4', className)}>
+      <div className={cn("inline-flex gap-4", className)}>
         <ToggleGroup
-          type="single"
-          value={mode ?? ''}
-          onValueChange={(v) => v && setMode(v as 'unified' | 'split')}
-          className="inline-flex gap-4"
           aria-label="Diff view mode"
+          className="inline-flex gap-4"
+          onValueChange={(v) => v && setMode(v as "unified" | "split")}
+          type="single"
+          value={mode ?? ""}
         >
           <Tooltip>
             <TooltipTrigger asChild>
               <ToggleGroupItem
-                value="unified"
+                active={mode === "unified"}
                 aria-label="Inline view"
-                active={mode === 'unified'}
+                value="unified"
               >
                 <FileText className="h-4 w-4" />
               </ToggleGroupItem>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('diff.viewModes.inline')}
+              {t("diff.viewModes.inline")}
             </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <ToggleGroupItem
-                value="split"
+                active={mode === "split"}
                 aria-label="Split view"
-                active={mode === 'split'}
+                value="split"
               >
                 <Columns className="h-4 w-4" />
               </ToggleGroupItem>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('diff.viewModes.split')}
+              {t("diff.viewModes.split")}
             </TooltipContent>
           </Tooltip>
         </ToggleGroup>
 
         <ToggleGroup
+          aria-label={t("diff.ignoreWhitespace")}
+          className="inline-flex gap-4"
+          onValueChange={(values) =>
+            setIgnoreWhitespace(values.includes("ignoreWhitespace"))
+          }
           type="multiple"
           value={whitespaceValue}
-          onValueChange={(values) =>
-            setIgnoreWhitespace(values.includes('ignoreWhitespace'))
-          }
-          className="inline-flex gap-4"
-          aria-label={t('diff.ignoreWhitespace')}
         >
           <Tooltip>
             <TooltipTrigger asChild>
               <ToggleGroupItem
-                value="ignoreWhitespace"
-                aria-label={t('diff.ignoreWhitespace')}
                 active={ignoreWhitespace}
+                aria-label={t("diff.ignoreWhitespace")}
+                value="ignoreWhitespace"
               >
                 <Pilcrow className="h-4 w-4" />
               </ToggleGroupItem>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('diff.ignoreWhitespace')}
+              {t("diff.ignoreWhitespace")}
             </TooltipContent>
           </Tooltip>
         </ToggleGroup>
 
         <ToggleGroup
+          aria-label={t("diff.wrapText", "Wrap text")}
+          className="inline-flex gap-4"
+          onValueChange={(values) => setWrapText(values.includes("wrapText"))}
           type="multiple"
           value={wrapTextValue}
-          onValueChange={(values) => setWrapText(values.includes('wrapText'))}
-          className="inline-flex gap-4"
-          aria-label={t('diff.wrapText', 'Wrap text')}
         >
           <Tooltip>
             <TooltipTrigger asChild>
               <ToggleGroupItem
-                value="wrapText"
-                aria-label={t('diff.wrapText', 'Wrap text')}
                 active={wrapText}
+                aria-label={t("diff.wrapText", "Wrap text")}
+                value="wrapText"
               >
                 <WrapText className="h-4 w-4" />
               </ToggleGroupItem>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {t('diff.wrapText', 'Wrap text')}
+              {t("diff.wrapText", "Wrap text")}
             </TooltipContent>
           </Tooltip>
         </ToggleGroup>

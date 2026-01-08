@@ -1,3 +1,11 @@
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
+import { Chrome, Github, Loader2, LogIn } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { ProfileResponse } from "shared/types";
+import { useUserSystem } from "@/components/ConfigProvider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -5,32 +13,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { LogIn, Github, Loader2, Chrome } from 'lucide-react';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { useState, useRef, useEffect } from 'react';
-import { useAuthMutations } from '@/hooks/auth/useAuthMutations';
-import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
-import { useUserSystem } from '@/components/ConfigProvider';
-import type { ProfileResponse } from 'shared/types';
-import { useTranslation } from 'react-i18next';
-import { defineModal, type NoProps } from '@/lib/modals';
+} from "@/components/ui/dialog";
+import { useAuthMutations } from "@/hooks/auth/useAuthMutations";
+import { useAuthStatus } from "@/hooks/auth/useAuthStatus";
+import { defineModal, type NoProps } from "@/lib/modals";
 
-type OAuthProvider = 'github' | 'google';
+type OAuthProvider = "github" | "google";
 
 type OAuthState =
-  | { type: 'select' }
-  | { type: 'waiting'; provider: OAuthProvider }
-  | { type: 'success'; profile: ProfileResponse }
-  | { type: 'error'; message: string };
+  | { type: "select" }
+  | { type: "waiting"; provider: OAuthProvider }
+  | { type: "success"; profile: ProfileResponse }
+  | { type: "error"; message: string };
 
 const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
   const modal = useModal();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
   const { reloadSystem } = useUserSystem();
-  const [state, setState] = useState<OAuthState>({ type: 'select' });
+  const [state, setState] = useState<OAuthState>({ type: "select" });
   const popupRef = useRef<Window | null>(null);
   const [isPolling, setIsPolling] = useState(false);
 
@@ -45,7 +45,7 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
 
       popupRef.current = window.open(
         data.authorize_url,
-        'oauth-popup',
+        "oauth-popup",
         `width=${width},height=${height},left=${left},top=${top},popup=yes,noopener=yes`
       );
 
@@ -54,11 +54,11 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
     },
     onInitError: (error) => {
       setState({
-        type: 'error',
+        type: "error",
         message:
           error instanceof Error
             ? error.message
-            : 'Failed to initialize OAuth flow',
+            : "Failed to initialize OAuth flow",
       });
     },
   });
@@ -73,23 +73,23 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
     if (isStatusError && isPolling) {
       setIsPolling(false);
       setState({
-        type: 'error',
-        message: 'Failed to check OAuth status',
+        type: "error",
+        message: "Failed to check OAuth status",
       });
     }
   }, [isStatusError, isPolling]);
 
   // Monitor status changes
   useEffect(() => {
-    if (!isPolling || !statusData) return;
+    if (!(isPolling && statusData)) return;
 
     // Check if popup is closed
     if (popupRef.current?.closed) {
       setIsPolling(false);
       if (!statusData.logged_in) {
         setState({
-          type: 'error',
-          message: 'OAuth window was closed before completing authentication',
+          type: "error",
+          message: "OAuth window was closed before completing authentication",
         });
       }
     }
@@ -104,7 +104,7 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
       // Reload user system to refresh login status
       reloadSystem();
 
-      setState({ type: 'success', profile: statusData.profile });
+      setState({ type: "success", profile: statusData.profile });
       setTimeout(() => {
         modal.resolve(statusData.profile);
         modal.remove();
@@ -113,7 +113,7 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
   }, [statusData, isPolling, modal, reloadSystem]);
 
   const handleProviderSelect = (provider: OAuthProvider) => {
-    setState({ type: 'waiting', provider });
+    setState({ type: "waiting", provider });
 
     // Get the current window location as return_to
     const returnTo = `${window.location.origin}/api/auth/handoff/complete`;
@@ -127,7 +127,7 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
     if (popupRef.current && !popupRef.current.closed) {
       popupRef.current.close();
     }
-    setState({ type: 'select' });
+    setState({ type: "select" });
     modal.resolve(null);
     modal.remove();
   };
@@ -137,7 +137,7 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
     if (popupRef.current && !popupRef.current.closed) {
       popupRef.current.close();
     }
-    setState({ type: 'select' });
+    setState({ type: "select" });
   };
 
   // Cleanup polling when dialog closes
@@ -152,94 +152,94 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
 
   const renderContent = () => {
     switch (state.type) {
-      case 'select':
+      case "select":
         return (
           <>
             <DialogHeader>
               <div className="flex items-center gap-3">
                 <LogIn className="h-6 w-6 text-primary-foreground" />
-                <DialogTitle>{t('oauth.title')}</DialogTitle>
+                <DialogTitle>{t("oauth.title")}</DialogTitle>
               </div>
-              <DialogDescription className="text-left pt-2">
-                {t('oauth.description')}
+              <DialogDescription className="pt-2 text-left">
+                {t("oauth.description")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3 py-4">
               <Button
+                className="flex h-12 w-full items-center justify-center gap-3"
+                onClick={() => handleProviderSelect("github")}
                 variant="outline"
-                className="w-full h-12 flex items-center justify-center gap-3"
-                onClick={() => handleProviderSelect('github')}
               >
                 <Github className="h-5 w-5" />
-                <span>{t('oauth.continueWithGitHub')}</span>
+                <span>{t("oauth.continueWithGitHub")}</span>
               </Button>
 
               <Button
+                className="flex h-12 w-full items-center justify-center gap-3"
+                onClick={() => handleProviderSelect("google")}
                 variant="outline"
-                className="w-full h-12 flex items-center justify-center gap-3"
-                onClick={() => handleProviderSelect('google')}
               >
                 <Chrome className="h-5 w-5" />
-                <span>{t('oauth.continueWithGoogle')}</span>
+                <span>{t("oauth.continueWithGoogle")}</span>
               </Button>
             </div>
 
             <DialogFooter>
-              <Button variant="ghost" onClick={handleClose}>
-                {t('buttons.cancel')}
+              <Button onClick={handleClose} variant="ghost">
+                {t("buttons.cancel")}
               </Button>
             </DialogFooter>
           </>
         );
 
-      case 'waiting':
+      case "waiting":
         return (
           <>
             <DialogHeader>
               <div className="flex items-center gap-3">
                 <LogIn className="h-6 w-6 text-primary-foreground" />
-                <DialogTitle>{t('oauth.waitingTitle')}</DialogTitle>
+                <DialogTitle>{t("oauth.waitingTitle")}</DialogTitle>
               </div>
-              <DialogDescription className="text-left pt-2">
-                {t('oauth.waitingDescription')}
+              <DialogDescription className="pt-2 text-left">
+                {t("oauth.waitingDescription")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-6">
-              <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-3 text-muted-foreground text-sm">
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span>{t('oauth.waitingForAuth')}</span>
+                <span>{t("oauth.waitingForAuth")}</span>
               </div>
-              <p className="text-sm text-center text-muted-foreground">
-                {t('oauth.popupInstructions')}
+              <p className="text-center text-muted-foreground text-sm">
+                {t("oauth.popupInstructions")}
               </p>
             </div>
 
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="ghost" onClick={handleBack}>
-                {t('oauth.back')}
+              <Button onClick={handleBack} variant="ghost">
+                {t("oauth.back")}
               </Button>
-              <Button variant="ghost" onClick={handleClose}>
-                {t('buttons.cancel')}
+              <Button onClick={handleClose} variant="ghost">
+                {t("buttons.cancel")}
               </Button>
             </DialogFooter>
           </>
         );
 
-      case 'success':
+      case "success":
         return (
           <>
             <DialogHeader>
-              <DialogTitle>{t('oauth.successTitle')}</DialogTitle>
-              <DialogDescription className="text-left pt-2">
-                {t('oauth.welcomeBack', {
+              <DialogTitle>{t("oauth.successTitle")}</DialogTitle>
+              <DialogDescription className="pt-2 text-left">
+                {t("oauth.welcomeBack", {
                   name: state.profile.username || state.profile.email,
                 })}
               </DialogDescription>
             </DialogHeader>
 
-            <div className="py-4 flex items-center justify-center">
+            <div className="flex items-center justify-center py-4">
               <div className="text-green-500">
                 <svg
                   className="h-16 w-16"
@@ -248,10 +248,10 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M5 13l4 4L19 7"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M5 13l4 4L19 7"
                   />
                 </svg>
               </div>
@@ -259,13 +259,13 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
           </>
         );
 
-      case 'error':
+      case "error":
         return (
           <>
             <DialogHeader>
-              <DialogTitle>{t('oauth.errorTitle')}</DialogTitle>
-              <DialogDescription className="text-left pt-2">
-                {t('oauth.errorDescription')}
+              <DialogTitle>{t("oauth.errorTitle")}</DialogTitle>
+              <DialogDescription className="pt-2 text-left">
+                {t("oauth.errorDescription")}
               </DialogDescription>
             </DialogHeader>
 
@@ -276,11 +276,11 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
             </div>
 
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="ghost" onClick={handleBack}>
-                {t('oauth.tryAgain')}
+              <Button onClick={handleBack} variant="ghost">
+                {t("oauth.tryAgain")}
               </Button>
-              <Button variant="ghost" onClick={handleClose}>
-                {t('buttons.close')}
+              <Button onClick={handleClose} variant="ghost">
+                {t("buttons.close")}
               </Button>
             </DialogFooter>
           </>
@@ -290,12 +290,12 @@ const OAuthDialogImpl = NiceModal.create<NoProps>(() => {
 
   return (
     <Dialog
-      open={modal.visible}
       onOpenChange={(open) => {
         if (!open) {
           handleClose();
         }
       }}
+      open={modal.visible}
     >
       <DialogContent className="sm:max-w-[500px]">
         {renderContent()}

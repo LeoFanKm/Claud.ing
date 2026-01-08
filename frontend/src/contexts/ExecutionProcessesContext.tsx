@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useMemo } from 'react';
-import { useExecutionProcesses } from '@/hooks/useExecutionProcesses';
-import type { ExecutionProcess } from 'shared/types';
+import type React from "react";
+import { createContext, useContext, useMemo } from "react";
+import type { ExecutionProcess } from "shared/types";
+import { useExecutionProcesses } from "@/hooks/useExecutionProcesses";
 
 type ExecutionProcessesContextType = {
   executionProcessesAll: ExecutionProcess[];
@@ -47,10 +48,10 @@ export const ExecutionProcessesProvider: React.FC<{
     () =>
       visible.some(
         (process) =>
-          (process.run_reason === 'codingagent' ||
-            process.run_reason === 'setupscript' ||
-            process.run_reason === 'cleanupscript') &&
-          process.status === 'running'
+          (process.run_reason === "codingagent" ||
+            process.run_reason === "setupscript" ||
+            process.run_reason === "cleanupscript") &&
+          process.status === "running"
       ),
     [visible]
   );
@@ -91,7 +92,7 @@ export const useExecutionProcessesContext = () => {
   const ctx = useContext(ExecutionProcessesContext);
   if (!ctx) {
     throw new Error(
-      'useExecutionProcessesContext must be used within ExecutionProcessesProvider'
+      "useExecutionProcessesContext must be used within ExecutionProcessesProvider"
     );
   }
   return ctx;

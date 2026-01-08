@@ -1,11 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { attemptsApi } from '@/lib/api';
-import type { PrCommentsResponse } from 'shared/types';
+import { useQuery } from "@tanstack/react-query";
+import type { PrCommentsResponse } from "shared/types";
+import { attemptsApi } from "@/lib/api";
 
 export const prCommentsKeys = {
-  all: ['prComments'] as const,
+  all: ["prComments"] as const,
   byAttempt: (attemptId: string | undefined, repoId: string | undefined) =>
-    ['prComments', attemptId, repoId] as const,
+    ["prComments", attemptId, repoId] as const,
 };
 
 type Options = {

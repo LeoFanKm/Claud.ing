@@ -1,12 +1,12 @@
-import { useRebase } from './useRebase';
-import { useMerge } from './useMerge';
-import { usePush } from './usePush';
-import { useForcePush } from './useForcePush';
-import { useChangeTargetBranch } from './useChangeTargetBranch';
-import { useGitOperationsError } from '@/contexts/GitOperationsContext';
-import { Result } from '@/lib/api';
-import type { GitOperationError, PushTaskAttemptRequest } from 'shared/types';
-import { ForcePushDialog } from '@/components/dialogs/git/ForcePushDialog';
+import type { GitOperationError, PushTaskAttemptRequest } from "shared/types";
+import { ForcePushDialog } from "@/components/dialogs/git/ForcePushDialog";
+import { useGitOperationsError } from "@/contexts/GitOperationsContext";
+import type { Result } from "@/lib/api";
+import { useChangeTargetBranch } from "./useChangeTargetBranch";
+import { useForcePush } from "./useForcePush";
+import { useMerge } from "./useMerge";
+import { usePush } from "./usePush";
+import { useRebase } from "./useRebase";
 
 export function useGitOperations(
   attemptId: string | undefined,
@@ -22,10 +22,10 @@ export function useGitOperations(
       if (!err.success) {
         const data = err?.error;
         const isConflict =
-          data?.type === 'merge_conflicts' ||
-          data?.type === 'rebase_in_progress';
+          data?.type === "merge_conflicts" ||
+          data?.type === "rebase_in_progress";
         if (!isConflict) {
-          setError(err.message || 'Failed to rebase');
+          setError(err.message || "Failed to rebase");
         }
       }
     }
@@ -36,9 +36,9 @@ export function useGitOperations(
     () => setError(null),
     (err: unknown) => {
       const message =
-        err && typeof err === 'object' && 'message' in err
+        err && typeof err === "object" && "message" in err
           ? String(err.message)
-          : 'Failed to merge';
+          : "Failed to merge";
       setError(message);
     }
   );
@@ -48,9 +48,9 @@ export function useGitOperations(
     () => setError(null),
     (err: unknown) => {
       const message =
-        err && typeof err === 'object' && 'message' in err
+        err && typeof err === "object" && "message" in err
           ? String(err.message)
-          : 'Failed to force push';
+          : "Failed to force push";
       setError(message);
     }
   );
@@ -60,7 +60,7 @@ export function useGitOperations(
     () => setError(null),
     async (err: unknown, errorData, params?: PushTaskAttemptRequest) => {
       // Handle typed push errors
-      if (errorData?.type === 'force_push_required') {
+      if (errorData?.type === "force_push_required") {
         // Show confirmation dialog - dialog handles the force push internally
         if (attemptId && params?.repo_id) {
           await ForcePushDialog.show({ attemptId, repoId: params.repo_id });
@@ -69,9 +69,9 @@ export function useGitOperations(
       }
 
       const message =
-        err && typeof err === 'object' && 'message' in err
+        err && typeof err === "object" && "message" in err
           ? String(err.message)
-          : 'Failed to push';
+          : "Failed to push";
       setError(message);
     }
   );
@@ -82,9 +82,9 @@ export function useGitOperations(
     () => setError(null),
     (err: unknown) => {
       const message =
-        err && typeof err === 'object' && 'message' in err
+        err && typeof err === "object" && "message" in err
           ? String(err.message)
-          : 'Failed to change target branch';
+          : "Failed to change target branch";
       setError(message);
     }
   );

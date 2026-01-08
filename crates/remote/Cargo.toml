@@ -45,3 +45,4 @@ aws-credential-types = "1.2"
 tempfile = "3"
 tar = "0.4"
 flate2 = "1.0"
+moka = { version = "0.12", features = ["future"] }

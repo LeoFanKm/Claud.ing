@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { projectsApi } from '@/lib/api';
-import { ProjectEditorSelectionDialog } from '@/components/dialogs/projects/ProjectEditorSelectionDialog';
-import type { EditorType, Project } from 'shared/types';
+import { useCallback } from "react";
+import type { EditorType, Project } from "shared/types";
+import { ProjectEditorSelectionDialog } from "@/components/dialogs/projects/ProjectEditorSelectionDialog";
+import { projectsApi } from "@/lib/api";
 
 export function useOpenProjectInEditor(
   project: Project | null,
@@ -19,10 +19,10 @@ export function useOpenProjectInEditor(
 
         // If a URL is returned, open it in a new window/tab
         if (response.url) {
-          window.open(response.url, '_blank');
+          window.open(response.url, "_blank");
         }
       } catch (err) {
-        console.error('Failed to open project in editor:', err);
+        console.error("Failed to open project in editor:", err);
         if (!editorType) {
           if (onShowEditorDialog) {
             onShowEditorDialog();
