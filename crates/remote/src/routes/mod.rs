@@ -103,9 +103,13 @@ pub fn router(state: AppState) -> Router {
     let spa =
         ServeDir::new(static_dir).fallback(ServeFile::new(format!("{static_dir}/index.html")));
 
+    // Legacy API router for frontend compatibility (e.g., /api/auth/handoff/init)
+    let api_legacy = oauth::legacy_api_router();
+
     Router::<AppState>::new()
         .nest("/v1", v1_public)
         .nest("/v1", v1_protected)
+        .nest("/api", api_legacy)
         .fallback_service(spa)
         .layer(
             CorsLayer::new()

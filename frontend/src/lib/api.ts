@@ -1333,15 +1333,74 @@ export const approvalsApi = {
   },
 };
 
+// ============================================================================
+// PKCE (Proof Key for Code Exchange) utilities for OAuth
+// ============================================================================
+
+const PKCE_VERIFIER_KEY = "oauth_pkce_verifier";
+
+/**
+ * Generate a random string for PKCE verifier (43-128 characters)
+ */
+function generateVerifier(length = 64): string {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) =>
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".charAt(
+      byte % 62
+    )
+  ).join("");
+}
+
+/**
+ * Generate SHA-256 hash of the verifier (hex encoded)
+ */
+async function generateChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Store PKCE verifier for later use in token exchange
+ */
+function storePkceVerifier(verifier: string): void {
+  sessionStorage.setItem(PKCE_VERIFIER_KEY, verifier);
+}
+
+/**
+ * Retrieve and clear stored PKCE verifier
+ */
+export function getPkceVerifier(): string | null {
+  const verifier = sessionStorage.getItem(PKCE_VERIFIER_KEY);
+  if (verifier) {
+    sessionStorage.removeItem(PKCE_VERIFIER_KEY);
+  }
+  return verifier;
+}
+
 // OAuth API
 export const oauthApi = {
   handoffInit: async (
     provider: string,
     returnTo: string
   ): Promise<{ handoff_id: string; authorize_url: string }> => {
+    // Generate PKCE verifier and challenge for secure OAuth flow
+    const appVerifier = generateVerifier();
+    const appChallenge = await generateChallenge(appVerifier);
+
+    // Store verifier for later token exchange
+    storePkceVerifier(appVerifier);
+
     const response = await makeRequest("/api/auth/handoff/init", {
       method: "POST",
-      body: JSON.stringify({ provider, return_to: returnTo }),
+      body: JSON.stringify({
+        provider,
+        return_to: returnTo,
+        app_challenge: appChallenge,
+      }),
     });
     return handleApiResponse<{ handoff_id: string; authorize_url: string }>(
       response

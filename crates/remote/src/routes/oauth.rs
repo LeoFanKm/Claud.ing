@@ -37,6 +37,14 @@ pub fn public_router() -> Router<AppState> {
         .route("/auth/status", get(auth_status))
 }
 
+/// Legacy API router for frontend compatibility.
+/// Frontend calls `/api/auth/handoff/init` which maps to `web_init`.
+pub fn legacy_api_router() -> Router<AppState> {
+    Router::new()
+        .route("/auth/handoff/init", post(web_init))
+        .route("/auth/status", get(auth_status))
+}
+
 pub fn protected_router() -> Router<AppState> {
     Router::new()
         .route("/profile", get(profile))
