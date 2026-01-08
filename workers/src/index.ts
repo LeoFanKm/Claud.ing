@@ -193,6 +193,26 @@ app.get("/api/editors/check-availability", (c) => {
 });
 
 // ============================================================================
+// OAuth Handoff Endpoints for Legacy Authentication
+// These endpoints are called when Clerk is disabled and the app falls back
+// to the legacy OAuth flow (used by desktop app)
+// ============================================================================
+
+// POST /api/auth/handoff/init - Initialize OAuth handoff
+// In web mode without Clerk, we return an error directing users to enable Clerk
+app.post("/api/auth/handoff/init", (c) => {
+  return c.json(
+    {
+      error: "OAuth handoff not available",
+      message:
+        "OAuth handoff is only available in desktop app. Please enable Clerk authentication for web mode, or use the desktop application.",
+      code: "OAUTH_NOT_AVAILABLE",
+    },
+    501
+  );
+});
+
+// ============================================================================
 // Authentication Status Endpoint
 // Returns the current user's login status and profile information
 // This endpoint is called by frontend's useAuthStatus hook during OAuth polling
