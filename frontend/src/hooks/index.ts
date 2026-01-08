@@ -1,5 +1,5 @@
 export { useAuth } from "./auth/useAuth";
-export { useLandingAuth } from "./auth/useLandingAuth";
+export { LandingAuthProvider, useLandingAuth } from "./auth/useLandingAuth";
 export { useAuthMutations } from "./auth/useAuthMutations";
 export { useAuthStatus } from "./auth/useAuthStatus";
 export { useCurrentUser } from "./auth/useCurrentUser";

@@ -6,7 +6,7 @@
  * @output React component for the landing page
  * @position pages/Landing
  *
- * @lastModified 2026-01-06
+ * @lastModified 2026-01-08
  */
 
 console.log("[Landing.tsx] Module loading...");
@@ -20,22 +20,25 @@ import {
   LandingNavbar,
   QuickStartSection,
 } from "@/components/landing";
+import { LandingAuthProvider } from "@/hooks";
 
 console.log("[Landing.tsx] Imports loaded successfully");
 
 export function Landing() {
   console.log("[Landing] Component rendering...");
   return (
-    <div className="min-h-screen bg-background">
-      <LandingNavbar />
-      <main>
-        <HeroSection />
-        <QuickStartSection />
-        <FeaturesSection />
-        <AgentSupportSection />
-        <FAQSection />
-      </main>
-      <FooterSection />
-    </div>
+    <LandingAuthProvider>
+      <div className="min-h-screen bg-background">
+        <LandingNavbar />
+        <main>
+          <HeroSection />
+          <QuickStartSection />
+          <FeaturesSection />
+          <AgentSupportSection />
+          <FAQSection />
+        </main>
+        <FooterSection />
+      </div>
+    </LandingAuthProvider>
   );
 }
