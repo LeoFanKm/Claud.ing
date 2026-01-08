@@ -16,6 +16,9 @@ import { clearAuthTokenGetter, setAuthTokenGetter } from "@/lib/api";
  *
  * When Clerk is enabled, sets up the token getter to fetch Clerk session tokens.
  * When Clerk is disabled, clears the token getter.
+ *
+ * IMPORTANT: Only sets up token getter after Clerk is fully loaded (isLoaded: true)
+ * to prevent getToken() from hanging during initialization.
  */
 export function useApiAuth() {
   const isClerkEnabled = useClerkEnabled();
@@ -23,28 +26,38 @@ export function useApiAuth() {
   // 只在 Clerk 启用时获取 getToken
   // 使用条件调用 hook 是安全的，因为 isClerkEnabled 在组件生命周期内不会改变
   let getToken: (() => Promise<string | null>) | null = null;
+  let isLoaded = false;
 
   if (isClerkEnabled) {
     try {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const clerkAuth = useClerkAuth();
-      getToken = clerkAuth.getToken;
+      // CRITICAL: Only use getToken after Clerk is fully loaded
+      // If isLoaded is false, getToken() will hang waiting for initialization
+      isLoaded = clerkAuth.isLoaded;
+      if (isLoaded) {
+        getToken = clerkAuth.getToken;
+      }
     } catch {
       // Clerk 未初始化时忽略错误
     }
   }
 
   useEffect(() => {
-    if (isClerkEnabled && getToken) {
+    // Only set token getter when Clerk is loaded AND we have a getToken function
+    if (isClerkEnabled && isLoaded && getToken) {
       // 设置 token getter，API 客户端会在每次请求时调用
       setAuthTokenGetter(getToken);
       return () => {
         clearAuthTokenGetter();
       };
     }
-    // Clerk 未启用时清除 token getter
+    // Clerk 未启用或未加载完成时清除 token getter
     clearAuthTokenGetter();
-  }, [isClerkEnabled, getToken]);
+  }, [isClerkEnabled, isLoaded, getToken]);
 
-  return { isAuthenticated: isClerkEnabled && !!getToken, isLoading: false };
+  return {
+    isAuthenticated: isClerkEnabled && isLoaded && !!getToken,
+    isLoading: isClerkEnabled && !isLoaded,
+  };
 }
