@@ -14,7 +14,39 @@
   },
   "quickStart": {
     "title": "Quick Start",
-    "requirement": "Requires a Claude Code subscription"
+    "selectAgent": "Select your AI Agent",
+    "visitSite": "Visit Official Site",
+    "agents": {
+      "claude_code": {
+        "requirement": "Requires a Claude Code subscription"
+      },
+      "cursor": {
+        "requirement": "Requires Cursor IDE installed",
+        "installHint": "Download Cursor IDE from cursor.sh to get started"
+      },
+      "copilot": {
+        "requirement": "Requires VS Code with GitHub Copilot extension",
+        "installHint": "Install VS Code and the GitHub Copilot extension from the marketplace"
+      },
+      "gemini": {
+        "requirement": "Requires a Google AI account"
+      },
+      "codex": {
+        "requirement": "Requires an OpenAI API key"
+      },
+      "amp": {
+        "requirement": "Requires an Amp account"
+      },
+      "qwen": {
+        "requirement": "Requires a Qwen account"
+      },
+      "opencode": {
+        "requirement": "Requires an Opencode account"
+      },
+      "droid": {
+        "requirement": "Requires a Factory account"
+      }
+    }
   },
   "features": {
     "title": "Powerful Features",
@@ -53,23 +85,23 @@
       },
       "supportedAgents": {
         "question": "Which AI agents are supported?",
-        "answer": "We currently support Claude Code as the primary AI agent. Claude Code can analyze your codebase, break down complex tasks, and provide intelligent suggestions. Support for additional agents is planned for future releases."
+        "answer": "We support multiple AI agents including Claude Code, Cursor, GitHub Copilot, Gemini CLI, OpenAI Codex, Amp, Qwen, Opencode, and Factory Droid. Each agent can analyze your codebase, break down complex tasks, and provide intelligent suggestions."
       },
       "isFree": {
         "question": "Is it free to use?",
-        "answer": "The Kanban board features are free to use. However, AI-powered features like task breakdown and intelligent suggestions require a Claude Code subscription, which you manage through Anthropic."
+        "answer": "The Kanban board features are free to use. However, AI-powered features like task breakdown and intelligent suggestions require a subscription to your chosen AI agent provider."
       },
       "parallelExecution": {
         "question": "How does parallel execution work?",
-        "answer": "Claude Code can execute multiple independent tasks simultaneously. When you have tasks without dependencies, our system automatically identifies and runs them in parallel, significantly reducing overall completion time."
+        "answer": "AI agents can execute multiple independent tasks simultaneously. When you have tasks without dependencies, our system automatically identifies and runs them in parallel, significantly reducing overall completion time."
       },
       "vscodeSupport": {
         "question": "Does it work with VS Code?",
-        "answer": "Yes! Claude Code integrates seamlessly with VS Code through the official extension. You can manage tasks directly from your editor and have Claude Code work on your codebase without leaving your development environment."
+        "answer": "Yes! Many AI agents integrate seamlessly with VS Code. You can manage tasks directly from your editor and have agents work on your codebase without leaving your development environment."
       },
       "whatIsMcp": {
         "question": "What is MCP?",
-        "answer": "MCP (Model Context Protocol) is an open protocol that enables AI models to securely connect with external tools and data sources. It allows Claude Code to interact with your development environment, databases, and other services while maintaining security boundaries."
+        "answer": "MCP (Model Context Protocol) is an open protocol that enables AI models to securely connect with external tools and data sources. It allows AI agents to interact with your development environment, databases, and other services while maintaining security boundaries."
       }
     }
   },

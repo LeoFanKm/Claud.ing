@@ -14,7 +14,39 @@
   },
   "quickStart": {
     "title": "Inicio Rápido",
-    "requirement": "Requiere una suscripción a Claude Code"
+    "selectAgent": "Selecciona tu Agente de IA",
+    "visitSite": "Visitar Sitio Oficial",
+    "agents": {
+      "claude_code": {
+        "requirement": "Requiere una suscripción a Claude Code"
+      },
+      "cursor": {
+        "requirement": "Requiere Cursor IDE instalado",
+        "installHint": "Descarga Cursor IDE desde cursor.sh para comenzar"
+      },
+      "copilot": {
+        "requirement": "Requiere VS Code con extensión GitHub Copilot",
+        "installHint": "Instala VS Code y la extensión GitHub Copilot desde el marketplace"
+      },
+      "gemini": {
+        "requirement": "Requiere una cuenta de Google AI"
+      },
+      "codex": {
+        "requirement": "Requiere una clave API de OpenAI"
+      },
+      "amp": {
+        "requirement": "Requiere una cuenta de Amp"
+      },
+      "qwen": {
+        "requirement": "Requiere una cuenta de Qwen"
+      },
+      "opencode": {
+        "requirement": "Requiere una cuenta de Opencode"
+      },
+      "droid": {
+        "requirement": "Requiere una cuenta de Factory"
+      }
+    }
   },
   "features": {
     "title": "Funciones Potentes",
@@ -49,27 +81,27 @@
     "items": {
       "codeSecurity": {
         "question": "¿Mi código está seguro?",
-        "answer": "Sí, tu código nunca sale de tu máquina local. Claude Code se ejecuta completamente en tu dispositivo, y solo almacenamos metadatos de tareas (títulos, descripciones, estado) en nuestros servidores. Tu código fuente y datos sensibles permanecen privados."
+        "answer": "Sí, tu código nunca sale de tu máquina local. Los agentes de IA se ejecutan completamente en tu dispositivo, y solo almacenamos metadatos de tareas (títulos, descripciones, estado) en nuestros servidores. Tu código fuente y datos sensibles permanecen privados."
       },
       "supportedAgents": {
         "question": "¿Qué agentes de IA son compatibles?",
-        "answer": "Actualmente soportamos Claude Code como el agente de IA principal. Claude Code puede analizar tu base de código, desglosar tareas complejas y proporcionar sugerencias inteligentes. El soporte para agentes adicionales está planificado para futuras versiones."
+        "answer": "Soportamos múltiples agentes de IA incluyendo Claude Code, Cursor, GitHub Copilot, Gemini CLI, OpenAI Codex, Amp, Qwen, Opencode y Factory Droid. Cada agente puede analizar tu base de código, desglosar tareas complejas y proporcionar sugerencias inteligentes."
       },
       "isFree": {
         "question": "¿Es gratis?",
-        "answer": "Las funciones del tablero Kanban son gratuitas. Sin embargo, las funciones impulsadas por IA como el desglose de tareas y las sugerencias inteligentes requieren una suscripción a Claude Code, que gestionas a través de Anthropic."
+        "answer": "Las funciones del tablero Kanban son gratuitas. Sin embargo, las funciones impulsadas por IA como el desglose de tareas y las sugerencias inteligentes requieren una suscripción al proveedor de agentes de IA que elijas."
       },
       "parallelExecution": {
         "question": "¿Cómo funciona la ejecución paralela?",
-        "answer": "Claude Code puede ejecutar múltiples tareas independientes simultáneamente. Cuando tienes tareas sin dependencias, nuestro sistema las identifica automáticamente y las ejecuta en paralelo, reduciendo significativamente el tiempo total de finalización."
+        "answer": "Los agentes de IA pueden ejecutar múltiples tareas independientes simultáneamente. Cuando tienes tareas sin dependencias, nuestro sistema las identifica automáticamente y las ejecuta en paralelo, reduciendo significativamente el tiempo total de finalización."
       },
       "vscodeSupport": {
         "question": "¿Funciona con VS Code?",
-        "answer": "¡Sí! Claude Code se integra perfectamente con VS Code a través de la extensión oficial. Puedes gestionar tareas directamente desde tu editor y hacer que Claude Code trabaje en tu base de código sin salir de tu entorno de desarrollo."
+        "answer": "¡Sí! Muchos agentes de IA se integran perfectamente con VS Code. Puedes gestionar tareas directamente desde tu editor y hacer que los agentes trabajen en tu base de código sin salir de tu entorno de desarrollo."
       },
       "whatIsMcp": {
         "question": "¿Qué es MCP?",
-        "answer": "MCP (Model Context Protocol) es un protocolo abierto que permite a los modelos de IA conectarse de forma segura con herramientas externas y fuentes de datos. Permite que Claude Code interactúe con tu entorno de desarrollo, bases de datos y otros servicios mientras mantiene los límites de seguridad."
+        "answer": "MCP (Model Context Protocol) es un protocolo abierto que permite a los modelos de IA conectarse de forma segura con herramientas externas y fuentes de datos. Permite que los agentes de IA interactúen con tu entorno de desarrollo, bases de datos y otros servicios mientras mantienen los límites de seguridad."
       }
     }
   },

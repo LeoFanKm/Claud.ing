@@ -130,7 +130,12 @@
       "Bash(gh run list:*)",
       "Bash(pnpm build:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: comprehensive web mode optimization and branding update\n\nPhase 1 - Critical Bug Fixes:\n- Fix onboarding/disclaimer dialogs not showing in web mode \\(ConfigProvider defaults\\)\n- Fix empty agent selector in OnboardingDialog with BaseCodingAgent enum fallback\n- Add web_mode detection to useEditorAvailability and useAgentAvailability\n- Update availability indicators for web mode UI\n\nPhase 2 - Branding Consistency:\n- Create centralized branding constants \\(frontend/src/constants/branding.ts\\)\n- Update all dialogs with \"Kanban by Clauding\" branding\n- Update all i18n files across 5 languages \\(en, es, ja, ko, zh-Hans\\)\n\nPhase 3 - UX Improvements:\n- Add ProjectListSkeleton component for better loading states\n- Update ProjectList to use skeleton loader instead of spinner\n\nPhase 4 - Code Quality:\n- Add environment-aware logger utility \\(frontend/src/lib/logger.ts\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: comprehensive web mode optimization and branding update\n\nPhase 1 - Critical Bug Fixes:\n- Fix onboarding/disclaimer dialogs not showing in web mode\n- Fix empty agent selector in OnboardingDialog with BaseCodingAgent enum fallback\n- Add web_mode detection to useEditorAvailability and useAgentAvailability\n- Update availability indicators for web mode UI\n\nPhase 2 - Branding Consistency:\n- Create centralized branding constants \\(frontend/src/constants/branding.ts\\)\n- Update all dialogs with \"Kanban by Clauding\" branding\n- Update all i18n files across 5 languages \\(en, es, ja, ko, zh-Hans\\)\n\nPhase 3 - UX Improvements:\n- Add ProjectListSkeleton component for better loading states\n- Update ProjectList to use skeleton loader instead of spinner\n\nPhase 4 - Code Quality:\n- Add environment-aware logger utility \\(frontend/src/lib/logger.ts\\)\n- Add .dev.vars to .gitignore to prevent secret exposure\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm eslint:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

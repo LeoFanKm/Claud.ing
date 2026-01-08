@@ -14,7 +14,39 @@
   },
   "quickStart": {
     "title": "クイックスタート",
-    "requirement": "Claude Codeサブスクリプションが必要です"
+    "selectAgent": "AIエージェントを選択",
+    "visitSite": "公式サイトへ",
+    "agents": {
+      "claude_code": {
+        "requirement": "Claude Codeサブスクリプションが必要です"
+      },
+      "cursor": {
+        "requirement": "Cursor IDEのインストールが必要です",
+        "installHint": "cursor.shからCursor IDEをダウンロードしてください"
+      },
+      "copilot": {
+        "requirement": "VS CodeとGitHub Copilot拡張機能が必要です",
+        "installHint": "VS CodeとMarketplaceからGitHub Copilot拡張機能をインストールしてください"
+      },
+      "gemini": {
+        "requirement": "Google AIアカウントが必要です"
+      },
+      "codex": {
+        "requirement": "OpenAI APIキーが必要です"
+      },
+      "amp": {
+        "requirement": "Ampアカウントが必要です"
+      },
+      "qwen": {
+        "requirement": "Qwenアカウントが必要です"
+      },
+      "opencode": {
+        "requirement": "Opencodeアカウントが必要です"
+      },
+      "droid": {
+        "requirement": "Factoryアカウントが必要です"
+      }
+    }
   },
   "features": {
     "title": "パワフルな機能",
@@ -49,27 +81,27 @@
     "items": {
       "codeSecurity": {
         "question": "コードは安全ですか？",
-        "answer": "はい、コードはローカルマシンから離れることはありません。Claude Codeは完全にデバイス上で実行され、サーバーにはタスクのメタデータ（タイトル、説明、ステータス）のみを保存します。ソースコードと機密データは常にプライベートに保たれます。"
+        "answer": "はい、コードはローカルマシンから離れることはありません。AIエージェントは完全にデバイス上で実行され、サーバーにはタスクのメタデータ（タイトル、説明、ステータス）のみを保存します。ソースコードと機密データは常にプライベートに保たれます。"
       },
       "supportedAgents": {
         "question": "どのAIエージェントがサポートされていますか？",
-        "answer": "現在、Claude Codeを主要なAIエージェントとしてサポートしています。Claude Codeはコードベースを分析し、複雑なタスクを分解し、インテリジェントな提案を提供できます。追加エージェントのサポートは将来のリリースで予定されています。"
+        "answer": "Claude Code、Cursor、GitHub Copilot、Gemini CLI、OpenAI Codex、Amp、Qwen、Opencode、Factory Droidを含む複数のAIエージェントをサポートしています。各エージェントはコードベースを分析し、複雑なタスクを分解し、インテリジェントな提案を提供できます。"
       },
       "isFree": {
         "question": "無料で使えますか？",
-        "answer": "カンバンボード機能は無料でご利用いただけます。ただし、タスク分解やインテリジェントな提案などのAI搭載機能にはClaude Codeサブスクリプションが必要で、Anthropicを通じて管理します。"
+        "answer": "カンバンボード機能は無料でご利用いただけます。ただし、タスク分解やインテリジェントな提案などのAI搭載機能には、選択したAIエージェントプロバイダーへのサブスクリプションが必要です。"
       },
       "parallelExecution": {
         "question": "並列実行はどのように機能しますか？",
-        "answer": "Claude Codeは複数の独立したタスクを同時に実行できます。依存関係のないタスクがある場合、システムが自動的に識別し、並列で実行することで、全体の完了時間を大幅に短縮します。"
+        "answer": "AIエージェントは複数の独立したタスクを同時に実行できます。依存関係のないタスクがある場合、システムが自動的に識別し、並列で実行することで、全体の完了時間を大幅に短縮します。"
       },
       "vscodeSupport": {
         "question": "VS Codeで使えますか？",
-        "answer": "はい！Claude Codeは公式拡張機能を通じてVS Codeとシームレスに統合されています。エディタから直接タスクを管理し、開発環境を離れることなくClaude Codeにコードベースで作業させることができます。"
+        "answer": "はい！多くのAIエージェントはVS Codeとシームレスに統合されています。エディタから直接タスクを管理し、開発環境を離れることなくエージェントにコードベースで作業させることができます。"
       },
       "whatIsMcp": {
         "question": "MCPとは何ですか？",
-        "answer": "MCP（Model Context Protocol）は、AIモデルが外部ツールやデータソースと安全に接続できるオープンプロトコルです。セキュリティ境界を維持しながら、Claude Codeが開発環境、データベース、その他のサービスと対話できるようにします。"
+        "answer": "MCP（Model Context Protocol）は、AIモデルが外部ツールやデータソースと安全に接続できるオープンプロトコルです。セキュリティ境界を維持しながら、AIエージェントが開発環境、データベース、その他のサービスと対話できるようにします。"
       }
     }
   },

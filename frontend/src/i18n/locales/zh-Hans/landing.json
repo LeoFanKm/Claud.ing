@@ -14,7 +14,39 @@
   },
   "quickStart": {
     "title": "快速开始",
-    "requirement": "需要 Claude Code 订阅"
+    "selectAgent": "选择您的 AI Agent",
+    "visitSite": "访问官方网站",
+    "agents": {
+      "claude_code": {
+        "requirement": "需要 Claude Code 订阅"
+      },
+      "cursor": {
+        "requirement": "需要安装 Cursor IDE",
+        "installHint": "从 cursor.sh 下载 Cursor IDE 开始使用"
+      },
+      "copilot": {
+        "requirement": "需要 VS Code 和 GitHub Copilot 扩展",
+        "installHint": "安装 VS Code 并从扩展市场安装 GitHub Copilot 扩展"
+      },
+      "gemini": {
+        "requirement": "需要 Google AI 账户"
+      },
+      "codex": {
+        "requirement": "需要 OpenAI API 密钥"
+      },
+      "amp": {
+        "requirement": "需要 Amp 账户"
+      },
+      "qwen": {
+        "requirement": "需要通义千问账户"
+      },
+      "opencode": {
+        "requirement": "需要 Opencode 账户"
+      },
+      "droid": {
+        "requirement": "需要 Factory 账户"
+      }
+    }
   },
   "features": {
     "title": "强大功能",
@@ -49,27 +81,27 @@
     "items": {
       "codeSecurity": {
         "question": "我的代码安全吗？",
-        "answer": "是的，您的代码永远不会离开您的本地机器。Claude Code 完全在您的设备上运行，我们只在服务器上存储任务元数据（标题、描述、状态）。您的源代码和敏感数据始终保持私密。"
+        "answer": "是的，您的代码永远不会离开您的本地机器。AI 代理完全在您的设备上运行，我们只在服务器上存储任务元数据（标题、描述、状态）。您的源代码和敏感数据始终保持私密。"
       },
       "supportedAgents": {
         "question": "支持哪些 AI 代理？",
-        "answer": "我们目前支持 Claude Code 作为主要 AI 代理。Claude Code 可以分析您的代码库、分解复杂任务并提供智能建议。未来版本将计划支持更多代理。"
+        "answer": "我们支持多种 AI 代理，包括 Claude Code、Cursor、GitHub Copilot、Gemini CLI、OpenAI Codex、Amp、通义千问、Opencode 和 Factory Droid。每个代理都可以分析您的代码库、分解复杂任务并提供智能建议。"
       },
       "isFree": {
         "question": "使用免费吗？",
-        "answer": "看板功能是免费使用的。但是，任务分解和智能建议等 AI 驱动功能需要 Claude Code 订阅，您可以通过 Anthropic 管理订阅。"
+        "answer": "看板功能是免费使用的。但是，任务分解和智能建议等 AI 驱动功能需要您所选 AI 代理提供商的订阅。"
       },
       "parallelExecution": {
         "question": "并行执行是如何工作的？",
-        "answer": "Claude Code 可以同时执行多个独立任务。当您有没有依赖关系的任务时，我们的系统会自动识别并并行运行它们，显著减少整体完成时间。"
+        "answer": "AI 代理可以同时执行多个独立任务。当您有没有依赖关系的任务时，我们的系统会自动识别并并行运行它们，显著减少整体完成时间。"
       },
       "vscodeSupport": {
         "question": "支持 VS Code 吗？",
-        "answer": "是的！Claude Code 通过官方扩展与 VS Code 无缝集成。您可以直接从编辑器管理任务，让 Claude Code 在您的代码库上工作，无需离开开发环境。"
+        "answer": "是的！许多 AI 代理与 VS Code 无缝集成。您可以直接从编辑器管理任务，让代理在您的代码库上工作，无需离开开发环境。"
       },
       "whatIsMcp": {
         "question": "什么是 MCP？",
-        "answer": "MCP（模型上下文协议）是一个开放协议，使 AI 模型能够安全地连接外部工具和数据源。它允许 Claude Code 与您的开发环境、数据库和其他服务交互，同时保持安全边界。"
+        "answer": "MCP（模型上下文协议）是一个开放协议，使 AI 模型能够安全地连接外部工具和数据源。它允许 AI 代理与您的开发环境、数据库和其他服务交互，同时保持安全边界。"
       }
     }
   },
