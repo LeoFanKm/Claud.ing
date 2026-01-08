@@ -91,6 +91,8 @@ function LegacyAuthButtons() {
   const { isSignedIn } = useLandingAuth();
   const navigate = useNavigate();
 
+  console.log("[LegacyAuthButtons] Rendering, isSignedIn:", isSignedIn);
+
   const handleSignIn = useCallback(async () => {
     if (isSignedIn) {
       navigate("/projects");
@@ -104,9 +106,11 @@ function LegacyAuthButtons() {
 
   // If already signed in, don't show sign in buttons
   if (isSignedIn) {
+    console.log("[LegacyAuthButtons] User signed in, hiding buttons");
     return null;
   }
 
+  console.log("[LegacyAuthButtons] Rendering sign in/up buttons");
   return (
     <>
       <Button className="gap-2" onClick={handleSignIn} size="sm" variant="ghost">
@@ -124,8 +128,11 @@ function LegacyAuthButtons() {
 export function ClerkAuthButtons() {
   const isClerkEnabled = useClerkEnabled();
 
+  console.log("[ClerkAuthButtons] isClerkEnabled:", isClerkEnabled);
+
   // If Clerk is not enabled, show legacy OAuth buttons
   if (!isClerkEnabled) {
+    console.log("[ClerkAuthButtons] Using LegacyAuthButtons");
     return <LegacyAuthButtons />;
   }
 
