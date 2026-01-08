@@ -45,6 +45,10 @@ jobs:
       - name: Build frontend
         run: pnpm build
         working-directory: frontend
+        env:
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+          VITE_VK_SHARED_API_BASE: https://api.claud.ing
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
