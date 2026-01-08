@@ -31,6 +31,7 @@ export function useApiAuth() {
   // 使用条件调用 hook 是安全的，因为 isClerkEnabled 在组件生命周期内不会改变
   let getToken: (() => Promise<string | null>) | null = null;
   let isLoaded = false;
+  let isSignedIn = false;
 
   if (isClerkEnabled) {
     try {
@@ -39,6 +40,7 @@ export function useApiAuth() {
       // CRITICAL: Only use getToken after Clerk is fully loaded
       // If isLoaded is false, getToken() will hang waiting for initialization
       isLoaded = clerkAuth.isLoaded;
+      isSignedIn = clerkAuth.isSignedIn ?? false;
 
       // Debug: Log Clerk auth state
       console.log("[useApiAuth] Clerk state:", {
@@ -48,9 +50,9 @@ export function useApiAuth() {
         hasGetToken: !!clerkAuth.getToken,
       });
 
-      if (isLoaded && clerkAuth.isSignedIn) {
+      if (isLoaded && isSignedIn) {
         getToken = clerkAuth.getToken;
-      } else if (isLoaded && !clerkAuth.isSignedIn) {
+      } else if (isLoaded && !isSignedIn) {
         // User is not signed in - don't set tokenGetter
         console.log("[useApiAuth] User not signed in, skipping token getter");
       }
@@ -61,23 +63,33 @@ export function useApiAuth() {
 
   useEffect(() => {
     if (isClerkEnabled) {
-      if (isLoaded && getToken) {
-        // Clerk is loaded - set the token getter
+      if (!isLoaded) {
+        // Clerk is still loading - signal that auth is pending
+        // This will make API requests wait for auth to be ready
+        console.log("[useApiAuth] Clerk loading, setting auth pending");
+        setAuthPending();
+        return () => {
+          clearAuthTokenGetter();
+        };
+      }
+
+      if (isLoaded && isSignedIn && getToken) {
+        // User is signed in - set the token getter
+        console.log("[useApiAuth] User signed in, setting token getter");
         setAuthTokenGetter(getToken);
         return () => {
           clearAuthTokenGetter();
         };
       }
-      // Clerk is enabled but still loading - signal that auth is pending
-      // This will make API requests wait for auth to be ready
-      setAuthPending();
-      return () => {
-        clearAuthTokenGetter();
-      };
+
+      // Clerk loaded but user not signed in - clear auth and proceed without token
+      console.log("[useApiAuth] User not signed in, clearing auth (API will work without token)");
+      clearAuthTokenGetter();
+      return;
     }
     // Clerk not enabled - clear any pending auth state
     clearAuthTokenGetter();
-  }, [isClerkEnabled, isLoaded, getToken]);
+  }, [isClerkEnabled, isLoaded, isSignedIn, getToken]);
 
   return {
     isAuthenticated: isClerkEnabled && isLoaded && !!getToken,
