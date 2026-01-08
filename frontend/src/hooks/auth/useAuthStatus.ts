@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { useAuth } from "@/hooks";
 import { oauthApi } from "@/lib/api";
 
 interface UseAuthStatusOptions {
   enabled: boolean;
 }
 
+/**
+ * Hook to poll OAuth authentication status.
+ * NOTE: This hook intentionally does NOT depend on useAuth/useUserSystem
+ * so it can be used on the Landing page outside UserSystemProvider.
+ */
 export function useAuthStatus(options: UseAuthStatusOptions) {
   const query = useQuery({
     queryKey: ["auth", "status"],
@@ -16,13 +19,6 @@ export function useAuthStatus(options: UseAuthStatusOptions) {
     retry: 3,
     staleTime: 0, // Always fetch fresh data when enabled
   });
-
-  const { isSignedIn } = useAuth();
-  useEffect(() => {
-    if (query) {
-      query.refetch();
-    }
-  }, [isSignedIn, query]);
 
   return query;
 }
