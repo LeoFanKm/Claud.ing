@@ -6,10 +6,12 @@
  */
 
 import { useAuth as useClerkAuth } from "@clerk/clerk-react";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useClerkEnabled } from "@/contexts/ClerkContext";
 import {
   clearAuthTokenGetter,
+  initAuthSettled,
+  markAuthSettled,
   setAuthPending,
   setAuthTokenGetter,
 } from "@/lib/api";
@@ -21,8 +23,11 @@ import {
  * When Clerk is enabled, sets up the token getter to fetch Clerk session tokens.
  * When Clerk is disabled, clears the token getter.
  *
- * IMPORTANT: Only sets up token getter after Clerk is fully loaded (isLoaded: true)
- * to prevent getToken() from hanging during initialization.
+ * Uses Auth Settled pattern: API requests wait until auth state is determined
+ * (signed in, signed out, or Clerk disabled) before proceeding.
+ *
+ * IMPORTANT: Uses useLayoutEffect to minimize race condition window between
+ * Clerk state updates and API requests.
  */
 export function useApiAuth() {
   const isClerkEnabled = useClerkEnabled();
@@ -61,7 +66,13 @@ export function useApiAuth() {
     }
   }
 
-  useEffect(() => {
+  // Use useLayoutEffect to minimize race condition window
+  // This runs synchronously after DOM mutations but before browser paint
+  useLayoutEffect(() => {
+    // Initialize auth settled promise on first render
+    // This ensures API requests wait for auth state to be determined
+    initAuthSettled();
+
     if (isClerkEnabled) {
       if (!isLoaded) {
         // Clerk is still loading - signal that auth is pending
@@ -75,6 +86,7 @@ export function useApiAuth() {
 
       if (isLoaded && isSignedIn && getToken) {
         // User is signed in - set the token getter
+        // setAuthTokenGetter also calls markAuthSettled internally
         console.log("[useApiAuth] User signed in, setting token getter");
         setAuthTokenGetter(getToken);
         return () => {
@@ -82,13 +94,18 @@ export function useApiAuth() {
         };
       }
 
-      // Clerk loaded but user not signed in - clear auth and proceed without token
-      console.log("[useApiAuth] User not signed in, clearing auth (API will work without token)");
+      // Clerk loaded but user not signed in - mark auth as settled
+      // This allows API requests to proceed without token
+      console.log("[useApiAuth] User not signed in, marking auth settled");
       clearAuthTokenGetter();
+      markAuthSettled();
       return;
     }
-    // Clerk not enabled - clear any pending auth state
+
+    // Clerk not enabled - mark auth as settled immediately
+    console.log("[useApiAuth] Clerk disabled, marking auth settled");
     clearAuthTokenGetter();
+    markAuthSettled();
   }, [isClerkEnabled, isLoaded, isSignedIn, getToken]);
 
   return {

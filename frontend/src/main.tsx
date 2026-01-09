@@ -13,8 +13,16 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { ClerkEnabledProvider } from './contexts/ClerkContext';
 // Import modal type definitions
 import './types/modals';
+// Import auth initialization
+import { initAuthSettled } from './lib/api';
 
 console.log('[main.tsx] All imports loaded successfully');
+
+// Initialize auth settled promise immediately
+// This ensures API requests wait for auth state to be determined
+// before proceeding, preventing 401 errors from race conditions
+initAuthSettled();
+console.log('[main.tsx] Auth settled promise initialized');
 
 // Initialize PostHog for analytics
 if (

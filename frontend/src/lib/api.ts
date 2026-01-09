@@ -152,7 +152,7 @@ function detectRemoteApiMode(): boolean {
 export const isRemoteApiEnabled = detectRemoteApiMode();
 
 // ============================================================================
-// Authentication
+// Authentication - Auth Settled 模式
 // ============================================================================
 
 /**
@@ -165,6 +165,24 @@ let tokenGetter: TokenGetter | null = null;
 // Auth ready state - resolves when Clerk is loaded and tokenGetter is set
 let authReadyResolve: (() => void) | null = null;
 let authReadyPromise: Promise<void> | null = null;
+
+// Auth settled state - resolves when auth state is determined (signed in, signed out, or Clerk disabled)
+// This ensures API requests wait until we know the final auth state
+let authSettled = false;
+let authSettledResolve: (() => void) | null = null;
+let authSettledPromise: Promise<void> | null = null;
+
+/**
+ * Initialize auth settled promise (call once at app startup)
+ * This ensures API requests wait for auth state to be determined
+ */
+export function initAuthSettled() {
+  if (!authSettledPromise && !authSettled) {
+    authSettledPromise = new Promise((resolve) => {
+      authSettledResolve = resolve;
+    });
+  }
+}
 
 /**
  * Signal that auth is pending (Clerk is loading)
@@ -190,49 +208,80 @@ export function setAuthTokenGetter(getter: TokenGetter) {
     authReadyResolve = null;
     authReadyPromise = null;
   }
+  // Also mark auth as settled (user is signed in)
+  markAuthSettled();
 }
 
 /**
- * Clear the authentication token getter (on logout)
+ * Clear the authentication token getter (on logout or not signed in)
  */
 export function clearAuthTokenGetter() {
   tokenGetter = null;
   // Reset auth ready state
   authReadyResolve = null;
   authReadyPromise = null;
+  // Note: Don't clear authSettled - "not signed in" is still a determined state
+}
+
+/**
+ * Mark auth state as settled (determined)
+ * Call this when auth state is known: signed in, signed out, or Clerk disabled
+ */
+export function markAuthSettled() {
+  if (!authSettled) {
+    authSettled = true;
+    if (authSettledResolve) {
+      authSettledResolve();
+      authSettledResolve = null;
+      authSettledPromise = null;
+    }
+  }
+}
+
+/**
+ * Reset auth state (for logout then re-login scenarios)
+ */
+export function resetAuthState() {
+  authSettled = false;
+  tokenGetter = null;
+  authReadyResolve = null;
+  authReadyPromise = null;
+  authSettledResolve = null;
+  authSettledPromise = null;
 }
 
 // Timeout for getting auth token
 const AUTH_TOKEN_TIMEOUT_MS = 5000; // 5 seconds for token fetch
-const AUTH_READY_TIMEOUT_MS = 10000; // 10 seconds max wait for Clerk to load
+const AUTH_SETTLED_TIMEOUT_MS = 10000; // 10 seconds max wait for auth to settle
 
 /**
  * Get the current auth token (if available)
- * Waits for auth to be ready if Clerk is loading, then fetches token
+ * Waits for auth state to be settled, then fetches token if signed in
  */
 async function getAuthToken(): Promise<string | null> {
-  // If auth is pending (Clerk loading), wait for it with timeout
-  if (authReadyPromise) {
+  // Step 1: Wait for auth state to be determined (settled)
+  if (authSettledPromise) {
     try {
       await Promise.race([
-        authReadyPromise,
+        authSettledPromise,
         new Promise<void>((_, reject) =>
           setTimeout(
-            () => reject(new Error("Auth ready timeout")),
-            AUTH_READY_TIMEOUT_MS
+            () => reject(new Error("Auth settled timeout")),
+            AUTH_SETTLED_TIMEOUT_MS
           )
         ),
       ]);
     } catch {
-      console.warn("[API] Auth ready timed out, proceeding without token");
+      console.warn("[API] Auth settled timed out, proceeding without token");
       return null;
     }
   }
 
+  // Step 2: If no tokenGetter, user is not signed in - return null immediately
   if (!tokenGetter) return null;
 
+  // Step 3: Fetch token with timeout
   try {
-    // Race between token getter and timeout
     const result = await Promise.race([
       tokenGetter(),
       new Promise<null>((resolve) =>
