@@ -214,11 +214,13 @@ export function setAuthTokenGetter(getter: TokenGetter) {
 
 /**
  * Clear the authentication token getter (on logout or not signed in)
+ * NOTE: Does NOT clear cached token - cache is cleared separately on logout
+ * This allows token to persist across useLayoutEffect re-runs
  */
 export function clearAuthTokenGetter() {
   tokenGetter = null;
-  // Clear cached token and pending fetch
-  cachedToken = null;
+  // DON'T clear cachedToken here - it should persist across effect re-runs
+  // cachedToken is only cleared in resetAuthState() (on logout)
   tokenFetchPromise = null;
   // Reset auth ready state
   authReadyResolve = null;
