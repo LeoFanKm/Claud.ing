@@ -42,11 +42,22 @@ new_classes = ["CollaborationSession"]
 # Set these using wrangler secret put:
 #   wrangler secret put CLERK_SECRET_KEY
 #   wrangler secret put CLERK_PUBLISHABLE_KEY
+#   wrangler secret put CLERK_JWT_KEY        # ← RECOMMENDED for performance!
 #
 # Get your keys from: https://dashboard.clerk.com
+# For CLERK_JWT_KEY (networkless verification):
+#   1. Go to API keys page in Clerk Dashboard
+#   2. Click "Show JWT public key"
+#   3. Copy the PEM Public Key
+#   4. Set via: wrangler secret put CLERK_JWT_KEY
+#
+# PERFORMANCE: Without CLERK_JWT_KEY, each API request calls api.clerk.com (~200ms)
+#              With CLERK_JWT_KEY, verification is local and instant (<1ms)
+#
 # For local development, add to .dev.vars:
 #   CLERK_SECRET_KEY=sk_test_xxx
 #   CLERK_PUBLISHABLE_KEY=pk_test_xxx
+#   CLERK_JWT_KEY="-----BEGIN PUBLIC KEY-----\nMIIB..."
 
 # Stripe Billing Secrets
 # Set using wrangler secret put:

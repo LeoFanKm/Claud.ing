@@ -50,9 +50,13 @@ function extractBearerToken(authHeader: string | undefined): string | null {
  *
  * This middleware:
  * - Extracts JWT from Authorization header
- * - Verifies token with Clerk
+ * - Verifies token with Clerk (networkless if CLERK_JWT_KEY is set)
  * - Sets userId and sessionClaims in context
  * - Allows unauthenticated requests to continue (for public routes)
+ *
+ * Performance Note:
+ * - With CLERK_JWT_KEY (PEM public key): Networkless verification < 1ms
+ * - Without CLERK_JWT_KEY: Calls api.clerk.com (~200ms per request)
  *
  * Usage:
  * ```ts
@@ -72,16 +76,28 @@ export const authMiddleware = createMiddleware<AuthBindings>(
     }
 
     try {
-      // verifyToken returns JWT payload directly on success, throws on failure
-      const claims = await verifyToken(token, {
-        secretKey: c.env.CLERK_SECRET_KEY,
+      // Build verification options
+      // Priority: jwtKey (networkless) > secretKey (API call)
+      const verifyOptions: Parameters<typeof verifyToken>[1] = {
         // Authorized parties to prevent CSRF attacks
         authorizedParties: [
           "http://localhost:5173", // Vite dev
           "http://localhost:3000", // Alt dev
           "https://claud.ing", // Production
         ],
-      });
+      };
+
+      // Use jwtKey for networkless verification if available (RECOMMENDED)
+      // This avoids ~200ms API calls to api.clerk.com per request
+      if (c.env.CLERK_JWT_KEY) {
+        verifyOptions.jwtKey = c.env.CLERK_JWT_KEY;
+      } else {
+        // Fallback to secretKey (will make API calls to Clerk)
+        verifyOptions.secretKey = c.env.CLERK_SECRET_KEY;
+      }
+
+      // verifyToken returns JWT payload directly on success, throws on failure
+      const claims = await verifyToken(token, verifyOptions);
 
       // Successful verification - set user context
       c.set("userId", claims.sub as string);

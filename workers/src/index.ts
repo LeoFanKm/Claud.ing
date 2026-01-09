@@ -42,6 +42,7 @@ export type Bindings = {
   // Clerk authentication
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
+  CLERK_JWT_KEY?: string; // PEM public key for networkless JWT verification
   // Stripe billing
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
