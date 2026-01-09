@@ -397,11 +397,13 @@ async function getAuthToken(): Promise<string | null> {
 
   // Create the fetch promise and store it for concurrent requests
   tokenFetchPromise = (async () => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     try {
       const result = await Promise.race([
         tokenGetter(),
-        new Promise<null>((resolve) =>
-          setTimeout(() => {
+        new Promise<null>((resolve) => {
+          timeoutId = setTimeout(() => {
             console.warn(
               "[API] Auth token fetch timed out after",
               AUTH_TOKEN_TIMEOUT_MS,
@@ -410,9 +412,12 @@ async function getAuthToken(): Promise<string | null> {
               "ms)"
             );
             resolve(null);
-          }, AUTH_TOKEN_TIMEOUT_MS)
-        ),
+          }, AUTH_TOKEN_TIMEOUT_MS);
+        }),
       ]);
+
+      // Clear timeout - prevents spurious timeout warning when token fetch succeeds
+      if (timeoutId) clearTimeout(timeoutId);
 
       const fetchDuration = Date.now() - fetchStartTime;
 
