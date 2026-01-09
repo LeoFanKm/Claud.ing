@@ -217,6 +217,8 @@ export function setAuthTokenGetter(getter: TokenGetter) {
  */
 export function clearAuthTokenGetter() {
   tokenGetter = null;
+  // Clear cached token
+  cachedToken = null;
   // Reset auth ready state
   authReadyResolve = null;
   authReadyPromise = null;
@@ -244,6 +246,7 @@ export function markAuthSettled() {
 export function resetAuthState() {
   authSettled = false;
   tokenGetter = null;
+  cachedToken = null; // Clear token cache
   authReadyResolve = null;
   authReadyPromise = null;
   authSettledResolve = null;
@@ -251,14 +254,76 @@ export function resetAuthState() {
 }
 
 // Timeout for getting auth token
-const AUTH_TOKEN_TIMEOUT_MS = 5000; // 5 seconds for token fetch
+// Increased from 5s to 15s for slow network environments (e.g., China to Clerk servers)
+const AUTH_TOKEN_TIMEOUT_MS = 15000; // 15 seconds for token fetch
 const AUTH_SETTLED_TIMEOUT_MS = 10000; // 10 seconds max wait for auth to settle
+
+// Token cache to avoid repeated slow Clerk API calls
+// JWT tokens from Clerk typically expire after 1 hour
+interface CachedToken {
+  token: string;
+  fetchedAt: number;
+  expiresAt: number | null; // Parsed from JWT if possible
+}
+
+let cachedToken: CachedToken | null = null;
+
+// Cache tokens for 50 minutes (refresh 10 minutes before typical 1-hour expiration)
+const TOKEN_CACHE_DURATION_MS = 50 * 60 * 1000;
+
+/**
+ * Parse JWT expiration time from token payload
+ * Returns null if parsing fails
+ */
+function parseJwtExpiration(token: string): number | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const payload = JSON.parse(atob(parts[1]));
+    if (payload.exp && typeof payload.exp === "number") {
+      return payload.exp * 1000; // Convert seconds to milliseconds
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if cached token is still valid
+ */
+function isCachedTokenValid(): boolean {
+  if (!cachedToken) return false;
+
+  const now = Date.now();
+
+  // Check JWT expiration if available (with 5 minute buffer)
+  if (cachedToken.expiresAt !== null) {
+    const bufferMs = 5 * 60 * 1000; // 5 minutes
+    return now < cachedToken.expiresAt - bufferMs;
+  }
+
+  // Fall back to time-based cache
+  return now - cachedToken.fetchedAt < TOKEN_CACHE_DURATION_MS;
+}
+
+/**
+ * Clear the token cache (call on logout)
+ */
+export function clearTokenCache() {
+  cachedToken = null;
+  console.log("[API] Token cache cleared");
+}
 
 /**
  * Get the current auth token (if available)
  * Waits for auth state to be settled, then fetches token if signed in
+ * Uses caching to avoid repeated slow Clerk API calls
  */
 async function getAuthToken(): Promise<string | null> {
+  const startTime = Date.now();
+
   // Step 1: Wait for auth state to be determined (settled)
   if (authSettledPromise) {
     try {
@@ -271,16 +336,41 @@ async function getAuthToken(): Promise<string | null> {
           )
         ),
       ]);
+      console.log(
+        "[API] Auth settled wait took",
+        Date.now() - startTime,
+        "ms"
+      );
     } catch {
-      console.warn("[API] Auth settled timed out, proceeding without token");
+      console.warn(
+        "[API] Auth settled timed out after",
+        Date.now() - startTime,
+        "ms, proceeding without token"
+      );
       return null;
     }
   }
 
   // Step 2: If no tokenGetter, user is not signed in - return null immediately
-  if (!tokenGetter) return null;
+  if (!tokenGetter) {
+    console.log("[API] No token getter, user not signed in");
+    return null;
+  }
 
-  // Step 3: Fetch token with timeout
+  // Step 3: Check cache first
+  if (isCachedTokenValid() && cachedToken) {
+    console.log(
+      "[API] Using cached token (age:",
+      Math.round((Date.now() - cachedToken.fetchedAt) / 1000),
+      "s)"
+    );
+    return cachedToken.token;
+  }
+
+  // Step 4: Fetch fresh token with timeout
+  const fetchStartTime = Date.now();
+  console.log("[API] Fetching fresh token from Clerk...");
+
   try {
     const result = await Promise.race([
       tokenGetter(),
@@ -289,15 +379,44 @@ async function getAuthToken(): Promise<string | null> {
           console.warn(
             "[API] Auth token fetch timed out after",
             AUTH_TOKEN_TIMEOUT_MS,
-            "ms"
+            "ms (actual:",
+            Date.now() - fetchStartTime,
+            "ms)"
           );
           resolve(null);
         }, AUTH_TOKEN_TIMEOUT_MS)
       ),
     ]);
+
+    const fetchDuration = Date.now() - fetchStartTime;
+
+    if (result) {
+      // Cache the token
+      const expiresAt = parseJwtExpiration(result);
+      cachedToken = {
+        token: result,
+        fetchedAt: Date.now(),
+        expiresAt,
+      };
+      console.log(
+        "[API] Token fetched and cached in",
+        fetchDuration,
+        "ms (expires:",
+        expiresAt ? new Date(expiresAt).toISOString() : "unknown",
+        ")"
+      );
+    } else {
+      console.warn("[API] Token fetch returned null after", fetchDuration, "ms");
+    }
+
     return result;
   } catch (error) {
-    console.warn("[API] Failed to get auth token:", error);
+    console.warn(
+      "[API] Failed to get auth token after",
+      Date.now() - fetchStartTime,
+      "ms:",
+      error
+    );
     return null;
   }
 }
