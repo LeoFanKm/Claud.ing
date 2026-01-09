@@ -359,13 +359,8 @@ async function getAuthToken(): Promise<string | null> {
     }
   }
 
-  // Step 2: If no tokenGetter, user is not signed in - return null immediately
-  if (!tokenGetter) {
-    console.log("[API] No token getter, user not signed in");
-    return null;
-  }
-
-  // Step 3: Check cache first
+  // Step 2: Check cache first (even if tokenGetter is temporarily null during cleanup)
+  // This is critical: useLayoutEffect cleanup sets tokenGetter = null, but cached token is still valid
   if (isCachedTokenValid() && cachedToken) {
     console.log(
       "[API] Using cached token (age:",
@@ -373,6 +368,13 @@ async function getAuthToken(): Promise<string | null> {
       "s)"
     );
     return cachedToken.token;
+  }
+
+  // Step 3: If no tokenGetter, user is not signed in - return null immediately
+  // This check comes AFTER cache check, so cached tokens work during cleanup
+  if (!tokenGetter) {
+    console.log("[API] No token getter and no cached token, user not signed in");
+    return null;
   }
 
   // Step 4: If another request is already fetching, wait for it
