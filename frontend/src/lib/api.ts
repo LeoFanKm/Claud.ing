@@ -217,8 +217,9 @@ export function setAuthTokenGetter(getter: TokenGetter) {
  */
 export function clearAuthTokenGetter() {
   tokenGetter = null;
-  // Clear cached token
+  // Clear cached token and pending fetch
   cachedToken = null;
+  tokenFetchPromise = null;
   // Reset auth ready state
   authReadyResolve = null;
   authReadyPromise = null;
@@ -247,6 +248,7 @@ export function resetAuthState() {
   authSettled = false;
   tokenGetter = null;
   cachedToken = null; // Clear token cache
+  tokenFetchPromise = null; // Clear any pending fetch
   authReadyResolve = null;
   authReadyPromise = null;
   authSettledResolve = null;
@@ -267,6 +269,10 @@ interface CachedToken {
 }
 
 let cachedToken: CachedToken | null = null;
+
+// Mutex to prevent concurrent token fetches
+// When multiple requests arrive simultaneously, they should share the same fetch
+let tokenFetchPromise: Promise<string | null> | null = null;
 
 // Cache tokens for 50 minutes (refresh 10 minutes before typical 1-hour expiration)
 const TOKEN_CACHE_DURATION_MS = 50 * 60 * 1000;
@@ -367,57 +373,81 @@ async function getAuthToken(): Promise<string | null> {
     return cachedToken.token;
   }
 
-  // Step 4: Fetch fresh token with timeout
+  // Step 4: If another request is already fetching, wait for it
+  // This prevents concurrent token fetches that can cause race conditions
+  if (tokenFetchPromise) {
+    console.log("[API] Waiting for existing token fetch...");
+    try {
+      const result = await tokenFetchPromise;
+      console.log("[API] Got token from existing fetch:", result ? "success" : "null");
+      return result;
+    } catch {
+      // If the existing fetch failed, we'll try again below
+      console.log("[API] Existing token fetch failed, will retry");
+    }
+  }
+
+  // Step 5: Fetch fresh token with timeout (with mutex)
   const fetchStartTime = Date.now();
   console.log("[API] Fetching fresh token from Clerk...");
 
-  try {
-    const result = await Promise.race([
-      tokenGetter(),
-      new Promise<null>((resolve) =>
-        setTimeout(() => {
-          console.warn(
-            "[API] Auth token fetch timed out after",
-            AUTH_TOKEN_TIMEOUT_MS,
-            "ms (actual:",
-            Date.now() - fetchStartTime,
-            "ms)"
-          );
-          resolve(null);
-        }, AUTH_TOKEN_TIMEOUT_MS)
-      ),
-    ]);
+  // Create the fetch promise and store it for concurrent requests
+  tokenFetchPromise = (async () => {
+    try {
+      const result = await Promise.race([
+        tokenGetter(),
+        new Promise<null>((resolve) =>
+          setTimeout(() => {
+            console.warn(
+              "[API] Auth token fetch timed out after",
+              AUTH_TOKEN_TIMEOUT_MS,
+              "ms (actual:",
+              Date.now() - fetchStartTime,
+              "ms)"
+            );
+            resolve(null);
+          }, AUTH_TOKEN_TIMEOUT_MS)
+        ),
+      ]);
 
-    const fetchDuration = Date.now() - fetchStartTime;
+      const fetchDuration = Date.now() - fetchStartTime;
 
-    if (result) {
-      // Cache the token
-      const expiresAt = parseJwtExpiration(result);
-      cachedToken = {
-        token: result,
-        fetchedAt: Date.now(),
-        expiresAt,
-      };
-      console.log(
-        "[API] Token fetched and cached in",
-        fetchDuration,
-        "ms (expires:",
-        expiresAt ? new Date(expiresAt).toISOString() : "unknown",
-        ")"
+      if (result) {
+        // Cache the token
+        const expiresAt = parseJwtExpiration(result);
+        cachedToken = {
+          token: result,
+          fetchedAt: Date.now(),
+          expiresAt,
+        };
+        console.log(
+          "[API] Token fetched and cached in",
+          fetchDuration,
+          "ms (expires:",
+          expiresAt ? new Date(expiresAt).toISOString() : "unknown",
+          ")"
+        );
+      } else {
+        console.warn("[API] Token fetch returned null after", fetchDuration, "ms");
+      }
+
+      return result;
+    } catch (error) {
+      console.warn(
+        "[API] Failed to get auth token after",
+        Date.now() - fetchStartTime,
+        "ms:",
+        error
       );
-    } else {
-      console.warn("[API] Token fetch returned null after", fetchDuration, "ms");
+      return null;
     }
+  })();
 
-    return result;
-  } catch (error) {
-    console.warn(
-      "[API] Failed to get auth token after",
-      Date.now() - fetchStartTime,
-      "ms:",
-      error
-    );
-    return null;
+  try {
+    return await tokenFetchPromise;
+  } finally {
+    // Clear the mutex after fetch completes (success or failure)
+    tokenFetchPromise = null;
   }
 }
 
@@ -474,8 +504,9 @@ function buildUrl(path: string): string {
   return `${API_BASE_URL}${normalizedPath}`;
 }
 
-// Default timeout for API requests (10 seconds)
-const API_TIMEOUT_MS = 10000;
+// Default timeout for API requests
+// Increased from 10s to 30s for slow network environments
+const API_TIMEOUT_MS = 30000;
 
 const makeRequest = async (url: string, options: RequestInit = {}) => {
   const headers = new Headers(options.headers ?? {});
