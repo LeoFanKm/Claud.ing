@@ -77,10 +77,10 @@ export function QuickStartSection() {
               type="button"
               onClick={() => setSelectedAgentId(agent.id)}
               className={cn(
-                "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all",
+                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all",
                 selectedAgentId === agent.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                  ? "border-2 border-foreground bg-foreground text-background font-medium shadow-md"
+                  : "border border-border bg-card text-muted-foreground hover:border-foreground/50 hover:text-foreground"
               )}
             >
               <AgentIcon agent={agent} className="h-4 w-4" />
