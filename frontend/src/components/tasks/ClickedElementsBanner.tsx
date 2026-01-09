@@ -123,7 +123,7 @@ const ClickedEntryCard = ({
                 aria-pressed={isSelected}
                 className={`inline-flex items-center rounded px-2 py-0.5 text-sm transition ${
                   isSelected
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-foreground text-background font-medium"
                     : "bg-muted hover:opacity-90"
                 } ${isDownstream ? "cursor-pointer opacity-50" : ""}`}
                 onClick={() => handleSelect(i)}

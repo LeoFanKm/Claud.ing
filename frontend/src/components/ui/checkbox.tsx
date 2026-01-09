@@ -19,8 +19,8 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
       <button
         aria-checked={checked}
         className={cn(
-          "peer h-4 w-4 shrink-0 rounded-sm border border-primary-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          checked && "bg-primary text-primary-foreground",
+          "peer h-4 w-4 shrink-0 rounded-sm border border-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          checked && "bg-foreground text-background",
           className
         )}
         disabled={disabled}
